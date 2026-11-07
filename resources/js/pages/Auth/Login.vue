@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthBrandPanel from '@/Components/Auth/AuthBrandPanel.vue';
-import InputError from '@/Components/InputError.vue';
-import Checkbox from '@/Components/Checkbox.vue';
+import { ref } from "vue";
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import AuthBrandPanel from "@/Components/Auth/AuthBrandPanel.vue";
+import InputError from "@/Components/InputError.vue";
+import Checkbox from "@/Components/Checkbox.vue";
 
 defineProps<{
     canResetPassword?: boolean;
@@ -11,17 +11,17 @@ defineProps<{
 }>();
 
 const form = useForm({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     remember: false,
 });
 
 const showPassword = ref(false);
 
 const submit = () => {
-    form.post(route('login'), {
+    form.post(route("login"), {
         onFinish: () => {
-            form.reset('password');
+            form.reset("password");
         },
     });
 };
@@ -69,7 +69,7 @@ const submit = () => {
                         Masuk ke CarePlate
                     </h1>
                     <p class="text-base font-medium text-[#5e5e5e]">
-                        Lanjutkan catatan makan keluargamu.
+                        Lanjutkan catatan makan keluarga.
                     </p>
                 </header>
 
@@ -145,7 +145,7 @@ const submit = () => {
                                 @click="showPassword = !showPassword"
                                 class="absolute right-4 cursor-pointer text-sm font-bold text-[#191919] transition-colors select-none hover:text-[#0b8043]"
                             >
-                                {{ showPassword ? 'Sembunyikan' : 'Tampilkan' }}
+                                {{ showPassword ? "Sembunyikan" : "Tampilkan" }}
                             </button>
                         </div>
                         <InputError
