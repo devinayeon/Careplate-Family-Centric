@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Ai\ChatSessionController;
+use App\Http\Controllers\Ai\ChatTurnController;
 use App\Http\Controllers\Ai\FoodController;
 use App\Http\Controllers\Ai\ScanController;
 use App\Http\Middleware\Ai\AiResponseHeaders;
@@ -19,5 +21,17 @@ Route::prefix('ai/v1')
             ->middleware('permission:nutrition-chat')
             ->name('foods.index');
 
-        // Chat routes are added by a later task.
+        // {session} binds through ChatSessionPolicy: foreign or deleted sessions are 404, never 403.
+        Route::prefix('chat/sessions')
+            ->name('chat.sessions.')
+            ->middleware('permission:nutrition-chat')
+            ->group(function (): void {
+                Route::post('/', [ChatSessionController::class, 'store'])->name('store');
+                Route::get('/', [ChatSessionController::class, 'index'])->name('index');
+                Route::delete('{session}', [ChatSessionController::class, 'destroy'])
+                    ->middleware('can:delete,session')->name('destroy');
+                Route::get('{session}/turns', [ChatTurnController::class, 'index'])
+                    ->middleware('can:view,session')->name('turns.index');
+                // POST {session}/turns is added by Task 11.
+            });
     });

@@ -22,6 +22,8 @@ class AiException extends RuntimeException
         'TURN_IN_PROGRESS' => [409, 'Pesan ini masih diproses.', true],
         'SESSION_BUSY' => [409, 'Sesi sedang memproses pesan lain. Coba lagi sebentar.', true],
         'STALE_REVISION' => [409, 'Data sudah berubah. Muat ulang lalu coba lagi.', false],
+        // A cited food was revoked or re-revised while the answer was being prepared; the turn is closed failed.
+        'KNOWLEDGE_CHANGED' => [409, 'Data pangan berubah saat jawaban disiapkan. Kirim ulang pertanyaan sebagai pesan baru.', true],
         'IMAGE_TOO_LARGE' => [413, 'Ukuran foto terlalu besar. Perkecil foto lalu coba lagi.', false],
         'UNSUPPORTED_MEDIA_TYPE' => [415, 'Format foto tidak didukung. Gunakan JPEG atau PNG.', false],
         'INVALID_INPUT' => [422, 'Data yang dikirim tidak valid.', false],
