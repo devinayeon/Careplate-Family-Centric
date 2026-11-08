@@ -138,8 +138,15 @@ class FoodSearch
             }
             $query->whereRaw(self::LIKE, ['%'.self::escapeLike($text).'%']);
         }
+        if ($q === '') {
+            return $this->guard(fn () => $query->orderBy('name')->orderBy('id')->limit($limit)->get());
+        }
 
-        return $this->guard(fn () => $query->orderBy('name')->orderBy('id')->limit($limit)->get());
+        // MySQL's ci/accent-insensitive collation makes LIKE a superset ('tahu' matches 'táhu'): the SQL result is
+        // only a prefilter and PHP keeps the rows that really contain the folded query, as on SQLite.
+        $rows = $this->guard(fn () => $query->orderBy('name')->orderBy('id')->limit(self::PREFILTER_ROWS)->get());
+
+        return $rows->filter(fn (Food $f) => str_contains((string) $f->search_text, $text))->take($limit)->values();
     }
 
     /** Escape LIKE wildcards (and the escape character) so user text is only ever a literal. */
