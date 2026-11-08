@@ -1,0 +1,1170 @@
+{
+    "suite": "scan",
+    "run_at_utc": "2026-11-08T18:00:56+00:00",
+    "manifest": "ai/evals/ocr-id/manifest.csv",
+    "split": "all",
+    "runs": 1,
+    "kind": "web_sample_id",
+    "truth_status": "unverified_by_human",
+    "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples.",
+    "model_config": "gemini-3.1-flash-lite",
+    "model_versions_reported": [
+        "gemini-3.1-flash-lite"
+    ],
+    "prompt_sha256": "c599e583179a49acf1faf2ec55154bceb8403185d08b880057c553eea54303c7",
+    "requests": 8,
+    "summary": {
+        "images": 8,
+        "fields": {
+            "energy_kcal": {
+                "correct": 7,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "fat_g": {
+                "correct": 8,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "sugars_total_g": {
+                "correct": 7,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "protein_g": {
+                "correct": 8,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "carbohydrate_g": {
+                "correct": 7,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "sodium_mg": {
+                "correct": 8,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "serving_size": {
+                "correct": 8,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            },
+            "label_basis": {
+                "correct": 8,
+                "total": 8,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            }
+        },
+        "abstained": 0,
+        "false_abstentions": 0,
+        "negative_total": 0,
+        "negative_correct": 0,
+        "invalid_output": 0,
+        "errors": 0,
+        "unsafe_inferences": 0,
+        "latency_ms": {
+            "n": 8,
+            "p50": 4446,
+            "p95": 6563,
+            "max": 6563
+        },
+        "usage": {
+            "prompt": 11085,
+            "candidates": 3739,
+            "thoughts": 2565,
+            "total": 17389,
+            "unknown_reports": 0
+        },
+        "by_kind": {
+            "web_sample_id": {
+                "images": 8,
+                "fields": {
+                    "energy_kcal": {
+                        "correct": 7,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "fat_g": {
+                        "correct": 8,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "sugars_total_g": {
+                        "correct": 7,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "protein_g": {
+                        "correct": 8,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "carbohydrate_g": {
+                        "correct": 7,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "sodium_mg": {
+                        "correct": 8,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "serving_size": {
+                        "correct": 8,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    },
+                    "label_basis": {
+                        "correct": 8,
+                        "total": 8,
+                        "null_correct": 0,
+                        "null_total": 0,
+                        "unsafe": 0
+                    }
+                },
+                "abstained": 0,
+                "false_abstentions": 0,
+                "negative_total": 0,
+                "negative_correct": 0,
+                "invalid_output": 0,
+                "errors": 0,
+                "unsafe_inferences": 0,
+                "latency_ms": {
+                    "n": 8,
+                    "p50": 4446,
+                    "p95": 6563,
+                    "max": 6563
+                },
+                "usage": {
+                    "prompt": 11085,
+                    "candidates": 3739,
+                    "thoughts": 2565,
+                    "total": 17389,
+                    "unknown_reports": 0
+                }
+            }
+        },
+        "errors_by_code": [],
+        "unstable": [],
+        "per_image": {
+            "ID-01": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-02": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-03": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-04": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-05": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 0,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 0,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 0,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-06": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-07": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 1,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            },
+            "ID-08": {
+                "kind": "web_sample_id",
+                "runs": 1,
+                "all_fields_pass_runs": 0,
+                "fields": {
+                    "energy_kcal": {
+                        "pass": 0,
+                        "of": 1
+                    },
+                    "fat_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sugars_total_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "protein_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "carbohydrate_g": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "sodium_mg": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "serving_size": {
+                        "pass": 1,
+                        "of": 1
+                    },
+                    "label_basis": {
+                        "pass": 1,
+                        "of": 1
+                    }
+                }
+            }
+        }
+    },
+    "items": [
+        {
+            "id": "ID-01",
+            "file": "id-01-energen-coklat.jpg",
+            "split": "dev",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "clear",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 4115,
+            "provider_latency_ms": 3441,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1401,
+                "candidates": 475,
+                "thoughts": 119,
+                "total": 1995
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 150,
+                    "got": 150,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 3.5,
+                    "got": 3.5,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 18,
+                    "got": 18,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 2,
+                    "got": 2,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 27,
+                    "got": 27,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 160,
+                    "got": 160,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        34,
+                        "g"
+                    ],
+                    "got": [
+                        34,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-02",
+            "file": "id-02-teh-pucuk.jpg",
+            "split": "dev",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 6507,
+            "provider_latency_ms": 3270,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1377,
+                "candidates": 459,
+                "thoughts": 109,
+                "total": 1945
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 70,
+                    "got": 70,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 18,
+                    "got": 18,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 18,
+                    "got": 18,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 10,
+                    "got": 10,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        240,
+                        "ml"
+                    ],
+                    "got": [
+                        240,
+                        "ml"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-03",
+            "file": "id-03-coca-cola-zero.jpg",
+            "split": "dev",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 4413,
+            "provider_latency_ms": 3464,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1415,
+                "candidates": 457,
+                "thoughts": 105,
+                "total": 1977
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 30,
+                    "got": 30,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        330,
+                        "ml"
+                    ],
+                    "got": [
+                        330,
+                        "ml"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-04",
+            "file": "id-04-ultra-milk.jpg",
+            "split": "holdout",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "clear",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 6563,
+            "provider_latency_ms": 6028,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1377,
+                "candidates": 467,
+                "thoughts": 1804,
+                "total": 3648
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 150,
+                    "got": 150,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 8,
+                    "got": 8,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 10,
+                    "got": 10,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 8,
+                    "got": 8,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 12,
+                    "got": 12,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 55,
+                    "got": 55,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        250,
+                        "ml"
+                    ],
+                    "got": [
+                        250,
+                        "ml"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-05",
+            "file": "id-05-mizone.jpg",
+            "split": "holdout",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 4446,
+            "provider_latency_ms": 3038,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1363,
+                "candidates": 459,
+                "thoughts": 93,
+                "total": 1915
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 35,
+                    "got": 35,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "mismatch",
+                    "truth": 9,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "mismatch",
+                    "truth": 9,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 65,
+                    "got": 65,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        250,
+                        "ml"
+                    ],
+                    "got": [
+                        250,
+                        "ml"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-06",
+            "file": "id-06-indomie-ayam-bawang.jpg",
+            "split": "holdout",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 4884,
+            "provider_latency_ms": 3504,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1380,
+                "candidates": 473,
+                "thoughts": 111,
+                "total": 1964
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 310,
+                    "got": 310,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 13,
+                    "got": 13,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 2,
+                    "got": 2,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 6,
+                    "got": 6,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 43,
+                    "got": 43,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 1220,
+                    "got": 1220,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        69,
+                        "g"
+                    ],
+                    "got": [
+                        69,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-07",
+            "file": "id-07-kecap-bango.jpg",
+            "split": "holdout",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 3333,
+            "provider_latency_ms": 3054,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1384,
+                "candidates": 467,
+                "thoughts": 105,
+                "total": 1956
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 60,
+                    "got": 60,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 13,
+                    "got": 13,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 15,
+                    "got": 15,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 400,
+                    "got": 400,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        20,
+                        "g"
+                    ],
+                    "got": [
+                        20,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "ID-08",
+            "file": "id-08-indomie-dual-column.jpg",
+            "split": "holdout",
+            "kind": "web_sample_id",
+            "run": 1,
+            "condition": "difficult",
+            "extraction_status": "complete",
+            "needs_review": false,
+            "warnings": [
+                "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal.",
+                "Kebijakan skrining internal belum disetujui; hasil tidak membuktikan keseimbangan pola makan."
+            ],
+            "latency_ms": 5928,
+            "provider_latency_ms": 3842,
+            "model_version": "gemini-3.1-flash-lite",
+            "usage": {
+                "prompt": 1388,
+                "candidates": 482,
+                "thoughts": 119,
+                "total": 1989
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "mismatch",
+                    "truth": 397,
+                    "got": 397.7055,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 17.7,
+                    "got": 17.7,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 7.7,
+                    "got": 7.7,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 8,
+                    "got": 8,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 51.4,
+                    "got": 51.4,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 649,
+                    "got": 649,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        175,
+                        "g"
+                    ],
+                    "got": [
+                        175,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        }
+    ]
+}
