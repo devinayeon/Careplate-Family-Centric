@@ -32,6 +32,8 @@ Route::prefix('ai/v1')
                     ->middleware('can:delete,session')->name('destroy');
                 Route::get('{session}/turns', [ChatTurnController::class, 'index'])
                     ->middleware('can:view,session')->name('turns.index');
-                // POST {session}/turns is added by Task 11.
+                // Policy before throttle: a foreign session is 404 and spends no quota; the quota 429 comes before any provider call.
+                Route::post('{session}/turns', [ChatTurnController::class, 'store'])
+                    ->middleware(['can:view,session', 'throttle:ai-chat'])->name('turns.store');
             });
     });
