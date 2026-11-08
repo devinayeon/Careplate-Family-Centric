@@ -81,7 +81,9 @@ class UsdaFoundationImporter
         $id = (string) $match['food']['fdcId'];
         $candidate = $this->candidate($row, $match, $snapshot);
         $key = ['source_provider' => $snapshot['provider'], 'source_id' => $id, 'snapshot_version' => $snapshot['version']];
-        $existing = FoodSubmission::where($key)->first();
+        // FOR UPDATE (a no-op on SQLite): on MySQL the pending check below is a current read, so a submission approved
+        // or rejected after this transaction's first read is never refreshed over, and an approve waits for us.
+        $existing = FoodSubmission::where($key)->lockForUpdate()->first();
 
         if ($existing === null) {
             FoodSubmission::create($key + [

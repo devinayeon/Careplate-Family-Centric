@@ -3,11 +3,15 @@
 use App\Actions\Foods\ReviewFood;
 use App\Exceptions\Ai\AiException;
 use App\Models\Food;
+use App\Models\FoodSubmission;
+use App\Services\Ai\Foods\SnapshotManifest;
+use App\Services\Ai\Foods\UsdaFoundationImporter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 require_once __DIR__.'/TwoConnectionMysqlSupport.php';
 require_once __DIR__.'/../FoodSubmissionSupport.php';
+require_once __DIR__.'/../FoundationFixture.php';
 
 // Catalog side of spec 06 section 4 on real InnoDB (REPEATABLE READ), same harness as TwoConnectionMysqlChatTest:
 // B runs from a DB::listen hook while A is inside its transaction; a B that needs A's row fails after 1 s and must
@@ -115,4 +119,31 @@ test('a lock wait timeout in approve, revoke or a submission insert is a retryab
     expect(DB::connection('cc_a')->table('food_revisions')->count())->toBe(0)
         ->and(DB::connection('cc_a')->table('food_submissions')->count())->toBe(1)
         ->and((int) DB::connection('cc_a')->table('foods')->value('current_revision'))->toBe(3);
+});
+
+test('an approve committed between importer reads is never overwritten by --refresh-pending', function () {
+    $snapshot = synSnapshot();
+    $path = sys_get_temp_dir().'/cm-manifest-'.bin2hex(random_bytes(4)).'.json';
+    file_put_contents($path, json_encode(['schema_version' => SnapshotManifest::SCHEMA, 'snapshots' => [[
+        'source_provider' => 'USDA_FDC', 'snapshot_version' => $snapshot['version'], 'data_type' => 'Foundation',
+        'url' => $snapshot['url'], 'sha256' => $snapshot['sha256'], 'retrieved_at' => $snapshot['retrieved_at'],
+        'record_count' => 1, 'raw_json_file' => 'x.json', 'imported_source_ids' => ['900009'],
+    ]]]));
+    app(UsdaFoundationImporter::class)->import(synCuration(), synFoods(), $snapshot);
+    $potato = FoodSubmission::query()->where('source_id', '900009')->sole();
+    $foods = synFoods();
+    $foods[0]['foodNutrients'][0]['amount'] = 8.5; // raw rice protein (FOOD-002, still pending)
+    $foods[8]['foodNutrients'][0]['amount'] = 3.5; // russet potato protein (FOOD-009, approved by B mid-import)
+    $approve = fn () => ccOn('cc_b', fn () => (new ReviewFood(new SnapshotManifest($path)))->approve($potato->id, null, 'audit-b', 1, 'Setuju', true));
+    $probe = cmAfter('cc_a', 'select * from `food_submissions`', $approve); // FOOD-001, the first curation row
+
+    $report = app(UsdaFoundationImporter::class)->import(synCuration(), $foods, $snapshot, 20, true);
+    $after = DB::connection('cc_b')->table('food_submissions')->where('id', $potato->id)->first();
+
+    expect($probe->outcome)->toBeArray()->and($probe->outcome['status'])->toBe('verified')
+        ->and(collect($report['rows'])->firstWhere('candidate_id', 'FOOD-009')['status'])->toBe('changed')
+        ->and(collect($report['rows'])->firstWhere('candidate_id', 'FOOD-002')['status'])->toBe('refreshed')
+        ->and($after->status)->toBe('approved')
+        ->and((int) $after->revision_counter)->toBe(2)
+        ->and(json_decode($after->candidate, true))->toEqual($potato->candidate);
 });
