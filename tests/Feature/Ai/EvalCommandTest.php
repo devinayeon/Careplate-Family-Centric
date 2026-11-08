@@ -31,7 +31,7 @@ it('rejects unknown suites and splits before any request', function () {
     geminiConfigure();
     Http::fake();
 
-    $this->artisan('ai:eval', ['suite' => 'chat'])->assertExitCode(2);
+    $this->artisan('ai:eval', ['suite' => 'bogus'])->assertExitCode(2);
     $this->artisan('ai:eval', ['suite' => 'scan', '--split' => 'everything'])->assertExitCode(2);
 
     Http::assertNothingSent();
