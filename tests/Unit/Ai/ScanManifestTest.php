@@ -106,3 +106,46 @@ it('keeps the 6 synthetic labels exact by construction, with sodium unknown on t
         expect(hash_file('sha256', $row['path']))->toBe($row['sha256']);
     }
 });
+
+it('does not claim a download date for generated labels', function () {
+    $handle = fopen(dirname(__DIR__, 3).'/ai/evals/ocr-id/synthetic/manifest.csv', 'rb');
+    $header = fgetcsv($handle, null, ',', '"', '');
+    $count = 0;
+    while (($cells = fgetcsv($handle, null, ',', '"', '')) !== false) {
+        $row = array_combine($header, $cells);
+        expect($row['downloaded_at'])->toBe('')->and($row['source_url'])->toStartWith('generated:');
+        $count++;
+    }
+    fclose($handle);
+
+    expect($count)->toBe(6);
+});
+
+it('rejects a manifest file name that is not a plain file name in the images folder', function (string $file) {
+    $dir = sys_get_temp_dir().'/ai-manifest-'.bin2hex(random_bytes(4));
+    mkdir($dir);
+    $header = 'id,file,split,condition,expected_outcome,label_basis,serving_size_value,serving_size_unit,energy_kcal,fat_g,sugars_total_g,protein_g,carbohydrate_g,sodium_mg,less_than_fields,sha256,kind,truth_status';
+    file_put_contents($dir.'/manifest.csv', $header."\nX-01,\"{$file}\",dev,clear,extract,,,,,,,,,,,abc,web_sample,unverified_by_human\n");
+
+    try {
+        expect(fn () => ScanManifest::load($dir.'/manifest.csv'))->toThrow(RuntimeException::class);
+    } finally {
+        unlink($dir.'/manifest.csv');
+        rmdir($dir);
+    }
+})->with(['../secret.jpg', 'sub/dir.jpg', 'sub\dir.jpg', '..', '/etc/passwd', 'C:\x.jpg']);
+
+it('accepts a plain image file name', function () {
+    $dir = sys_get_temp_dir().'/ai-manifest-'.bin2hex(random_bytes(4));
+    mkdir($dir);
+    $header = 'id,file,split,condition,expected_outcome,label_basis,serving_size_value,serving_size_unit,energy_kcal,fat_g,sugars_total_g,protein_g,carbohydrate_g,sodium_mg,less_than_fields,sha256,kind,truth_status';
+    file_put_contents($dir.'/manifest.csv', $header."\nX-01,plain-1.jpg,dev,clear,extract,,,,,,,,,,,abc,web_sample,unverified_by_human\n");
+
+    try {
+        $rows = ScanManifest::load($dir.'/manifest.csv');
+        expect($rows[0]['file'])->toBe('plain-1.jpg')->and($rows[0]['path'])->toBe($dir.'/images/plain-1.jpg');
+    } finally {
+        unlink($dir.'/manifest.csv');
+        rmdir($dir);
+    }
+});

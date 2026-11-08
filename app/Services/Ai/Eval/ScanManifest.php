@@ -32,6 +32,9 @@ class ScanManifest
                 continue;
             }
             $row = array_combine($header, $cells);
+            if (preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]*$/', $row['file']) !== 1 || str_contains($row['file'], '..')) {
+                throw new RuntimeException('Manifest file must be a plain image file name inside the images folder.');
+            }
             $rows[] = [
                 'id' => $row['id'],
                 'file' => $row['file'],
