@@ -39,8 +39,8 @@ class FoodSubmissionController extends Controller
                 // Lost a race with an identical insert: judge the winner below.
                 $submission = $this->existing($source) ?? throw AiException::for('IDEMPOTENCY_CONFLICT');
             } catch (QueryException|PDOException $e) {
-                // SQLite lock contention is a retryable DB_BUSY; every other database error propagates unchanged.
-                throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
+                // Lock contention (SQLite busy, MySQL lock wait timeout/deadlock) is a retryable DB_BUSY; every other database error propagates unchanged.
+                throw AiException::isLockContention($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
             }
         }
 

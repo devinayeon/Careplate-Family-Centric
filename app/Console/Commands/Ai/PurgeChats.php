@@ -130,16 +130,25 @@ class PurgeChats extends Command
     }
 
     /**
-     * Excludes sessions (by $column) that currently hold a pending turn with a valid lease. The protected ids are
-     * read first: MySQL rejects a DELETE FROM chat_turns whose sub-select reads chat_turns (error 1093). The set is
-     * tiny (live leases only) and each call runs inside the same chunk transaction as the delete that uses it.
+     * Excludes sessions (by $column) that currently hold a pending turn with a valid lease, re-checked inside the
+     * DELETE itself (on MySQL a DML sub-select is a current, locking read, not the chunk's snapshot), so a session
+     * that gains a lease after the chunk's ids were read keeps its turns.
+     * chat_sessions deletes sub-select chat_turns directly. A DELETE FROM chat_turns may not sub-select chat_turns
+     * (MySQL error 1093): it uses the pending turns read at the start of the chunk (only ever adds protection) plus
+     * the session slot, which TurnGate::reserve sets in the same transaction that inserts the pending turn.
      */
     private function unprotected(Builder $query, string $column, Carbon $now): Builder
     {
+        if ($query->from !== 'chat_turns') {
+            return $query->whereNotIn($column, fn ($q) => $q->select('session_id')->from('chat_turns')
+                ->where('status', 'pending')->where('lease_expires_at', '>', $now));
+        }
         $protected = DB::table('chat_turns')->where('status', 'pending')->where('lease_expires_at', '>', $now)
             ->distinct()->pluck('session_id')->all();
 
-        return $query->whereNotIn($column, $protected);
+        return $query->whereNotIn($column, $protected)
+            ->whereNotIn($column, fn ($q) => $q->select('id')->from('chat_sessions')
+                ->whereNotNull('active_turn_id')->where('active_lease_expires_at', '>', $now));
     }
 
     private function horizonSeconds(): int

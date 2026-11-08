@@ -15,7 +15,9 @@ use PDOException;
 
 /**
  * The only writer of foods.status / current_revision / search_text. Each call is ONE DB::transaction
- * (sqlite IMMEDIATE), no provider call inside: either every row of the decision commits or none.
+ * (sqlite IMMEDIATE), no provider call inside: either every row of the decision commits or none. The rows whose
+ * state is checked are read FOR UPDATE first (a no-op on SQLite), so on MySQL the check is a current read and a
+ * concurrent decision waits for this one (or fails as a retryable DB_BUSY) instead of acting on a stale snapshot.
  */
 class ReviewFood
 {
@@ -39,7 +41,8 @@ class ReviewFood
         $hash = ReviewSnapshot::hash('approve', $submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags);
 
         return $this->atomic(function () use ($submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags, $hash) {
-            $submission = FoodSubmission::query()->find($submissionId) ?? throw AiException::for('NOT_FOUND');
+            // Lock order: submission, then food (revoke takes only the food), so approve and revoke cannot deadlock.
+            $submission = FoodSubmission::query()->lockForUpdate()->find($submissionId) ?? throw AiException::for('NOT_FOUND');
             /** @var array{food_id: string, revision: int, status: string, sync_status: string}|null $stored */
             $stored = $submission->decision_result;
             if ($submission->status === 'approved' && $submission->decision_hash === $hash && is_array($stored)) {
@@ -53,7 +56,7 @@ class ReviewFood
             $food = Food::query()->where([
                 'source_provider' => $submission->source_provider, 'source_id' => $submission->source_id,
                 'snapshot_version' => $submission->snapshot_version,
-            ])->first() ?? new Food;
+            ])->lockForUpdate()->first() ?? new Food;
             $revision = $food->exists ? $food->current_revision + 1 : 1;
             $food->fill($facts['nutrients'] + [
                 'name' => $facts['name'], 'aliases' => $facts['aliases'], 'basis' => '100g',
@@ -90,7 +93,7 @@ class ReviewFood
         $hash = ReviewSnapshot::hash('revoke', $foodId, $actor, $auditId, $expectedRevision, $reason, false);
 
         return $this->atomic(function () use ($foodId, $actor, $auditId, $expectedRevision, $reason, $hash) {
-            $food = Food::query()->find($foodId) ?? throw AiException::for('NOT_FOUND');
+            $food = Food::query()->lockForUpdate()->find($foodId) ?? throw AiException::for('NOT_FOUND');
             $replay = FoodRevision::query()->where(['food_id' => $food->id, 'action' => 'revoke', 'decision_hash' => $hash])->first();
             /** @var array{food_id: string, revision: int, status: string, sync_status: string}|null $stored */
             $stored = $replay?->result;
@@ -110,7 +113,7 @@ class ReviewFood
     }
 
     /**
-     * One short write transaction. SQLite lock contention becomes a retryable DB_BUSY (nothing was written);
+     * One short write transaction. Lock contention (AiException::isLockContention) becomes a retryable DB_BUSY (nothing was written);
      * every other database error propagates unchanged.
      *
      * @template T
@@ -123,7 +126,7 @@ class ReviewFood
         try {
             return DB::transaction($fn);
         } catch (QueryException|PDOException $e) {
-            throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
+            throw AiException::isLockContention($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
         }
     }
 

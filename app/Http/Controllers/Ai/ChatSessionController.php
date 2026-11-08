@@ -34,8 +34,8 @@ class ChatSessionController extends Controller
                 'generation' => 1, 'next_sequence' => 1,
             ])->refresh();
         } catch (QueryException|PDOException $e) {
-            // SQLite lock contention is a retryable DB_BUSY; every other database error propagates unchanged.
-            throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
+            // Lock contention (SQLite busy, MySQL lock wait timeout/deadlock) is a retryable DB_BUSY; every other database error propagates unchanged.
+            throw AiException::isLockContention($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
         }
 
         return response()->json(ChatHistory::session($session), 201);

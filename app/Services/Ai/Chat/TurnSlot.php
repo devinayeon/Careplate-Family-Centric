@@ -20,7 +20,7 @@ use PDOException;
 class TurnSlot
 {
     /**
-     * One short write transaction. Lock contention or a racing insert becomes a controlled retryable
+     * One short write transaction. Lock contention (SQLite busy, MySQL lock wait timeout or deadlock) or a racing insert becomes a controlled retryable
      * SESSION_BUSY, never a 500 and never an automatic model retry.
      *
      * @template T
@@ -36,22 +36,25 @@ class TurnSlot
             throw AiException::for('SESSION_BUSY', previous: $e);
         } catch (QueryException|PDOException $e) {
             // BEGIN IMMEDIATE (transaction_mode) fails as a raw PDOException, not a QueryException, once busy_timeout runs out.
-            if (AiException::isDatabaseLocked($e)) {
+            if (AiException::isLockContention($e)) {
                 throw AiException::for('SESSION_BUSY', previous: $e);
             }
             throw $e;
         }
     }
 
-    /** Fresh row read inside the caller's transaction; never trusts a model the caller already holds. */
+    /**
+     * Fresh row read inside the caller's transaction, FOR UPDATE (a current read on MySQL; SQLite already holds
+     * its IMMEDIATE write lock). Never trusts a model the caller already holds. Lock the session before its turn.
+     */
     public function session(string $sessionId): ?ChatSession
     {
-        return ChatSession::query()->find($sessionId);
+        return ChatSession::query()->lockForUpdate()->find($sessionId);
     }
 
     public function turn(string $turnId): ?ChatTurn
     {
-        return ChatTurn::query()->find($turnId);
+        return ChatTurn::query()->lockForUpdate()->find($turnId);
     }
 
     public static function leaseValid(?Carbon $leaseExpiresAt, Carbon $now): bool
@@ -103,8 +106,10 @@ class TurnSlot
             return false;
         }
 
+        // Shared lock in id order: a current read on MySQL (never the transaction's older snapshot), and a revoke of a
+        // cited food waits until this turn commits. A no-op on SQLite, where the IMMEDIATE write lock already holds.
         $live = DB::table('foods')->whereIn('id', array_keys($cited))->where('status', 'verified')
-            ->pluck('current_revision', 'id');
+            ->orderBy('id')->sharedLock()->pluck('current_revision', 'id');
         foreach ($cited as $id => $revisions) {
             if (! $live->has($id) || array_keys($revisions) !== [(int) $live[$id]]) {
                 return true;

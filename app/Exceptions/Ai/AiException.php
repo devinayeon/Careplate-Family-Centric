@@ -3,6 +3,7 @@
 namespace App\Exceptions\Ai;
 
 use Illuminate\Http\JsonResponse;
+use PDOException;
 use RuntimeException;
 use Throwable;
 
@@ -33,7 +34,7 @@ class AiException extends RuntimeException
         'INTERNAL' => [500, 'Terjadi kesalahan pada server.', false],
         'AI_PROVIDER_ERROR' => [502, 'Layanan AI sedang bermasalah. Coba lagi nanti.', true],
         'AI_OUTPUT_INVALID' => [502, 'Jawaban layanan AI tidak dapat dipakai. Coba lagi.', true],
-        // SQLite lock contention outside chat (admin approve/revoke). Nothing was written; the same call may be retried.
+        // Lock contention outside chat (SQLite busy, MySQL lock wait timeout/deadlock). Nothing was written; the same call may be retried.
         'DB_BUSY' => [503, 'Server sedang sibuk menyimpan data. Coba lagi sebentar.', true],
         'KNOWLEDGE_UNAVAILABLE' => [503, 'Data pangan belum tersedia. Coba lagi nanti.', true],
         'AI_DISABLED' => [503, 'Fitur AI sedang tidak aktif.', false],
@@ -68,10 +69,28 @@ class AiException extends RuntimeException
         return new self($code, $status, $message ?? $defaultMessage, $retryable ?? $defaultRetryable, $headers, $previous);
     }
 
-    /** True for SQLite lock contention (BEGIN IMMEDIATE fails as a raw PDOException once busy_timeout runs out). */
-    public static function isDatabaseLocked(Throwable $e): bool
+    /**
+     * True for lock contention, where nothing was committed and the same call may be retried: SQLite "database
+     * (table) is locked" (BEGIN IMMEDIATE / busy_timeout, matched by message), MySQL lock wait timeout (driver
+     * code 1205), deadlock (1213) or any SQLSTATE 40001 (matched by errorInfo). Walks the previous chain, because
+     * Laravel rethrows contention inside a nested transaction as a DeadlockException around the QueryException.
+     */
+    public static function isLockContention(Throwable $e): bool
     {
-        return str_contains($e->getMessage(), 'database is locked') || str_contains($e->getMessage(), 'database table is locked');
+        for ($error = $e; $error !== null; $error = $error->getPrevious()) {
+            if (! $error instanceof PDOException) {
+                continue;
+            }
+            $info = $error->errorInfo;
+            if (is_array($info) && (($info[0] ?? null) === '40001' || in_array($info[1] ?? null, [1205, 1213], true))) {
+                return true;
+            }
+            if (str_contains($error->getMessage(), 'database is locked') || str_contains($error->getMessage(), 'database table is locked')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

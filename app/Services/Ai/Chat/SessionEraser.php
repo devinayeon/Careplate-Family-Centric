@@ -20,6 +20,8 @@ class SessionEraser
     {
         $this->slot->atomic(function () use ($session) {
             $now = now();
+            // Same lock order as TurnGate: this UPDATE takes the session row lock first (waiting for a running
+            // finalize, then acting on its committed state), and only then the turn rows.
             $deleted = DB::table('chat_sessions')
                 ->where('id', $session->getKey())->where('state', 'active')
                 ->update([

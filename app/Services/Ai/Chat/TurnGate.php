@@ -13,7 +13,9 @@ use Illuminate\Support\Carbon;
  * Protocol: reserve() in one short transaction -> retrieval/provider work OUTSIDE any transaction ->
  * finalize() or fail() in one short transaction. Session slot = active_turn_id + active_token +
  * active_lease_expires_at, fenced by session.generation (bumped on delete). All writes are conditional
- * updates on the exact expected row version; a late or foreign writer changes nothing.
+ * updates on the exact expected row version; a late or foreign writer changes nothing. Each transaction first
+ * locks the session row, then the turn row (TurnSlot, FOR UPDATE; a no-op on SQLite), so on MySQL every check is
+ * a current read and two writers on one session queue (or fail as SESSION_BUSY) instead of racing.
  */
 class TurnGate
 {
@@ -39,6 +41,9 @@ class TurnGate
                 throw AiException::for('NOT_FOUND');
             }
 
+            // A plain read is current here: every writer of this session's turns holds the session row lock taken
+            // above. FOR UPDATE on a missing (session_id, client_turn_id) key would gap-lock the unique index and
+            // let two new sessions' first inserts deadlock each other.
             $existing = ChatTurn::query()->where('session_id', $live->id)->where('client_turn_id', $clientTurnId)->first();
             if ($existing !== null) {
                 return $this->replay($live, $existing, $requestHash, $now);
@@ -65,8 +70,7 @@ class TurnGate
     {
         $outcome = $this->slot->atomic(function () use ($turn, $response, $citations, $foodRefs, $mode) {
             $now = now();
-            [$row, $token, $generation] = $this->claim($turn);
-            $session = $row === null ? null : $this->slot->session($row->session_id);
+            [$session, $row, $token, $generation] = $this->claim($turn);
             if ($row === null || ! $this->owns($session, $row, $token, $generation, $now)) {
                 return false;
             }
@@ -94,7 +98,7 @@ class TurnGate
                     'updated_at' => $now,
                 ]);
             if (! $released || $completed !== 1) {
-                // Unreachable under the IMMEDIATE write lock after owns(); roll back rather than write half.
+                // Unreachable under the session and turn row locks after owns(); roll back rather than write half.
                 throw AiException::for('AI_TIMEOUT');
             }
 
@@ -116,8 +120,7 @@ class TurnGate
     {
         return $this->slot->atomic(function () use ($turn, $errorCode) {
             $now = now();
-            [$row, $token, $generation] = $this->claim($turn);
-            $session = $row === null ? null : $this->slot->session($row->session_id);
+            [$session, $row, $token, $generation] = $this->claim($turn);
             if ($row === null || $session === null || $session->state !== 'active' || (int) $session->generation !== $generation) {
                 return false;
             }
@@ -212,20 +215,25 @@ class TurnGate
     }
 
     /**
-     * The reservation's own token/generation when given the reserved model; the stored ones for an id.
+     * Locks the session row, then the turn row: the one lock order of every chat write (SessionEraser too). The
+     * session id never changes, so it comes from the reserved model or an unlocked lookup. Returns the
+     * reservation's own token/generation when given the reserved model; the stored ones for an id.
      *
-     * @return array{0: ChatTurn|null, 1: string, 2: int}
+     * @return array{0: ChatSession|null, 1: ChatTurn|null, 2: string, 3: int}
      */
     private function claim(ChatTurn|string $turn): array
     {
-        $row = $this->slot->turn($turn instanceof ChatTurn ? (string) $turn->getKey() : $turn);
-        if ($row === null) {
-            return [null, '', 0];
+        $turnId = $turn instanceof ChatTurn ? (string) $turn->getKey() : $turn;
+        $sessionId = $turn instanceof ChatTurn ? $turn->session_id : ChatTurn::query()->whereKey($turnId)->value('session_id');
+        $session = is_string($sessionId) ? $this->slot->session($sessionId) : null;
+        $row = $session === null ? null : $this->slot->turn($turnId);
+        if ($row === null || $row->session_id !== $session->id) {
+            return [$session, null, '', 0];
         }
 
         return $turn instanceof ChatTurn
-            ? [$row, (string) $turn->token, (int) $turn->generation]
-            : [$row, (string) $row->token, (int) $row->generation];
+            ? [$session, $row, (string) $turn->token, (int) $turn->generation]
+            : [$session, $row, (string) $row->token, (int) $row->generation];
     }
 
     private function owns(?ChatSession $session, ChatTurn $row, string $token, int $generation, Carbon $now): bool
