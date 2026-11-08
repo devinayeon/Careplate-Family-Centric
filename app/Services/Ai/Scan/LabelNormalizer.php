@@ -19,8 +19,8 @@ class LabelNormalizer
 {
     private const KJ_PER_KCAL = '4.184';
 
-    /** Matches salt wording that is not accompanied by sodium wording. */
-    private const SALT = '/\b(garam|salt)\b/iu';
+    /** Matches salt wording (Indonesian, English, and the Dutch/French/Spanish/German words seen on imported packs) that is not accompanied by sodium wording. */
+    private const SALT = '/\b(garam|salt|zout|sel|sal|salz)\b/iu';
 
     /** Sodium chloride is salt even when it names sodium ("natrium klorida"): its grams are not sodium grams. */
     private const CHLORIDE = '/\b(klorida|chloride|nacl)\b/iu';
