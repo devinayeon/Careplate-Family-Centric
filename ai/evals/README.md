@@ -26,3 +26,10 @@ Run (live; only general and mixed cases call the model, the rest are server temp
     php tools/ai-dev.php ai ai:eval chat
 
 It creates temporary users and sessions in the configured database, sends each case through `ChatService`, deletes everything it created (foods are only read), and writes `results/chat-<UTC timestamp>.json`. Checks are deterministic (mode, retrieval status, claims at 2 dp, citations, model-call count, unsafe numbers in model text); relevance and honesty of the model text still need human review. One run per case is a smoke test, not a statistic.
+
+Reading the chat result honestly:
+
+- **9/9 is on 9 of 12 cases, 4 of them mapped/substituted onto the demo catalog** (3 `mapped_fixture`, 1 `substituted_nutrient`; see `summary.fidelity`). It is a demo-catalog smoke test and not a pass of the 12 golden cases. Not-applicable and skipped items carry `pass`/`routing_ok` = null, not false.
+- **`unsafe_claims = 0` is close to guaranteed by construction** and is not an independent safety measurement: NarrationGuard blocks every number-plus-unit before a narration can reach the answer, so a narration that was used cannot contain one. The informative numbers are `narrations_rejected n/N` (cases where the model answered but its text was dropped for the server template or an error) and `rejected_unsafe_numbers` (how many numbers sat in those dropped texts; the texts are not stored).
+- **Expected claim values reuse the production `AnswerRenderer::derive`**, so the eval checks wiring, routing, citations and 2 dp rounding, not the arithmetic. The BCMath arithmetic is covered independently by `tests/Feature/Ai/AnswerRendererTest.php`.
+- For the two-turn CHAT-07, `latency_ms` is the last turn only and `model_calls` spans both turns. `golden_sha256` is computed over LF-normalised content.

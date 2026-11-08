@@ -112,6 +112,10 @@ final class ChatComparer
             'citations_ok' => $count('citations_ok').'/'.$n,
             'model_calls_ok' => $count('model_calls_ok').'/'.$n,
             'unsafe_claims' => array_sum(array_column($run, 'unsafe_claims')),
+            // Cases where the model answered but its text was dropped for the server template, and the unsafe numbers in those dropped texts.
+            'narrations_rejected' => count(array_filter($run, fn (array $i) => ($i['narration_rejected'] ?? false) === true)).'/'.count(array_filter($run, fn (array $i) => ($i['model_responses'] ?? 0) > 0)),
+            'rejected_unsafe_numbers' => array_sum(array_map(fn (array $i) => $i['rejected_unsafe_numbers'] ?? 0, $run)),
+            'fidelity' => array_merge(['literal' => 0, 'mapped_fixture' => 0, 'substituted_nutrient' => 0], array_count_values(array_map(fn (array $i) => (string) ($i['fidelity'] ?? 'unspecified'), $run))),
             'errors' => count(array_filter($run, fn (array $i) => $i['error_code'] !== null)),
             'model_calls' => array_sum(array_column($run, 'model_calls')),
             'latency_ms' => ['server' => $latency(false), 'model' => $latency(true)],

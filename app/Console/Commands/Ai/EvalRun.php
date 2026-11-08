@@ -173,9 +173,9 @@ class EvalRun extends Command
             implode('|', $i['expected']['modes'] ?? []) ?: '-', $i['actual_mode'] ?? '-', $i['outcome'], $i['model_calls'], $i['latency_ms'] ?? '-',
         ], $items));
         $this->line(sprintf(
-            'routing %s, passed %s, claims %s, citations %s, model-call expectation %s, model calls %d, unsafe claims %d, errors %d; not applicable %d, skipped %d',
+            'routing %s, passed %s, claims %s, citations %s, model-call expectation %s, model calls %d, unsafe claims %d (by construction, see caveat), narrations rejected %s, errors %d; not applicable %d, skipped %d',
             $summary['routing'], $summary['passed'], $summary['claims_ok'], $summary['citations_ok'], $summary['model_calls_ok'],
-            $summary['model_calls'], $summary['unsafe_claims'], $summary['errors'], $summary['not_applicable'], $summary['skipped'],
+            $summary['model_calls'], $summary['unsafe_claims'], $summary['narrations_rejected'], $summary['errors'], $summary['not_applicable'], $summary['skipped'],
         ));
         $this->line('latency_ms '.json_encode($summary['latency_ms']).' usage '.json_encode($summary['usage']));
         $this->line('result: '.$file);
@@ -196,12 +196,19 @@ class EvalRun extends Command
             'run_at_utc' => gmdate('c'),
             'kind' => 'demo_catalog_live',
             'truth_status' => 'rubric_from_spec_not_human_graded',
-            'caveat' => 'One run per case against the 10-food USDA demo catalog. Cases whose premise the catalog lacks are listed as not applicable, not scored. Deterministic checks only (mode, status, claims, citations, model calls, unsafe numbers); relevance and honesty of model text still need human review (scores 0-2, spec 08). Not a statistic.',
+            'caveat' => [
+                'scope' => 'One run per case against the 10-food USDA demo catalog. Not a statistic. 9/9-style results are on the applicable cases only; the rest are listed as not applicable, not scored.',
+                'mapping' => 'Applicable cases were partly mapped (mapped_fixture) or substituted (substituted_nutrient) onto the demo catalog; see summary.fidelity. This is a demo-catalog smoke test, not a pass of the 12 golden cases.',
+                'unsafe_claims' => 'unsafe_claims=0 is close to guaranteed by construction: NarrationGuard already blocks every number-plus-unit before narration reaches the answer, so the count is not an independent safety measurement. narrations_rejected and rejected_unsafe_numbers show how often the guard actually dropped a model text and how many numbers were in the dropped texts.',
+                'claims' => 'Expected claim values are derived from the catalog row with the production AnswerRenderer::derive, so the check covers wiring, routing, citations and 2 dp rounding, not the arithmetic itself; the BCMath arithmetic is covered independently by tests/Feature/Ai/AnswerRendererTest.php.',
+                'checks' => 'Deterministic checks only. Relevance and honesty of model text still need human review (scores 0-2, spec 08).',
+                'latency' => 'For two-turn CHAT-07, latency_ms is the last turn only and model_calls spans both turns.',
+            ],
             'model_config' => (string) config('ai.gemini.model'),
             'model_versions_reported' => $versions,
-            'prompt_sha256' => hash_file('sha256', base_path('ai/prompts/chat-system.txt')),
-            'golden_sha256' => hash_file('sha256', base_path('ai/evals/chat-golden.jsonl')),
-            'catalog_map_sha256' => hash_file('sha256', base_path('ai/evals/chat-catalog-map.json')),
+            'prompt_sha256' => self::lfSha(base_path('ai/prompts/chat-system.txt')),
+            'golden_sha256' => self::lfSha(base_path('ai/evals/chat-golden.jsonl')),
+            'catalog_map_sha256' => self::lfSha(base_path('ai/evals/chat-catalog-map.json')),
             'catalog' => Food::query()->verified()->orderBy('name')->get(['id', 'name', 'current_revision'])
                 ->map(fn (Food $f) => ['id' => $f->id, 'name' => $f->name, 'revision' => (int) $f->current_revision])->all(),
             'model_requests' => $summary['model_calls'],
@@ -211,6 +218,12 @@ class EvalRun extends Command
         file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR)."\n");
 
         return str_replace(base_path().DIRECTORY_SEPARATOR, '', $path);
+    }
+
+    /** SHA-256 of the file with CRLF turned into LF, so the hash does not depend on git line-ending conversion. */
+    private static function lfSha(string $path): string
+    {
+        return hash('sha256', str_replace("\r\n", "\n", (string) file_get_contents($path)));
     }
 
     private function resultPath(string $suite): string

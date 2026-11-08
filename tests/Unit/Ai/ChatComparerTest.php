@@ -125,9 +125,9 @@ it('summarizes routing over applicable cases only and keeps not-applicable and s
         'model_calls' => 0, 'model_calls_ok' => true, 'unsafe_claims' => 0, 'error_code' => null, 'latency_ms' => 10, 'usage' => null,
     ];
     $s = (new ChatComparer)->summarize([
-        $item([]),
+        $item(['fidelity' => 'literal']),
         $item(['routing_ok' => false, 'pass' => false, 'latency_ms' => 30]),
-        $item(['model_calls' => 1, 'latency_ms' => 3000, 'usage' => ['prompt' => 100, 'candidates' => 20, 'thoughts' => null, 'total' => 120]]),
+        $item(['fidelity' => 'mapped_fixture', 'model_responses' => 1, 'narration_rejected' => true, 'rejected_unsafe_numbers' => 2, 'model_calls' => 1, 'latency_ms' => 3000, 'usage' => ['prompt' => 100, 'candidates' => 20, 'thoughts' => null, 'total' => 120]]),
         $item(['model_calls' => 1, 'latency_ms' => 5000, 'error_code' => 'AI_TIMEOUT', 'routing_ok' => false, 'pass' => false]),
         $item(['applicable' => false, 'routing_ok' => false, 'pass' => false]),
         $item(['skipped' => 'ai_disabled', 'routing_ok' => false, 'pass' => false]),
@@ -139,7 +139,9 @@ it('summarizes routing over applicable cases only and keeps not-applicable and s
         ->and($s['unsafe_claims'])->toBe(2)->and($s['errors'])->toBe(1)->and($s['model_calls'])->toBe(2)
         ->and($s['latency_ms']['model'])->toBe(['n' => 2, 'p50' => 3000, 'p95' => 5000, 'max' => 5000])
         ->and($s['latency_ms']['server'])->toBe(['n' => 3, 'p50' => 10, 'p95' => 30, 'max' => 30])
-        ->and($s['usage'])->toBe(['prompt' => 100, 'candidates' => 20, 'thoughts' => null, 'total' => 120]);
+        ->and($s['usage'])->toBe(['prompt' => 100, 'candidates' => 20, 'thoughts' => null, 'total' => 120])
+        ->and($s['narrations_rejected'])->toBe('1/1')->and($s['rejected_unsafe_numbers'])->toBe(2)
+        ->and($s['fidelity'])->toBe(['literal' => 1, 'mapped_fixture' => 1, 'substituted_nutrient' => 0, 'unspecified' => 3]);
 });
 
 it('does not count a number the server put into its own claims', function () {

@@ -77,6 +77,12 @@ test('ai:eval chat runs the golden cases, calls the model only for general cases
         ->and(collect($result['items'])->where('model_calls', '>', 0)->pluck('id')->all())->toBe(['CHAT-02', 'CHAT-10'])
         ->and(collect($result['items'])->where('applicable', true)->where('group', '!=', 'general')->where('group', '!=', 'injection')->pluck('model_calls')->unique()->all())->toBe([0])
         ->and(chatEvalItem($result, 'CHAT-01')['claims'])->toBe([['nutrient' => 'protein_g', 'value' => '11.25']])
+        ->and(chatEvalItem($result, 'CHAT-04')['pass'])->toBeNull()->and(chatEvalItem($result, 'CHAT-04')['routing_ok'])->toBeNull()
+        ->and($result['summary']['fidelity'])->toBe(['literal' => 5, 'mapped_fixture' => 3, 'substituted_nutrient' => 1])
+        ->and($result['summary']['narrations_rejected'])->toBe('0/2')
+        ->and(chatEvalItem($result, 'CHAT-02')['narration_used'])->toBeTrue()->and(chatEvalItem($result, 'CHAT-01')['narration_used'])->toBeFalse()
+        ->and($result['caveat']['unsafe_claims'])->toContain('by construction')->and($result['caveat']['claims'])->toContain('AnswerRendererTest')
+        ->and($result['golden_sha256'])->toBe(hash('sha256', str_replace("\r\n", "\n", file_get_contents(base_path('ai/evals/chat-golden.jsonl')))))
         ->and(chatEvalItem($result, 'CHAT-01')['citations'][0]['revision'])->toBe(3)
         ->and(chatEvalItem($result, 'CHAT-05')['claims'])->toBe([])
         ->and(chatEvalItem($result, 'CHAT-07')['claims'])->toHaveCount(5)
@@ -152,6 +158,24 @@ test('a failing case is reported and the command still succeeds', function () {
     expect(chatEvalItem($result, 'CHAT-02')['error_code'])->toBe('AI_OUTPUT_INVALID')
         ->and(chatEvalItem($result, 'CHAT-02')['pass'])->toBeFalse()
         ->and($result['summary']['errors'])->toBeGreaterThanOrEqual(1);
+    chatEvalNothingLeft();
+    File::deleteDirectory($dir);
+});
+
+test('a model text the guard drops is counted as a rejected narration with its unsafe numbers', function () {
+    chatFake(chatNarration('Protein dada ayam sekitar 31 g per 100 g.'));
+    chatEvalCatalog();
+    $dir = chatEvalDir();
+
+    $this->artisan('ai:eval', ['suite' => 'chat', '--out-dir' => $dir])->assertSuccessful();
+
+    $result = chatEvalResult($dir);
+    $item = chatEvalItem($result, 'CHAT-02');
+    expect($item['narration_rejected'])->toBeTrue()->and($item['narration_used'])->toBeFalse()
+        ->and($item['error_code'])->toBe('AI_OUTPUT_INVALID')->and($item['rejected_unsafe_numbers'])->toBe(2)
+        ->and($item['unsafe_claims'])->toBe(0)->and($item['answer'])->toBeNull()
+        ->and($result['summary']['narrations_rejected'])->toBe('2/2')->and($result['summary']['rejected_unsafe_numbers'])->toBe(4);
+    expect(json_encode($result))->not->toContain('sekitar 31 g');
     chatEvalNothingLeft();
     File::deleteDirectory($dir);
 });

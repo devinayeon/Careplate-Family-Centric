@@ -119,6 +119,10 @@ final class ChatEvalRunner
             'answer' => $run['response']['answer'] ?? null,
             'warnings' => $run['response']['warnings'] ?? [],
             'model_calls' => $run['model_calls'],
+            'model_responses' => $run['model_responses'],
+            'narration_used' => $run['narration_used'],
+            'narration_rejected' => $run['narration_rejected'],
+            'rejected_unsafe_numbers' => $run['rejected_unsafe_numbers'],
             'latency_ms' => $run['latency_ms'],
             'provider_latency_ms' => $run['provider_latency_ms'],
             'model_version' => $run['model_version'],
@@ -160,12 +164,17 @@ final class ChatEvalRunner
         }
         $latency = (int) round((hrtime(true) - $start) / 1_000_000);
 
+        // Rejected = the model answered (a result exists) but its text is not in the final answer: guard or schema dropped it.
         $text = $this->recorder->last?->json['text'] ?? null;
-        $narration = is_string($text) && $response !== null && trim($text) !== '' && str_contains($response['answer'], trim($text)) ? trim($text) : null;
+        $text = is_string($text) && trim($text) !== '' ? trim($text) : null;
+        $narration = $text !== null && $response !== null && str_contains($response['answer'], $text) ? $text : null;
+        $rejected = $this->recorder->results !== [] && $narration === null;
 
         return [
             'response' => $response, 'error' => $error, 'narration' => $narration, 'latency_ms' => $latency,
-            'model_calls' => $this->recorder->calls,
+            'model_calls' => $this->recorder->calls, 'model_responses' => count($this->recorder->results),
+            'narration_used' => $narration !== null, 'narration_rejected' => $rejected,
+            'rejected_unsafe_numbers' => $rejected && $text !== null ? $this->comparer->unsafeClaims($text) : 0,
             'provider_latency_ms' => $this->recorder->results === [] ? null : array_sum(array_map(fn ($r) => $r->latencyMs, $this->recorder->results)),
             'model_version' => $this->recorder->last?->modelVersion,
             'usage' => $this->usage(),
@@ -174,6 +183,7 @@ final class ChatEvalRunner
 
     /**
      * Concrete expectation from the map entry and the live catalog row; [null, reason] when the premise is missing.
+     * Values use the production AnswerRenderer::derive: this checks wiring and rounding, not the arithmetic (AnswerRendererTest does).
      *
      * @return array{0: array<string, mixed>|null, 1: string|null}
      */
@@ -219,8 +229,8 @@ final class ChatEvalRunner
     {
         return array_merge($item, [
             'applicable' => $skippedForModel, 'skipped' => $skippedForModel ? 'ai_disabled' : null, 'reason' => $reason,
-            'outcome' => $skippedForModel ? 'skipped' : 'not_applicable', 'pass' => false, 'routing_ok' => false, 'claims_ok' => false,
-            'citations_ok' => false, 'model_calls_ok' => false, 'unsafe_claims' => 0, 'error_code' => null, 'model_calls' => 0,
+            'outcome' => $skippedForModel ? 'skipped' : 'not_applicable', 'pass' => null, 'routing_ok' => null, 'claims_ok' => null,
+            'citations_ok' => null, 'model_calls_ok' => null, 'model_responses' => 0, 'narration_used' => null, 'narration_rejected' => null, 'unsafe_claims' => 0, 'error_code' => null, 'model_calls' => 0,
             'latency_ms' => null, 'usage' => null, 'failures' => [],
         ]);
     }
