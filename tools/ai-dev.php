@@ -111,17 +111,28 @@ function aiTestArguments(array $arguments, string $root): array
 
 $command = $argv[1] ?? 'help';
 $arguments = array_slice($argv, 2);
-$menu = ['doctor', 'migrate', 'seed', 'test', 'lint', 'analyse', 'serve'];
+$menu = ['doctor', 'migrate', 'seed', 'test', 'lint', 'analyse', 'serve', 'ai'];
 if (in_array($command, ['help', '--help', '-h'], true)) {
-    fwrite(STDOUT, "Usage: php tools/ai-dev.php doctor [--testing]|migrate|seed|test [selection]|lint|analyse|serve\n");
+    fwrite(STDOUT, "Usage: php tools/ai-dev.php doctor [--testing]|migrate|seed|test [selection]|lint|analyse|serve|ai <ai:name> [args]\n");
     exit(0);
 }
 if (! in_array($command, $menu, true)) {
     aiFail('Unknown command. Run php tools/ai-dev.php help.');
 }
 $testing = $command === 'test' || ($command === 'doctor' && $arguments === ['--testing']);
-if ($command !== 'test' && ! ($command === 'doctor' && $arguments === ['--testing']) && $arguments !== []) {
+if (! in_array($command, ['test', 'ai'], true) && ! ($command === 'doctor' && $arguments === ['--testing']) && $arguments !== []) {
     aiFail('This command does not accept extra arguments.');
+}
+if ($command === 'ai') {
+    // Only project ai:* artisan commands; options that could re-point the environment are refused.
+    if (! isset($arguments[0]) || preg_match('/^ai:[A-Za-z0-9:_-]+$/', $arguments[0]) !== 1) {
+        aiFail('The ai command only runs artisan commands named ai:<name>.');
+    }
+    foreach (array_slice($arguments, 1) as $argument) {
+        if (preg_match('/^--(env|database)(=|$)/', $argument) === 1) {
+            aiFail('The --env and --database options are not accepted.');
+        }
+    }
 }
 
 try {
@@ -310,6 +321,7 @@ try {
         'lint' => [PHP_BINARY, $root.'/vendor/bin/pint', '--test', '--parallel'],
         'analyse' => [PHP_BINARY, $root.'/vendor/bin/phpstan', 'analyse', '--no-progress'],
         'serve' => [PHP_BINARY, $root.'/artisan', 'serve', '--host=127.0.0.1', '--port=8001'],
+        'ai' => [PHP_BINARY, $root.'/artisan', ...$arguments],
     };
     exit(aiRun($processCommand, $root));
 } catch (Throwable $error) {

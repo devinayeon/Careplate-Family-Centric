@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\Ai\AiErrorRenderer;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*', 'ai/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(AiErrorRenderer::render(...));
     })->create();
