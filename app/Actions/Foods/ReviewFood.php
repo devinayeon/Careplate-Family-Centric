@@ -8,7 +8,10 @@ use App\Models\FoodRevision;
 use App\Models\FoodSubmission;
 use App\Models\User;
 use App\Services\Ai\Foods\SnapshotManifest;
+use Closure;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use PDOException;
 
 /**
  * The only writer of foods.status / current_revision / search_text. Each call is ONE DB::transaction
@@ -34,7 +37,7 @@ class ReviewFood
         $note = $this->required($note);
         $hash = ReviewSnapshot::hash('approve', $submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags);
 
-        return DB::transaction(function () use ($submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags, $hash) {
+        return $this->atomic(function () use ($submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags, $hash) {
             $submission = FoodSubmission::query()->find($submissionId) ?? throw AiException::for('NOT_FOUND');
             /** @var array{food_id: string, revision: int, status: string, sync_status: string}|null $stored */
             $stored = $submission->decision_result;
@@ -83,7 +86,7 @@ class ReviewFood
         $reason = $this->required($reason);
         $hash = ReviewSnapshot::hash('revoke', $foodId, $actor, $auditId, $expectedRevision, $reason, false);
 
-        return DB::transaction(function () use ($foodId, $actor, $auditId, $expectedRevision, $reason, $hash) {
+        return $this->atomic(function () use ($foodId, $actor, $auditId, $expectedRevision, $reason, $hash) {
             $food = Food::query()->find($foodId) ?? throw AiException::for('NOT_FOUND');
             $replay = FoodRevision::query()->where(['food_id' => $food->id, 'action' => 'revoke', 'decision_hash' => $hash])->first();
             /** @var array{food_id: string, revision: int, status: string, sync_status: string}|null $stored */
@@ -101,6 +104,24 @@ class ReviewFood
 
             return $result;
         });
+    }
+
+    /**
+     * One short write transaction. SQLite lock contention becomes a retryable DB_BUSY (nothing was written);
+     * every other database error propagates unchanged.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $fn
+     * @return T
+     */
+    private function atomic(Closure $fn): mixed
+    {
+        try {
+            return DB::transaction($fn);
+        } catch (QueryException|PDOException $e) {
+            throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
+        }
     }
 
     private function required(string $text): string

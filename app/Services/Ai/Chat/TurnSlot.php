@@ -36,7 +36,7 @@ class TurnSlot
             throw AiException::for('SESSION_BUSY', previous: $e);
         } catch (QueryException|PDOException $e) {
             // BEGIN IMMEDIATE (transaction_mode) fails as a raw PDOException, not a QueryException, once busy_timeout runs out.
-            if (str_contains($e->getMessage(), 'database is locked') || str_contains($e->getMessage(), 'database table is locked')) {
+            if (AiException::isDatabaseLocked($e)) {
                 throw AiException::for('SESSION_BUSY', previous: $e);
             }
             throw $e;

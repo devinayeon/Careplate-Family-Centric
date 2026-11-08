@@ -33,6 +33,8 @@ class AiException extends RuntimeException
         'INTERNAL' => [500, 'Terjadi kesalahan pada server.', false],
         'AI_PROVIDER_ERROR' => [502, 'Layanan AI sedang bermasalah. Coba lagi nanti.', true],
         'AI_OUTPUT_INVALID' => [502, 'Jawaban layanan AI tidak dapat dipakai. Coba lagi.', true],
+        // SQLite lock contention outside chat (admin approve/revoke). Nothing was written; the same call may be retried.
+        'DB_BUSY' => [503, 'Server sedang sibuk menyimpan data. Coba lagi sebentar.', true],
         'KNOWLEDGE_UNAVAILABLE' => [503, 'Data pangan belum tersedia. Coba lagi nanti.', true],
         'AI_DISABLED' => [503, 'Fitur AI sedang tidak aktif.', false],
         'POLICY_CONFIG_INVALID' => [503, 'Konfigurasi layanan AI belum valid.', false],
@@ -64,6 +66,12 @@ class AiException extends RuntimeException
         }
 
         return new self($code, $status, $message ?? $defaultMessage, $retryable ?? $defaultRetryable, $headers, $previous);
+    }
+
+    /** True for SQLite lock contention (BEGIN IMMEDIATE fails as a raw PDOException once busy_timeout runs out). */
+    public static function isDatabaseLocked(Throwable $e): bool
+    {
+        return str_contains($e->getMessage(), 'database is locked') || str_contains($e->getMessage(), 'database table is locked');
     }
 
     /**

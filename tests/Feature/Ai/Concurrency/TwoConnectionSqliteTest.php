@@ -175,7 +175,7 @@ test('(d) approve with the same expected revision from A and B: exactly one wins
         ->and(DB::connection('cc_b')->table('food_submissions')->value('status'))->toBe('approved');
 });
 
-test('(d) a revoke attempted by B while A is mid-revoke fails on the lock without partial state; then B is STALE_REVISION', function () {
+test('(d) a revoke attempted by B while A is mid-revoke is a retryable DB_BUSY without partial state; then B is STALE_REVISION', function () {
     $food = cfFood(['current_revision' => 3]);
     $manifest = rfManifest();
     $probe = ccWhenAWrites('insert into "food_revisions"', fn () => ccOn('cc_b', fn () => (new ReviewFood($manifest))->revoke($food->id, null, 'audit-b', 3, 'Alasan B')));
@@ -183,9 +183,11 @@ test('(d) a revoke attempted by B while A is mid-revoke fails on the lock withou
     ccOn('cc_a', fn () => (new ReviewFood($manifest))->revoke($food->id, null, 'audit-a', 3, 'Alasan A'));
     $after = rfThrown(fn () => ccOn('cc_b', fn () => (new ReviewFood($manifest))->revoke($food->id, null, 'audit-b', 3, 'Alasan B')));
 
-    // ReviewFood has no busy mapping (known limit): the lock surfaces raw, but nothing of B was written.
-    expect($probe->outcome)->toBeInstanceOf(Throwable::class)
-        ->and($probe->outcome->getMessage())->toContain('database is locked')
+    // The lock is a controlled, retryable DB_BUSY (not a raw PDOException), and nothing of B was written.
+    expect($probe->outcome)->toBeInstanceOf(AiException::class)
+        ->and($probe->outcome->errorCode)->toBe('DB_BUSY')
+        ->and($probe->outcome->status)->toBe(503)
+        ->and($probe->outcome->retryable)->toBeTrue()
         ->and($after->errorCode)->toBe('STALE_REVISION')
         ->and(DB::connection('cc_b')->table('food_revisions')->where('action', 'revoke')->count())->toBe(1);
 });
