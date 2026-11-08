@@ -3,6 +3,7 @@
 namespace App\Services\Ai\Foods;
 
 use App\Models\FoodSubmission;
+use App\Support\Ai\JsonShape;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -203,7 +204,7 @@ class UsdaFoundationImporter
                         $out[] = "nutrients.{$field}";
                     }
                 }
-            } elseif (json_encode($stored[$key] ?? null) !== json_encode($fresh[$key] ?? null)) {
+            } elseif (! JsonShape::same($stored[$key] ?? null, $fresh[$key] ?? null)) {
                 $out[] = (string) $key;
             }
         }

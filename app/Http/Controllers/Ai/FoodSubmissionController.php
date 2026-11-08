@@ -6,6 +6,7 @@ use App\Exceptions\Ai\AiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ai\SubmitFoodRequest;
 use App\Models\FoodSubmission;
+use App\Support\Ai\JsonShape;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +46,7 @@ class FoodSubmissionController extends Controller
 
         /** @var mixed $stored */
         $stored = $submission->candidate;
-        $retry = (string) $submission->user_id === $userId && $submission->status === 'pending' && $stored === $candidate;
+        $retry = (string) $submission->user_id === $userId && $submission->status === 'pending' && JsonShape::same($stored, $candidate);
         if (! $created && ! $retry) {
             throw AiException::for('IDEMPOTENCY_CONFLICT', 'Sumber makanan ini sudah pernah diajukan.');
         }
