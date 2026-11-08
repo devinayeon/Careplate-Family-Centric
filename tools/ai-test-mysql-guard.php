@@ -26,3 +26,19 @@ function aiMysqlTargetError(mixed $connection, mixed $host, mixed $port, mixed $
 
     return null;
 }
+
+/**
+ * Guard for one configured connection: MySQL and MariaDB speak the same protocol, so both drivers get the
+ * same target check; any other driver (sqlite) is not guarded here. Returns a refusal reason or null.
+ *
+ * @param  array<string, mixed>  $config  database.connections.<name>
+ */
+function aiTestConnectionError(array $config): ?string
+{
+    if (! in_array($config['driver'] ?? null, ['mysql', 'mariadb'], true)) {
+        return null;
+    }
+
+    return aiMysqlTargetError('mysql', $config['host'] ?? null, $config['port'] ?? null, $config['database'] ?? null,
+        $config['unix_socket'] ?? '', $config['url'] ?? '');
+}

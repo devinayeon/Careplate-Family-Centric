@@ -38,3 +38,23 @@ test('phpunit.mysql.xml pins the target and the runner refuses unsupported optio
     exec('php '.escapeshellarg($root.'/tools/ai-test-mysql.php').' --bogus 2>&1', $output, $code);
     expect($code)->toBe(1)->and(implode("\n", $output))->toContain('Unsupported test option');
 });
+
+test('the connection guard covers the mysql and mariadb drivers and ignores sqlite', function (string $driver) {
+    $target = ['driver' => $driver, 'host' => '127.0.0.1', 'port' => '3407', 'database' => 'careplate_ai_test'];
+
+    expect(aiTestConnectionError($target))->toBeNull()
+        ->and(aiTestConnectionError(['port' => '3306'] + $target))->toStartWith('Refused')
+        ->and(aiTestConnectionError(['database' => 'careplate'] + $target))->toStartWith('Refused')
+        ->and(aiTestConnectionError(['host' => 'db.internal'] + $target))->toStartWith('Refused')
+        ->and(aiTestConnectionError(['url' => 'mysql://prod/db'] + $target))->toStartWith('Refused');
+})->with(['mysql', 'mariadb']);
+
+test('the connection guard does not touch sqlite connections', function () {
+    expect(aiTestConnectionError(['driver' => 'sqlite', 'database' => ':memory:']))->toBeNull();
+});
+
+test('tests/TestCase.php routes every connection through the shared guard', function () {
+    $source = (string) file_get_contents(dirname(__DIR__, 2).'/TestCase.php');
+
+    expect($source)->toContain('aiTestConnectionError(')->and($source)->not->toContain("=== 'mysql'");
+});
