@@ -53,7 +53,7 @@ class AiErrorRenderer
             // Laravel already converted CSRF/authorization/model-not-found into HTTP exceptions.
             return match ($e->getStatusCode()) {
                 403 => AiException::for('FORBIDDEN'),
-                404, 405 => AiException::for('NOT_FOUND'),
+                404 => AiException::for('NOT_FOUND'),
                 413 => AiException::for('IMAGE_TOO_LARGE'),
                 419 => AiException::for('CSRF_MISMATCH'),
                 429 => AiException::for('RATE_LIMITED', headers: array_intersect_key($e->getHeaders(), ['Retry-After' => 1])),

@@ -129,7 +129,7 @@ if ($command === 'ai') {
         aiFail('The ai command only runs artisan commands named ai:<name>.');
     }
     foreach (array_slice($arguments, 1) as $argument) {
-        if (preg_match('/^--(env|database)(=|$)/', $argument) === 1) {
+        if (preg_match('/^--(env|database)/', $argument) === 1) {
             aiFail('The --env and --database options are not accepted.');
         }
     }
