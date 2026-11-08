@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Ai;
 
+use App\Services\Ai\Chat\TurnGate;
 use Closure;
 use Illuminate\Console\Command;
 use Illuminate\Database\Query\Builder;
@@ -24,13 +25,17 @@ use Throwable;
  *     inside that window, so the tombstone is not needed afterwards.
  * A session holding a pending turn with a VALID lease is never touched. Each chunk (by id) is one short
  * transaction; a failure leaves earlier chunks done and the rest consistent. Output is counts only.
+ *
+ * --dry-run executes the real purge inside one outer transaction that is always rolled back, so counts are exact.
+ * On SQLite that transaction holds the write lock (IMMEDIATE mode) for the whole run: run it off-peak.
  */
 class PurgeChats extends Command
 {
     /** Added to the provider horizon before a tombstone may go. */
     public const SAFETY_MARGIN_SECONDS = 86400;
 
-    private const CHUNK = 200;
+    /** Ids per transaction. Static only so tests can force several chunks; the default is the production value. */
+    public static int $chunkSize = 200;
 
     protected $signature = 'ai:purge-chats {--dry-run : Report the counts a real run would delete, delete nothing}';
 
@@ -72,7 +77,8 @@ class PurgeChats extends Command
     /** @return array{turns: int, sessions: int} */
     private function purge(Carbon $now): array
     {
-        $cutoff = $now->copy()->subDays((int) config('ai.chat.retention_days'));
+        // One definition of "expired" shared with the read side (ChatHistory, MemoryBuilder, TurnGate replay).
+        $cutoff = TurnGate::retentionCutoff();
         $horizon = $now->copy()->subSeconds($this->horizonSeconds());
         $turns = $sessions = 0;
 
@@ -113,7 +119,7 @@ class PurgeChats extends Command
     {
         do {
             $done = DB::transaction(function () use ($scope, $work): bool {
-                $ids = array_values($scope()->orderBy('id')->limit(self::CHUNK)->pluck('id')->all());
+                $ids = array_values($scope()->orderBy('id')->limit(max(1, self::$chunkSize))->pluck('id')->all());
                 if ($ids !== []) {
                     $work($ids);
                 }

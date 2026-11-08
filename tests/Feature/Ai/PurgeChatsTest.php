@@ -3,6 +3,7 @@
 use App\Console\Commands\Ai\PurgeChats;
 use App\Models\ChatSession;
 use App\Models\ChatTurn;
+use App\Services\Ai\Chat\SessionEraser;
 use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Contracts\Console\Kernel;
@@ -20,6 +21,7 @@ const PG_MARKER = 'RAHASIA-PENGGUNA-7731';
 
 beforeEach(function () {
     test()->seed(AiPermissionSeeder::class);
+    PurgeChats::$chunkSize = 200;
     test()->travelTo(PG_NOW);
     config([
         'ai.chat.retention_days' => 7, 'ai.chat.lease_seconds' => 35, 'ai.chat.deadline_seconds' => 20,
@@ -246,4 +248,49 @@ test('the purge is registered on the scheduler once a day without overlapping', 
         ->and($events->first()->expression)->toBe('0 0 * * *')
         ->and($events->first()->withoutOverlapping)->toBeTrue();
     expect(Artisan::all())->toHaveKey('inspire');
+});
+
+test('a late finalize or fail after the purge removed the turn and tombstone writes nothing', function () {
+    $session = ctSession();
+    $turn = ctReserve($session)->turn;
+    app(SessionEraser::class)->erase($session);
+    test()->travelTo('2026-11-09 10:01:00');                  // past the 86435 s horizon since the delete at 10:00:00
+
+    pgRun();
+
+    expect(ChatSession::count())->toBe(0)->and(ChatTurn::count())->toBe(0);
+    foreach ([$turn, $turn->id] as $handle) {
+        expect(ctGate()->finalize($handle, ctResponse(), [], []))->toBeFalse()
+            ->and(ctGate()->fail($handle, 'AI_TIMEOUT'))->toBeFalse();
+    }
+    expect(ChatSession::count())->toBe(0)->and(ChatTurn::count())->toBe(0);
+});
+
+test('with a chunk size of 2 every eligible row in every scope is deleted, nothing younger, and a rerun is a no-op', function () {
+    PurgeChats::$chunkSize = 2;
+    $keepers = [];
+    $expiredHost = pgSession(PG_NOW);                          // 5 expired turns, plus one fresh turn that must stay
+    foreach (range(1, 5) as $i) {
+        pgTurn($expiredHost, $i, '2026-10-01 00:00:00');
+    }
+    $keepers[] = pgTurn($expiredHost, 6, PG_NOW);
+    $emptied = collect(range(1, 5))->map(fn () => pgSession('2026-10-01 00:00:00'));          // 5 old empty active sessions
+    $keepers[] = pgSession('2026-11-07 00:00:00');             // young empty active session
+    $tombs = collect(range(1, 5))->map(function ($i) {         // 5 expired tombstones with one turn each
+        $t = pgSession('2026-10-01 00:00:00', ['state' => 'deleted', 'generation' => 2]);
+        pgTurn($t, 1, '2026-11-07 09:00:00');
+
+        return $t;
+    });
+    $keepers[] = pgSession('2026-11-07 09:59:30', ['state' => 'deleted', 'generation' => 2]);   // inside the horizon
+
+    $first = pgRun();
+    $second = pgRun();
+
+    expect($first)->toMatchArray(['turns' => 10, 'sessions' => 10])
+        ->and($second)->toMatchArray(['turns' => 0, 'sessions' => 0])
+        ->and(ChatSession::count())->toBe(3)->and(ChatTurn::count())->toBe(1)
+        ->and(collect($keepers)->every(fn ($row) => pgExists($row)))->toBeTrue()
+        ->and($emptied->contains(fn ($s) => pgExists($s)))->toBeFalse()
+        ->and($tombs->contains(fn ($s) => pgExists($s)))->toBeFalse();
 });
