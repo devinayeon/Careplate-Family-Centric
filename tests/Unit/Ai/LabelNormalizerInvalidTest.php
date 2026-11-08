@@ -1,5 +1,8 @@
 <?php
 
+use App\Services\Ai\Scan\Decimal;
+use App\Services\Ai\Scan\LabelNormalizer;
+
 require_once __DIR__.'/RawLabelFactory.php';
 
 it('rejects a unit that is invalid for the nutrient', function (string $key, ?string $unit) {
@@ -73,3 +76,31 @@ it('rejects a raw shape that does not conform instead of assuming it', function 
     'unexpected nutrient' => [fn ($r) => array_replace($r, ['nutrients' => $r['nutrients'] + ['salt' => $r['nutrients']['fat']]])],
     'unexpected nutrient field' => [fn ($r) => array_replace_recursive($r, ['nutrients' => ['fat' => ['note' => 'x']]])],
 ]);
+
+it('rejects implausibly large values but accepts a value exactly at the cap', function () {
+    $serving = fn ($v) => ['value' => $v, 'unit' => 'g', 'household_text' => null];
+
+    expect(normalizeCode(rawLabel(['fat' => rawNutrient(1e30, 'g')])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(100001, 'g')])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(100000.5, 'g')])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(100000, 'g')])))->toBe('NO_EXCEPTION')
+        ->and(normalizeCode(rawLabel([], ['serving_size' => $serving(1e30)])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel([], ['serving_size' => $serving(100001)])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel([], ['serving_size' => $serving(100000)])))->toBe('NO_EXCEPTION')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(8, 'g', 'exact', '8 g', 1e30)])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(8, 'g', 'exact', '8 g', 1001)])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel(['fat' => rawNutrient(8, 'g', 'exact', '8 g', 1000)])))->toBe('NO_EXCEPTION')
+        ->and(normalizeCode(rawLabel([], ['servings_per_package' => 1e30])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel([], ['servings_per_package' => 1001])))->toBe('AI_OUTPUT_INVALID')
+        ->and(normalizeCode(rawLabel([], ['servings_per_package' => 1000])))->toBe('NO_EXCEPTION');
+});
+
+it('keeps the largest accepted values exact in the public numbers', function () {
+    $r = (new LabelNormalizer)->normalize(rawLabel(
+        ['sodium' => rawNutrient(100000, 'g')],
+        ['serving_size' => ['value' => 100000, 'unit' => 'g', 'household_text' => null]],
+    ));
+
+    expect($r['normalized_per_serving']['sodium_mg'])->toBe(100000000)
+        ->and(Decimal::toNumber('99999999999999999999999'))->toBeFloat()->toBeGreaterThan(9.9e22);
+});

@@ -25,6 +25,13 @@ final class RawLabelValidator
         'sodium' => ['sodium_mg', 'mg', ['mg', 'g']],
     ];
 
+    /** Plausibility caps: anything above is a misread or hostile output, not a label value. */
+    public const MAX_VALUE = 100000;          // nutrient raw_value and serving_size.value
+
+    public const MAX_SERVINGS_PER_PACKAGE = 1000;
+
+    public const MAX_PERCENT_AKG = 1000;
+
     private const TOP = ['readable', 'label_basis', 'needs_review', 'serving_size', 'servings_per_package', 'nutrients'];
 
     private const FIELDS = ['raw_value', 'raw_unit', 'qualifier', 'evidence', 'label_percent_akg'];
@@ -44,7 +51,7 @@ final class RawLabelValidator
         $serving = $this->object($raw['serving_size'], ['value', 'unit', 'household_text']);
         $this->check(in_array($serving['unit'], ['g', 'ml', null], true));
         $this->check($serving['household_text'] === null || is_string($serving['household_text']));
-        $servingValue = $this->positiveOrNull($serving['value']);
+        $servingValue = $this->positiveOrNull($serving['value'], self::MAX_VALUE);
 
         $nutrients = $this->object($raw['nutrients'], array_keys(self::NUTRIENTS));
 
@@ -62,7 +69,7 @@ final class RawLabelValidator
                 'unit' => $servingValue === null ? null : $serving['unit'],
                 'household_text' => $serving['household_text'] === null ? null : mb_substr($serving['household_text'], 0, 120),
             ],
-            'per_package' => $this->positiveOrNull($raw['servings_per_package']),
+            'per_package' => $this->positiveOrNull($raw['servings_per_package'], self::MAX_SERVINGS_PER_PACKAGE),
             'nutrients' => $out,
         ];
     }
@@ -77,8 +84,8 @@ final class RawLabelValidator
         $this->check(in_array($n['qualifier'], ['exact', 'less_than', 'unknown'], true));
         $this->check(in_array($n['raw_unit'], ['g', 'mg', 'kcal', 'kJ', null], true));
         $this->check($n['evidence'] === null || is_string($n['evidence']));
-        $value = $this->numberOrNull($n['raw_value']);
-        $akg = $this->numberOrNull($n['label_percent_akg']);
+        $value = $this->numberOrNull($n['raw_value'], self::MAX_VALUE);
+        $akg = $this->numberOrNull($n['label_percent_akg'], self::MAX_PERCENT_AKG);
 
         if ($n['qualifier'] === 'unknown') {
             return ['value' => null, 'unit' => null, 'canonical_unit' => $canonical,
@@ -92,19 +99,19 @@ final class RawLabelValidator
             'qualifier' => $n['qualifier'], 'evidence' => mb_substr($evidence, 0, 120), 'akg' => $akg];
     }
 
-    private function numberOrNull(mixed $v): ?string
+    private function numberOrNull(mixed $v, int $max): ?string
     {
         if ($v === null) {
             return null;
         }
-        $this->check((is_int($v) || is_float($v)) && is_finite($v) && $v >= 0);
+        $this->check((is_int($v) || is_float($v)) && is_finite($v) && $v >= 0 && $v <= $max);
 
         return Decimal::fromNumber($v);
     }
 
-    private function positiveOrNull(mixed $v): ?string
+    private function positiveOrNull(mixed $v, int $max): ?string
     {
-        $s = $this->numberOrNull($v);
+        $s = $this->numberOrNull($v, $max);
 
         return $s === null || Decimal::cmp($s, '0') === 0 ? null : $s;
     }

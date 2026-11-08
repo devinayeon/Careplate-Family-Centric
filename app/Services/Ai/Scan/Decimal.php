@@ -32,7 +32,8 @@ final class Decimal
     {
         $r = self::round($x, $scale);
 
-        return str_contains($r, '.') ? (float) $r : (int) $r;
+        // Integral strings that do not fit an int must not saturate to PHP_INT_MAX.
+        return str_contains($r, '.') || strlen($r) > 18 ? (float) $r : (int) $r;
     }
 
     /** @return numeric-string */
