@@ -22,6 +22,9 @@ class LabelNormalizer
     /** Matches salt wording that is not accompanied by sodium wording. */
     private const SALT = '/\b(garam|salt)\b/iu';
 
+    /** Sodium chloride is salt even when it names sodium ("natrium klorida"): its grams are not sodium grams. */
+    private const CHLORIDE = '/\b(klorida|chloride|nacl)\b/iu';
+
     private const SODIUM = '/\b(natrium|sodium|na)\b/iu';
 
     public function __construct(private readonly RawLabelValidator $validator = new RawLabelValidator) {}
@@ -85,7 +88,8 @@ class LabelNormalizer
     {
         $sodium = $label['nutrients']['sodium_mg'];
         $evidence = (string) $sodium['evidence'];
-        if ($sodium['value'] !== null && preg_match(self::SALT, $evidence) && ! preg_match(self::SODIUM, $evidence)) {
+        $isSalt = preg_match(self::CHLORIDE, $evidence) || (preg_match(self::SALT, $evidence) && ! preg_match(self::SODIUM, $evidence));
+        if ($sodium['value'] !== null && $isSalt) {
             $label['nutrients']['sodium_mg'] = ['value' => null, 'unit' => null, 'canonical_unit' => 'mg',
                 'qualifier' => 'unknown', 'evidence' => null, 'akg' => null];
             $warnings[] = 'Kadar garam tidak sama dengan natrium; natrium dianggap belum terbaca.';

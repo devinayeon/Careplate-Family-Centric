@@ -149,6 +149,21 @@ it('treats a salt-only sodium reading as unknown, since salt is not sodium', fun
     expect($ok['normalized_per_serving']['sodium_mg'])->toBe(450);
 });
 
+it('treats sodium chloride wording as salt, not sodium, while real sodium evidence stays accepted', function (string $evidence, bool $accepted) {
+    $r = norm(rawLabel(['sodium' => rawNutrient(450, 'mg', 'exact', $evidence)]));
+
+    expect($r['normalized_per_serving']['sodium_mg'])->toBe($accepted ? 450 : null);
+})->with([
+    ['Natrium klorida 450 mg', false],
+    ['Sodium chloride 450mg', false],
+    ['NaCl 450 mg', false],
+    ['Garam 450 mg', false],
+    ['Salt 450 mg', false],
+    ['Natrium 450 mg', true],
+    ['Sodium 450mg', true],
+    ['Natrium (garam) 450 mg', true],
+]);
+
 it('nulls every normalized value on a global conflict but keeps the readings', function () {
     $r = norm(rawLabel([], ['needs_review' => true]));
 
