@@ -129,11 +129,17 @@ class PurgeChats extends Command
         } while (! $done);
     }
 
-    /** Excludes sessions (by $column) that currently hold a pending turn with a valid lease. */
+    /**
+     * Excludes sessions (by $column) that currently hold a pending turn with a valid lease. The protected ids are
+     * read first: MySQL rejects a DELETE FROM chat_turns whose sub-select reads chat_turns (error 1093). The set is
+     * tiny (live leases only) and each call runs inside the same chunk transaction as the delete that uses it.
+     */
     private function unprotected(Builder $query, string $column, Carbon $now): Builder
     {
-        return $query->whereNotIn($column, fn ($sub) => $sub->select('session_id')->from('chat_turns')
-            ->where('status', 'pending')->where('lease_expires_at', '>', $now));
+        $protected = DB::table('chat_turns')->where('status', 'pending')->where('lease_expires_at', '>', $now)
+            ->distinct()->pluck('session_id')->all();
+
+        return $query->whereNotIn($column, $protected);
     }
 
     private function horizonSeconds(): int
