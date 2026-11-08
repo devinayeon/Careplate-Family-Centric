@@ -1,0 +1,695 @@
+{
+    "suite": "scan",
+    "run_at_utc": "2026-11-08T07:17:17+00:00",
+    "split": "all",
+    "kind": "web_sample",
+    "truth_status": "unverified_by_human",
+    "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging.",
+    "model_config": "gemini-3.6-flash",
+    "model_versions_reported": [
+        "gemini-3.6-flash"
+    ],
+    "prompt_sha256": "c599e583179a49acf1faf2ec55154bceb8403185d08b880057c553eea54303c7",
+    "requests": 8,
+    "summary": {
+        "images": 8,
+        "fields": {
+            "energy_kcal": {
+                "correct": 6,
+                "total": 6,
+                "null_correct": 2,
+                "null_total": 2,
+                "unsafe": 0
+            },
+            "fat_g": {
+                "correct": 7,
+                "total": 7,
+                "null_correct": 1,
+                "null_total": 1,
+                "unsafe": 0
+            },
+            "sugars_total_g": {
+                "correct": 6,
+                "total": 6,
+                "null_correct": 2,
+                "null_total": 2,
+                "unsafe": 0
+            },
+            "protein_g": {
+                "correct": 7,
+                "total": 7,
+                "null_correct": 1,
+                "null_total": 1,
+                "unsafe": 0
+            },
+            "carbohydrate_g": {
+                "correct": 7,
+                "total": 7,
+                "null_correct": 1,
+                "null_total": 1,
+                "unsafe": 0
+            },
+            "sodium_mg": {
+                "correct": 5,
+                "total": 5,
+                "null_correct": 3,
+                "null_total": 3,
+                "unsafe": 0
+            },
+            "serving_size": {
+                "correct": 5,
+                "total": 5,
+                "null_correct": 3,
+                "null_total": 3,
+                "unsafe": 0
+            },
+            "label_basis": {
+                "correct": 7,
+                "total": 7,
+                "null_correct": 0,
+                "null_total": 0,
+                "unsafe": 0
+            }
+        },
+        "abstained": 1,
+        "false_abstentions": 0,
+        "negative_total": 1,
+        "negative_correct": 1,
+        "invalid_output": 0,
+        "errors": 0,
+        "unsafe_inferences": 0,
+        "latency_ms": {
+            "n": 8,
+            "p50": 15563,
+            "p95": 21787,
+            "max": 21787
+        },
+        "usage": {
+            "prompt": 11014,
+            "candidates": 3774,
+            "thoughts": 3678,
+            "total": 18466,
+            "unknown_reports": 1
+        }
+    },
+    "items": [
+        {
+            "id": "SMP-01",
+            "file": "smp-01-oranges.jpg",
+            "split": "dev",
+            "condition": "clear",
+            "extraction_status": "partial",
+            "latency_ms": 21787,
+            "provider_latency_ms": 21319,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1397,
+                "candidates": 456,
+                "thoughts": 681,
+                "total": 2534
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 42,
+                    "got": 42,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 8.5,
+                    "got": 8.5,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 1.1,
+                    "got": 1.1,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 8.5,
+                    "got": 8.5,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": "unknown"
+                },
+                "serving_size": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_100g",
+                    "got": "per_100g"
+                }
+            }
+        },
+        {
+            "id": "SMP-02",
+            "file": "smp-02-fruit-drink-box.jpg",
+            "split": "dev",
+            "condition": "difficult",
+            "extraction_status": "partial",
+            "latency_ms": 15563,
+            "provider_latency_ms": 13831,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1363,
+                "candidates": 502,
+                "thoughts": null,
+                "total": 1865
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 10,
+                    "got": 10,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 2,
+                    "got": 2,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 2,
+                    "got": 2,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 80,
+                    "got": 80,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "SMP-03",
+            "file": "smp-03-fruit-salad.jpg",
+            "split": "dev",
+            "condition": "negative",
+            "extraction_status": null,
+            "latency_ms": 17614,
+            "provider_latency_ms": 16266,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1379,
+                "candidates": 421,
+                "thoughts": 64,
+                "total": 1864
+            },
+            "expected_outcome": "unreadable",
+            "outcome": "unreadable",
+            "error_code": "OCR_UNREADABLE",
+            "abstained": true,
+            "invalid_output": false,
+            "negative_correct": true,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "fat_g": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "sugars_total_g": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "protein_g": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "carbohydrate_g": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "sodium_mg": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": null
+                },
+                "serving_size": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null
+                },
+                "label_basis": {
+                    "result": "not_scored",
+                    "truth": null,
+                    "got": null
+                }
+            }
+        },
+        {
+            "id": "SMP-04",
+            "file": "smp-04-fda-2016.png",
+            "split": "holdout",
+            "condition": "clear",
+            "extraction_status": "complete",
+            "latency_ms": 10843,
+            "provider_latency_ms": 10568,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1403,
+                "candidates": 482,
+                "thoughts": 607,
+                "total": 2492
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 230,
+                    "got": 230,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 8,
+                    "got": 8,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 12,
+                    "got": 12,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 3,
+                    "got": 3,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 37,
+                    "got": 37,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 160,
+                    "got": 160,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        55,
+                        "g"
+                    ],
+                    "got": [
+                        55,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "SMP-05",
+            "file": "smp-05-canada-bilingual.jpg",
+            "split": "holdout",
+            "condition": "clear",
+            "extraction_status": "complete",
+            "latency_ms": 12460,
+            "provider_latency_ms": 10652,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1365,
+                "candidates": 490,
+                "thoughts": 703,
+                "total": 2558
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 110,
+                    "got": 110,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 2,
+                    "got": 2,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 25,
+                    "got": 25,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 0,
+                    "got": 0,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        30,
+                        "g"
+                    ],
+                    "got": [
+                        30,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "SMP-06",
+            "file": "smp-06-hk-bread.jpg",
+            "split": "holdout",
+            "condition": "clear",
+            "extraction_status": "complete",
+            "latency_ms": 17986,
+            "provider_latency_ms": 17033,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1387,
+                "candidates": 479,
+                "thoughts": 459,
+                "total": 2325
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 147,
+                    "got": 147,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 2.8,
+                    "got": 2.8,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 3.5,
+                    "got": 3.5,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 4.2,
+                    "got": 4.2,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 26.2,
+                    "got": 26.2,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 226,
+                    "got": 226,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        50,
+                        "g"
+                    ],
+                    "got": [
+                        50,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "SMP-07",
+            "file": "smp-07-snack-cake-cropped.jpg",
+            "split": "holdout",
+            "condition": "partial",
+            "extraction_status": "partial",
+            "latency_ms": 17774,
+            "provider_latency_ms": 16241,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1363,
+                "candidates": 471,
+                "thoughts": 772,
+                "total": 2606
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": "unknown"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 28,
+                    "got": 28,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "match",
+                    "truth": 26,
+                    "got": 26,
+                    "qualifier": "exact"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 5,
+                    "got": 5,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 47,
+                    "got": 47,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "match",
+                    "truth": 400,
+                    "got": 400,
+                    "qualifier": "exact"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        94,
+                        "g"
+                    ],
+                    "got": [
+                        94,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        },
+        {
+            "id": "SMP-08",
+            "file": "smp-08-ryazhenka.jpg",
+            "split": "holdout",
+            "condition": "partial",
+            "extraction_status": "partial",
+            "latency_ms": 6860,
+            "provider_latency_ms": 6679,
+            "model_version": "gemini-3.6-flash",
+            "usage": {
+                "prompt": 1357,
+                "candidates": 473,
+                "thoughts": 392,
+                "total": 2222
+            },
+            "expected_outcome": "extract",
+            "outcome": "extracted",
+            "error_code": null,
+            "abstained": false,
+            "invalid_output": false,
+            "negative_correct": false,
+            "unsafe_count": 0,
+            "fields": {
+                "energy_kcal": {
+                    "result": "match",
+                    "truth": 133.6,
+                    "got": 133.6,
+                    "qualifier": "exact"
+                },
+                "fat_g": {
+                    "result": "match",
+                    "truth": 8,
+                    "got": 8,
+                    "qualifier": "exact"
+                },
+                "sugars_total_g": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": "unknown"
+                },
+                "protein_g": {
+                    "result": "match",
+                    "truth": 6,
+                    "got": 6,
+                    "qualifier": "exact"
+                },
+                "carbohydrate_g": {
+                    "result": "match",
+                    "truth": 9.4,
+                    "got": 9.4,
+                    "qualifier": "exact"
+                },
+                "sodium_mg": {
+                    "result": "correct_null",
+                    "truth": null,
+                    "got": null,
+                    "qualifier": "unknown"
+                },
+                "serving_size": {
+                    "result": "match",
+                    "truth": [
+                        200,
+                        "g"
+                    ],
+                    "got": [
+                        200,
+                        "g"
+                    ]
+                },
+                "label_basis": {
+                    "result": "match",
+                    "truth": "per_serving",
+                    "got": "per_serving"
+                }
+            }
+        }
+    ]
+}
