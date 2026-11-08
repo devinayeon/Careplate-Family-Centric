@@ -54,7 +54,7 @@ it('ai:seed-catalog approves only pending USDA submissions with an honest audit 
     expect($revision->actor_id)->toBeNull()
         ->and($revision->actor_audit_id)->toBe('script:ai-source-match')
         ->and($revision->note)->toContain('variant_pick')->toContain('exact_zero:sodium_mg')
-        ->and($revision->note)->toContain('source-match checked programmatically against the USDA snapshot; flags acknowledged by script; no human nutritionist review');
+        ->and($revision->note)->toContain('source id and archive sha256 matched against the snapshot manifest; nutrient values NOT re-verified against the raw data; review flags acknowledged by script; no human nutritionist review')->not->toContain('checked programmatically');
 
     $this->artisan('ai:seed-catalog')->expectsOutputToContain('approved 0')->assertSuccessful();
     expect(FoodRevision::count())->toBe(2)->and(Food::count())->toBe(2);

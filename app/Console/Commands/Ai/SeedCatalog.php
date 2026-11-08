@@ -10,7 +10,7 @@ class SeedCatalog extends Command
 {
     protected $signature = 'ai:seed-catalog';
 
-    protected $description = 'Approve pending USDA food submissions through ReviewFood (source-match by script, no human review).';
+    protected $description = 'Approve pending USDA food submissions through ReviewFood (manifest source id and sha256 match only; values not re-verified; no human review).';
 
     public function handle(ApprovePendingCatalog $catalog): int
     {

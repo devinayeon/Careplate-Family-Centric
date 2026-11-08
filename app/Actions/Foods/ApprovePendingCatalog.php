@@ -6,14 +6,15 @@ use App\Exceptions\Ai\AiException;
 use App\Models\FoodSubmission;
 
 /**
- * Demo catalog seeding: approves every still-pending USDA submission through ReviewFood. There is no
- * human reviewer here, and the audit trail says so; nothing else can mark a food verified.
+ * Demo catalog seeding: approves every still-pending USDA submission through ReviewFood. The only
+ * script check is that the source id and archive sha256 are listed in the snapshot manifest; nutrient
+ * values are NOT re-verified against the raw data. No human reviewer exists, and the audit note says so.
  */
 class ApprovePendingCatalog
 {
     public const AUDIT_ID = 'script:ai-source-match';
 
-    public const NOTE = 'source-match checked programmatically against the USDA snapshot; flags acknowledged by script; no human nutritionist review';
+    public const NOTE = 'source id and archive sha256 matched against the snapshot manifest; nutrient values NOT re-verified against the raw data; review flags acknowledged by script; no human nutritionist review';
 
     public function __construct(private readonly ReviewFood $review) {}
 
