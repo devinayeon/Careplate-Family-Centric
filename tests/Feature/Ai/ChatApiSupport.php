@@ -4,6 +4,7 @@ use App\Models\ChatSession;
 use App\Models\User;
 use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Http\Client\Factory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Testing\TestResponse;
 
@@ -69,10 +70,14 @@ function chatOk(TestResponse $response): array
 {
     $response->assertOk();
     $json = $response->json();
-    expect(array_keys($json))->toBe([
+    $keys = [
         'schema_version', 'request_id', 'session_id', 'turn_id', 'client_turn_id', 'sequence', 'mode',
         'retrieval_status', 'answer', 'claims', 'citations', 'general_knowledge_notice', 'warnings',
-    ])->and($json['schema_version'])->toBe('1.0')
+    ];
+    // The answer is the stored result read back, and MySQL JSON columns reorder object keys (not a contract).
+    // Same key SET everywhere; the exact build order is still asserted on SQLite.
+    DB::getDriverName() === 'sqlite' ? expect(array_keys($json))->toBe($keys) : expect(array_keys($json))->toEqualCanonicalizing($keys);
+    expect($json['schema_version'])->toBe('1.0')
         ->and($response->headers->get('Cache-Control'))->toContain('no-store')
         ->and($json['request_id'])->toBe($response->headers->get('X-Request-Id'));
     cfAssertChatShape(array_diff_key($json, array_flip(['schema_version', 'request_id', 'session_id', 'turn_id', 'client_turn_id', 'sequence'])));

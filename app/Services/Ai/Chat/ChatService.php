@@ -55,6 +55,9 @@ class ChatService
             if (! $this->gate->finalize($turn, $response, $answer->part['citations'], $answer->foodRefs)) {
                 throw $this->lateResult($turn);
             }
+            // Commit, then answer with the STORED result (spec 04): the first response and every replay are the same
+            // value on every database, whatever order the JSON column hands object keys back in.
+            $response = ChatTurn::query()->find($turn->getKey())?->response ?? throw AiException::for('INTERNAL');
         } catch (AiException $e) {
             $this->abort($turn, $e->errorCode);
             $this->log($requestId, $e->errorCode, null, $start);
