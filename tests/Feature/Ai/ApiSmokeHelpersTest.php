@@ -49,3 +49,28 @@ test('smokeLogProvesOurServer needs the banner for the exact address', function 
 test('smokeFail throws the printable SmokeFailure type', function () {
     expect(fn () => smokeFail('x'))->toThrow(SmokeFailure::class, 'x');
 });
+
+test('smokeBannerPort reads the bound port and is null before the banner is flushed', function () {
+    expect(smokeBannerPort("\n INFO Server running on [http://127.0.0.1:8001]. \n"))->toBe(8001)
+        ->and(smokeBannerPort('Server running on [http://127.0.0.1:8002].'))->toBe(8002)
+        ->and(smokeBannerPort(''))->toBeNull();
+});
+
+test('smokeStartDecision: late banner keeps waiting, then is ready', function () {
+    // /up already answers 200 from our child, banner not flushed yet.
+    expect(smokeStartDecision(true, 200, null, 1.0))->toBe('wait')
+        ->and(smokeStartDecision(true, 200, null, 29.9))->toBe('wait')
+        ->and(smokeStartDecision(true, 200, 8001, 1.5))->toBe('ready')
+        ->and(smokeStartDecision(true, 0, null, 0.5))->toBe('wait')
+        ->and(smokeStartDecision(true, 0, 8001, 0.5))->toBe('wait');
+});
+
+test('smokeStartDecision: child exited, wrong port and deadline outcomes', function () {
+    expect(smokeStartDecision(false, 200, 8001, 1.0))->toBe('exited')
+        ->and(smokeStartDecision(false, 0, null, 1.0))->toBe('exited')
+        ->and(smokeStartDecision(true, 200, 8002, 1.0))->toBe('wrong_port')
+        ->and(smokeStartDecision(true, 0, 8002, 1.0))->toBe('wrong_port')
+        ->and(smokeStartDecision(true, 200, null, 30.0))->toBe('no_banner')
+        ->and(smokeStartDecision(true, 0, null, 30.0))->toBe('never_up')
+        ->and(smokeStartDecision(true, 0, 8001, 30.0))->toBe('never_up');
+});

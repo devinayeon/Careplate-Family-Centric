@@ -48,6 +48,34 @@ function smokeLogProvesOurServer(string $log, string $base): bool
     return str_contains($log, 'Server running on ['.$base.']');
 }
 
+/** Port named by the artisan serve banner, or null while the banner is not flushed yet. */
+function smokeBannerPort(string $log): ?int
+{
+    return preg_match('#Server running on \[http://127\.0\.0\.1:(\d+)\]#', $log, $match) === 1 ? (int) $match[1] : null;
+}
+
+/**
+ * Pure polling decision for smokeServerStart: 'wait' | 'ready' | 'exited' | 'wrong_port' | 'no_banner' | 'never_up'.
+ * /up may answer from our own child before artisan flushes its banner, so a missing banner only fails at the deadline.
+ */
+function smokeStartDecision(bool $childRunning, int $upStatus, ?int $bannerPort, float $elapsed, int $expectedPort = 8001, float $deadline = 30.0): string
+{
+    if (! $childRunning) {
+        return 'exited';
+    }
+    if ($bannerPort !== null && $bannerPort !== $expectedPort) {
+        return 'wrong_port';
+    }
+    if ($upStatus === 200 && $bannerPort === $expectedPort) {
+        return 'ready';
+    }
+    if ($elapsed >= $deadline) {
+        return $upStatus === 200 ? 'no_banner' : 'never_up';
+    }
+
+    return 'wait';
+}
+
 /** Boots the app against the git-ignored demo SQLite file only (same forced environment as tools/ai-dev.php). */
 function smokeBoot(string $root): void
 {
@@ -85,32 +113,38 @@ function smokeServerStart(string $root): array
     $pipes = [];
     $process = proc_open([PHP_BINARY, $root.'/tools/ai-dev.php', 'serve'], [['file', 'php://stdin', 'r'], ['file', $log, 'w'], ['file', $log, 'a']], $pipes, $root);
     if (! is_resource($process)) {
+        if (is_file($log)) {
+            @unlink($log);
+        }
         smokeFail('Could not start the dev server.');
     }
     $pid = (int) (proc_get_status($process)['pid'] ?? 0);
-    for ($i = 0; $i < 60; $i++) {
+    $started = hrtime(true);
+    $messages = [
+        'exited' => 'Dev server exited early (is port 8001 already in use?).',
+        'wrong_port' => 'The dev server bound a different port than 8001; stopping.',
+        'no_banner' => '/up answered but the server banner never appeared in 30 s: cannot prove the server is the one this harness started.',
+        'never_up' => 'Dev server never started: no /up answer within 30 s.',
+    ];
+    while (true) {
         usleep(500000);
-        if (! (proc_get_status($process)['running'] ?? false)) {
-            smokeServerStop($process, $pid, $log);
-            smokeFail('Dev server exited early (is port 8001 already in use?).');
-        }
         $ch = curl_init(SMOKE_BASE.'/up');
         curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2]);
         curl_exec($ch);
-        $up = curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 200;
+        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         curl_close($ch);
-        if ($up) {
-            // Our own child must still be alive and its banner must name this address.
-            if (! (proc_get_status($process)['running'] ?? false) || ! smokeLogProvesOurServer((string) @file_get_contents($log), SMOKE_BASE)) {
-                smokeServerStop($process, $pid, $log);
-                smokeFail('/up answered but not from the server this harness started; stopping.');
-            }
-
+        $decision = smokeStartDecision(
+            (bool) (proc_get_status($process)['running'] ?? false), $status,
+            smokeBannerPort((string) @file_get_contents($log)), (hrtime(true) - $started) / 1e9,
+        );
+        if ($decision === 'ready') {
             return [$process, $pipes, $pid, $log];
         }
+        if ($decision !== 'wait') {
+            smokeServerStop($process, $pid, $log);
+            smokeFail($messages[$decision]);
+        }
     }
-    smokeServerStop($process, $pid, $log);
-    smokeFail('Dev server did not answer /up within 30 s.');
 }
 
 function smokeServerStop(mixed $process, int $pid, string $log): void
