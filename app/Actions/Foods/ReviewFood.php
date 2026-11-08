@@ -159,12 +159,19 @@ class ReviewFood
     }
 
     /**
-     * @param  array<string, mixed>|null  $stored  a result column read back from the database
+     * A result column read back from the database, checked against the result shape and returned as stored (the
+     * stored key order, so the first answer equals every replay). Anything else is a server fault.
+     *
      * @return array{food_id: string, revision: int, status: string, sync_status: string}
      */
-    private function storedResult(?array $stored): array
+    private function storedResult(mixed $stored): array
     {
-        return $stored ?? throw AiException::for('INTERNAL');
+        if (! is_array($stored) || ! is_string($stored['food_id'] ?? null) || ! is_int($stored['revision'] ?? null)
+            || ! is_string($stored['status'] ?? null) || ! is_string($stored['sync_status'] ?? null) || count($stored) !== 4) {
+            throw AiException::for('INTERNAL');
+        }
+
+        return $stored;
     }
 
     /** @param  array<string, mixed>  $result */
