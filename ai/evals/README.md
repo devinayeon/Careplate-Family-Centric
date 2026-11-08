@@ -16,3 +16,13 @@ Run (live, needs `AI_ENABLED=true` and a key in the git-ignored `.env`; sends on
     php tools/ai-dev.php ai ai:eval scan
 
 Results go to `results/scan-<UTC timestamp>.json` (no image bytes, no base64). `--split=dev` limits the run to one split.
+
+## Chat evaluation
+
+`chat-golden.jsonl` is the unchanged copy of the 12 spec cases. Their inputs are fixture descriptions, so `chat-catalog-map.json` gives each one a concrete Indonesian message and an expectation that is resolved against the live demo catalog (value = per-100 g value x amount / 100, two decimals). A case whose premise the demo catalog lacks (CHAT-04 several rice variants, CHAT-08 revised food, CHAT-09 revoke during a turn) is `applicable=false` with a reason and is not scored; synthetic coverage of those lives in the Pest tests only.
+
+Run (live; only general and mixed cases call the model, the rest are server templates):
+
+    php tools/ai-dev.php ai ai:eval chat
+
+It creates temporary users and sessions in the configured database, sends each case through `ChatService`, deletes everything it created (foods are only read), and writes `results/chat-<UTC timestamp>.json`. Checks are deterministic (mode, retrieval status, claims at 2 dp, citations, model-call count, unsafe numbers in model text); relevance and honesty of the model text still need human review. One run per case is a smoke test, not a statistic.
