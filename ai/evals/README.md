@@ -2,6 +2,8 @@
 
 `ocr/manifest.csv` lists 8 nutrition-label images (3 dev, 5 holdout, product-disjoint) fetched from Wikimedia Commons on 2026-11-08 under free licences (public domain, CC0, CC BY, CC BY-SA). Source URL, licence, author and SHA-256 are recorded per file. Attribution for the CC BY and CC BY-SA files is in the manifest `author_attribution` column; the files were re-encoded (see `processing`), so they are adapted copies.
 
+Licences, attribution and what was changed per file are in `ocr/NOTICE.md`. These images show third-party packaging; SMP-01 in particular is a scan of store-brand packaging whose uploader-declared public-domain status does not cover the artwork (residual copyright risk). Remove or replace the images with team-owned photos before any public redistribution beyond the competition evaluation.
+
 Limits you must keep in mind:
 
 - The samples are mostly US/Canadian/European web samples, not Indonesian packaging. Results are NOT accuracy on Indonesian packaging.
