@@ -2,7 +2,7 @@
 
 Backend only (Laravel 13, SQLite or MySQL 8, Pest). No UI was built or changed. This file is for the frontend team and the competition judges. Everything below was checked against the code or a command run on 2026-11-08/09; the limits section is part of the contract, read it before writing product copy.
 
-Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite (and MySQL 8.0.43 in part, see Databases). Full SQLite suite on 2026-11-09: 941 tests, 915 passed, 9 failed, 17 skipped (the 17 are the MySQL-only tests, which skip with SQLite or with the throwaway MySQL server stopped). The 9 failures are old and not AI related (8 Vite manifest tests that need `public/build/manifest.json`, and 1 `RegistrationTest` registration test). Pint reports the same 3 old files, PHPStan the same 1 old error (`VerifyEmailController`). Every other test passes. The full MySQL suite was NOT run at the final commit (see Databases). Read Provider quota before demoing: the free-tier key allowed about 20 requests per day on `gemini-3.6-flash` (observed; other models may differ).
+Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite and MySQL 8.0.43 (see Databases). Full suite on 2026-11-09 at commit `ede68c5`: SQLite 959 tests, 933 passed, 9 failed, 17 skipped (the 17 are MySQL-only tests); MySQL 959 tests, 938 passed, 9 failed, 12 skipped (the 12 are SQLite-only tests). The 9 failures are old and not AI related (8 Vite manifest tests that need `public/build/manifest.json`, and 1 `RegistrationTest` registration test). Pint reports the same 3 old files, PHPStan the same 1 old error (`VerifyEmailController`). Every other test passes. Read Provider quota before demoing: the free-tier key allowed about 20 requests per day on `gemini-3.6-flash` (observed; other models may differ).
 
 ## What exists
 
@@ -168,7 +168,7 @@ Two engines are supported by the same code. The default and the demo are SQLite.
 
 - SQLite: one instance, one persistent volume. Write transactions use `transaction_mode=IMMEDIATE` (PHP 8.4 or newer), `busy_timeout` 5 s. No multi-instance hosting.
 - MySQL 8: InnoDB, `utf8mb4_unicode_ci`, strict mode. Tested on a throwaway MySQL 8.0.43 (`127.0.0.1:3407`, sql_mode with STRICT_TRANS_TABLES and ONLY_FULL_GROUP_BY, isolation REPEATABLE-READ). Other versions, other isolation levels and the team's real server were not tested. The `mariadb` connection in `config/database.php` is not tuned (no lock wait setting) and was not tested. Both `mysql` and `mariadb` pin the session time zone to `+00:00` (the app runs in UTC), so TIMESTAMP values do not depend on the server's SYSTEM zone or DST; the live `@@session.time_zone` check was not run (MySQL server unavailable).
-- The app's MySQL connection runs `SET SESSION innodb_lock_wait_timeout = 5` on connect, so a blocked write fails after about 5 s instead of the InnoDB default of 50 s. This setting is configured; it was not re-verified live after commit de5f816 (MySQL server unavailable).
+- The app's MySQL connection runs `SET SESSION innodb_lock_wait_timeout = 5` on connect, so a blocked write fails after about 5 s instead of the InnoDB default of 50 s. This setting is configured and verified live on MySQL 8.0.43 (`@@session.innodb_lock_wait_timeout` = 5).
 
 Row locks (`lockForUpdate()` compiles to nothing on SQLite, where the IMMEDIATE write lock already serialises). One order everywhere:
 - chat: session row, then turn row, then cited food rows (shared lock). A competing turn, delete or finalize waits or fails as a retryable error, and it never acts on a stale snapshot.
@@ -194,7 +194,7 @@ php tools/ai-test-mysql.php [--compact] [--filter=x] [tests/Feature/Ai/FooTest.p
 
 The runner force-sets host `127.0.0.1`, port `3407`, database `careplate_ai_test` (and `careplate_ai_cc` for the two-connection tests), user `root` with an empty password, and refuses anything else before connecting. Create those two empty databases on a local mysqld on port 3407 first.
 
-Status of the MySQL runs: the last COMPLETE MySQL suite was 860 passed, 9 baseline failures, 12 skipped, of 881 tests, at commit `e0c40e1` (Task 3 before its fix round). After the fix round only the covering tests ran (108 tests: 97 passed, 11 skipped) before the throwaway server was stopped. The final full MySQL run on the final commit is NOT RUN and is pending a restart of that server. Treat MySQL as tested up to `e0c40e1` plus the covering tests, not as fully re-verified at the final commit.
+Status of the MySQL runs: the full MySQL suite was run on the final code (commit `ede68c5`, MySQL 8.0.43 throwaway server): 959 tests, 938 passed, 9 failed, 12 skipped. The 9 failures are the same baseline as SQLite (8 Vite manifest tests and the registration test), none is AI-owned; the 12 skips are SQLite-only tests. This includes the two-connection MySQL concurrency tests, the importer lock test, the 5 s lock-wait check and the MySQL timezone/index checks that earlier could not run. Not covered: your own MySQL server (version, `sql_mode`, time zone), MariaDB, and more than one application instance.
 
 ## Provider quota
 
