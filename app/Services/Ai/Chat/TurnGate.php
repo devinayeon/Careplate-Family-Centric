@@ -41,9 +41,10 @@ class TurnGate
                 throw AiException::for('NOT_FOUND');
             }
 
-            // A plain read is current here: every writer of this session's turns holds the session row lock taken
-            // above. FOR UPDATE on a missing (session_id, client_turn_id) key would gap-lock the unique index and
-            // let two new sessions' first inserts deadlock each other.
+            // A plain read is enough here: every turn write that changes what reserve decides on (TurnGate,
+            // SessionEraser) holds the session row lock taken above. PurgeChats deletes turns without it, but only
+            // turns past retention, which a replay refuses anyway. FOR UPDATE on a missing (session_id, client_turn_id)
+            // key would gap-lock the unique index and let two new sessions' first inserts deadlock each other.
             $existing = ChatTurn::query()->where('session_id', $live->id)->where('client_turn_id', $clientTurnId)->first();
             if ($existing !== null) {
                 return $this->replay($live, $existing, $requestHash, $now);

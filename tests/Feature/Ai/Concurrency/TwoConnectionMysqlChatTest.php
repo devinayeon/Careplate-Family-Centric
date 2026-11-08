@@ -32,6 +32,8 @@ test('cc_a and cc_b are distinct handles on careplate_ai_cc at 127.0.0.1:3407 wi
     foreach (['cc_a', 'cc_b'] as $name) {
         $c = config('database.connections.'.$name);
         expect(aiMysqlTargetError($c['driver'], $c['host'], $c['port'], $c['database'], $c['unix_socket'], $c['url']))->toBeNull()
+            ->and(array_intersect(array_keys($c), ['read', 'write', 'sticky']))->toBe([])
+            ->and($c['options'])->toBe([PDO::ATTR_TIMEOUT => 2])
             ->and(DB::connection($name)->selectOne('select database() as db')->db)->toBe('careplate_ai_cc')
             ->and((int) DB::connection($name)->selectOne('select @@session.innodb_lock_wait_timeout as t')->t)->toBe(1);
     }

@@ -12,14 +12,18 @@ require_once __DIR__.'/../../../../tools/ai-test-mysql-guard.php';
 
 const CM_DATABASE = 'careplate_ai_cc';
 
-/** The connection config for cc_a/cc_b: the app's mysql defaults with the target pinned. */
+/**
+ * The connection config for cc_a/cc_b, built from scratch: nothing is merged from the app's mysql config, so no
+ * read/write/sticky/url/socket key (or env value) can redirect these connections.
+ */
 function cmConfig(): array
 {
-    return array_merge(config('database.connections.mysql'), [
+    return [
         'driver' => 'mysql', 'host' => AI_MYSQL_HOST, 'port' => AI_MYSQL_PORT, 'database' => CM_DATABASE,
         'username' => 'root', 'password' => '', 'unix_socket' => '', 'url' => null,
-        'options' => [PDO::ATTR_TIMEOUT => 2],
-    ]);
+        'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci', 'prefix' => '', 'prefix_indexes' => true,
+        'strict' => true, 'engine' => null, 'options' => [PDO::ATTR_TIMEOUT => 2],
+    ];
 }
 
 /**
