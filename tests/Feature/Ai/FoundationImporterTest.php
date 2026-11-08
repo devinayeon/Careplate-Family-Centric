@@ -171,3 +171,43 @@ it('respects the row limit by priority', function () {
 
     expect(collect($report['rows'])->pluck('candidate_id')->all())->toBe(['FOOD-001', 'FOOD-002']);
 });
+
+it('flags candidates that need a reviewer acknowledgement with machine-readable reasons', function () {
+    synImport();
+
+    $reasons = fn (string $id) => synSubmission($id)->candidate;
+    expect($reasons('900004'))->requires_review->toBeTrue()->review_reasons->toContain('variant_pick')
+        ->and($reasons('900001'))->requires_review->toBeTrue()->review_reasons->toBe(['single_variety_only'])
+        ->and($reasons('900003')['review_reasons'])->toContain('energy_legacy_1008')
+        ->and($reasons('900003')['provenance']['energy'])->toMatchArray(['requires_review' => true, 'review_reasons' => ['energy_legacy_1008']])
+        ->and($reasons('900008')['review_reasons'])->toBe(['single_variety_only', 'exact_zero:sodium_mg'])
+        ->and($reasons('900010')['review_reasons'])->toBe(['single_variety_only', 'nutrient_review:protein_g', 'nutrient_review:fat_g']);
+
+    // A plain unique match with modern energy and no zeros needs no acknowledgement.
+    synImport([synFood(900040, 'Broccoli, raw', [1003 => 2, 1004 => 0.5, 1005 => 6, 1093 => 30, 2048 => 30])], [synCuration()[6]]);
+    expect(synSubmission('900040')->candidate)->requires_review->toBeFalse()->review_reasons->toBe([]);
+});
+
+it('refreshes only still-pending rows when asked and never touches decided ones', function () {
+    synImport();
+    $foods = synFoods();
+    $foods[0]['foodNutrients'][0]['amount'] = 8.5; // raw rice protein
+    $foods[8]['foodNutrients'][0]['amount'] = 3.5; // russet potato protein
+    synSubmission('900009')->update(['status' => 'approved']);
+    $before = synSubmission('900009')->only(['candidate', 'revision_counter', 'updated_at']);
+
+    $plain = synImport($foods);
+    expect($plain['counts'])->toMatchArray(['changed' => 2, 'refreshed' => 0])
+        ->and(synSubmission('900001')->candidate['nutrients']['protein_g'])->toBe('7.5');
+
+    $report = app(UsdaFoundationImporter::class)->import(synCuration(), $foods, synSnapshot(), 20, true);
+
+    expect($report['counts'])->toMatchArray(['refreshed' => 1, 'changed' => 1, 'unchanged' => 5])
+        ->and(synRow($report, 'FOOD-002')['status'])->toBe('refreshed')
+        ->and(synRow($report, 'FOOD-009')['status'])->toBe('changed')
+        ->and(synSubmission('900001')->candidate['nutrients']['protein_g'])->toBe('8.5')
+        ->and(synSubmission('900001')->revision_counter)->toBe(2)
+        ->and(synSubmission('900009')->only(['candidate', 'revision_counter', 'updated_at']))->toEqual($before)
+        ->and(synSubmission('900009')->status)->toBe('approved')
+        ->and(Food::count())->toBe(0);
+});

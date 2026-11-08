@@ -41,7 +41,9 @@ class FoundationNutrients
             if ($read['value'] !== null) {
                 $energy = ['value' => $read['value'], 'prov' => ['qualifier' => 'exact', 'nutrient_id' => $id, 'method' => $method] + $read['prov']];
                 if ($id === 1008) {
-                    $energy['prov']['note'] = '1008 used as fallback; import-mapping.json lists it for SR Legacy records only';
+                    $energy['prov']['note'] = '1008 (legacy energy) used as a flagged fallback because 2048 and 2047 are absent on this Foundation record';
+                    $energy['prov']['requires_review'] = true;
+                    $energy['prov']['review_reasons'] = ['energy_legacy_1008'];
                 }
                 break;
             }

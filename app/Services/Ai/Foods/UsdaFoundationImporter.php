@@ -3,11 +3,14 @@
 namespace App\Services\Ai\Foods;
 
 use App\Models\FoodSubmission;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Turns matched Foundation Foods records into pending food_submissions. It never creates foods
  * and never approves. Idempotent on (source_provider, source_id, snapshot_version): an existing
- * row is reported "unchanged" or "changed" and is never rewritten.
+ * row is reported "unchanged" or "changed" and is not rewritten, except with $refresh: a row that
+ * is still pending is then rewritten ("refreshed"); approved or rejected rows are never touched.
+ * Each candidate carries a machine-readable requires_review flag with review_reasons.
  */
 class UsdaFoundationImporter
 {
@@ -24,10 +27,21 @@ class UsdaFoundationImporter
      * @param  array{provider: string, version: string, sha256: string, url: string}  $snapshot
      * @return array{rows: list<array<string, mixed>>, counts: array<string, int>, source_ids: list<string>}
      */
-    public function import(array $curation, array $foods, array $snapshot, int $limit = 20): array
+    public function import(array $curation, array $foods, array $snapshot, int $limit = 20, bool $refresh = false): array
+    {
+        return DB::transaction(fn () => $this->run($curation, $foods, $snapshot, $limit, $refresh));
+    }
+
+    /**
+     * @param  list<array<string, string>>  $curation
+     * @param  list<array<string, mixed>>  $foods
+     * @param  array<string, mixed>  $snapshot
+     * @return array{rows: list<array<string, mixed>>, counts: array<string, int>, source_ids: list<string>}
+     */
+    private function run(array $curation, array $foods, array $snapshot, int $limit, bool $refresh): array
     {
         usort($curation, fn (array $a, array $b) => (int) $a['priority'] <=> (int) $b['priority']);
-        $counts = ['matched' => 0, 'skipped' => 0, 'created' => 0, 'unchanged' => 0, 'changed' => 0];
+        $counts = ['matched' => 0, 'skipped' => 0, 'created' => 0, 'unchanged' => 0, 'changed' => 0, 'refreshed' => 0];
         $rows = [];
         $claimed = [];
 
@@ -45,7 +59,7 @@ class UsdaFoundationImporter
             }
             $claimed[$id] = $row['candidate_id'];
             $counts['matched']++;
-            $outcome = $this->persist($row, $match, $snapshot);
+            $outcome = $this->persist($row, $match, $snapshot, $refresh);
             $counts[$outcome['status']]++;
             $rows[] = ['candidate_id' => $row['candidate_id'], 'fdc_id' => $id, 'description' => (string) $match['food']['description']] + $outcome;
         }
@@ -61,7 +75,7 @@ class UsdaFoundationImporter
      * @param  array<string, mixed>  $snapshot
      * @return array{status: string, changed?: list<string>}
      */
-    private function persist(array $row, array $match, array $snapshot): array
+    private function persist(array $row, array $match, array $snapshot, bool $refresh): array
     {
         $id = (string) $match['food']['fdcId'];
         $candidate = $this->candidate($row, $match, $snapshot);
@@ -81,7 +95,19 @@ class UsdaFoundationImporter
             $changed[] = 'source_sha256';
         }
 
-        return $changed === [] ? ['status' => 'unchanged'] : ['status' => 'changed', 'changed' => $changed];
+        if ($changed === []) {
+            return ['status' => 'unchanged'];
+        }
+        if ($refresh && $existing->status === 'pending') {
+            $existing->update([
+                'candidate' => $candidate, 'source_sha256' => $snapshot['sha256'],
+                'revision_counter' => $existing->revision_counter + 1,
+            ]);
+
+            return ['status' => 'refreshed', 'changed' => $changed];
+        }
+
+        return ['status' => 'changed', 'changed' => $changed];
     }
 
     /**
@@ -95,7 +121,10 @@ class UsdaFoundationImporter
         $food = $match['food'];
         $read = $this->nutrients->extract($food);
 
+        $reasons = $this->reviewReasons($match, $read);
         $candidate = [
+            'requires_review' => $reasons !== [],
+            'review_reasons' => $reasons,
             'name' => $row['display_name_id'],
             'aliases' => $this->aliases($row['display_name_id']),
             'basis' => '100g',
@@ -111,12 +140,44 @@ class UsdaFoundationImporter
                 'match' => [
                     'candidate_id' => $row['candidate_id'], 'query' => $row['search_query_en'],
                     'required_state' => $row['required_state'], 'kind' => $match['kind'], 'alternatives' => $match['alternatives'],
+                    'extra_terms' => $match['extra_terms'],
                 ],
             ] + $read['provenance'],
         ];
 
         // Round-trip so the compared shape equals what a JSON column returns.
         return json_decode((string) json_encode($candidate), true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $match
+     * @param  array{nutrients: array<string, string|null>, provenance: array<string, mixed>}  $read
+     * @return list<string>
+     */
+    private function reviewReasons(array $match, array $read): array
+    {
+        $reasons = [];
+        if ($match['kind'] === 'variant') {
+            $reasons[] = 'variant_pick';
+        } elseif ($match['extra_terms'] !== []) {
+            $reasons[] = 'single_variety_only';
+        }
+        foreach ((array) ($read['provenance']['energy']['review_reasons'] ?? []) as $reason) {
+            $reasons[] = $reason;
+        }
+        foreach ($read['provenance']['nutrients'] as $field => $prov) {
+            if ($read['nutrients'][$field] === '0') {
+                $reasons[] = 'exact_zero:'.$field;
+            }
+            if (($prov['requires_review'] ?? false) === true) {
+                $reasons[] = 'nutrient_review:'.$field;
+            }
+        }
+        if ($read['nutrients']['energy_kcal'] === '0') {
+            $reasons[] = 'exact_zero:energy_kcal';
+        }
+
+        return array_values(array_unique($reasons));
     }
 
     /** @return list<string> */

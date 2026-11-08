@@ -14,7 +14,7 @@ use RuntimeException;
  */
 class ImportFoods extends Command
 {
-    protected $signature = 'ai:import-foods {--download : Download and extract the snapshot archive first} {--limit=20 : Curation rows to process, by priority} {--url= : Archive URL (default: the Foundation Foods archive)} {--data-dir= : Data directory (default: ai/data)}';
+    protected $signature = 'ai:import-foods {--download : Download and extract the snapshot archive first} {--limit=20 : Curation rows to process, by priority} {--refresh-pending : Rewrite candidates of rows that are still pending (never approved or rejected ones)} {--url= : Archive URL (default: the Foundation Foods archive)} {--data-dir= : Data directory (default: ai/data)}';
 
     protected $description = 'Import USDA Foundation Foods records for the curation list as pending food submissions.';
 
@@ -28,8 +28,14 @@ class ImportFoods extends Command
 
             return self::INVALID;
         }
-        $dir = rtrim((string) ($this->option('data-dir') ?: base_path('ai/data')), '/\\');
         $url = (string) ($this->option('url') ?: FoundationSnapshot::DEFAULT_URL);
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! app()->environment('testing') && (parse_url($url, PHP_URL_SCHEME) !== 'https' || $host !== 'fdc.nal.usda.gov')) {
+            $this->error('--url must be an https://fdc.nal.usda.gov/ address.');
+
+            return self::INVALID;
+        }
+        $dir = rtrim((string) ($this->option('data-dir') ?: base_path('ai/data')), '/\\');
         $source = new FoundationSnapshot($dir.'/raw');
         $manifest = new SnapshotManifest($dir.'/snapshot.manifest.json');
 
@@ -46,6 +52,7 @@ class ImportFoods extends Command
                 $foods,
                 ['provider' => self::PROVIDER, 'version' => $version, 'sha256' => $meta['sha256'], 'url' => $meta['url']],
                 $limit,
+                (bool) $this->option('refresh-pending'),
             );
             $manifest->record([
                 'source_provider' => self::PROVIDER, 'snapshot_version' => $version, 'data_type' => 'Foundation',
@@ -64,7 +71,7 @@ class ImportFoods extends Command
         }
         $c = $report['counts'];
         $this->line("snapshot {$version} sha256 {$meta['sha256']}");
-        $this->line("matched {$c['matched']}, skipped {$c['skipped']}; created {$c['created']}, unchanged {$c['unchanged']}, changed {$c['changed']}");
+        $this->line("matched {$c['matched']}, skipped {$c['skipped']}; created {$c['created']}, unchanged {$c['unchanged']}, changed {$c['changed']}, refreshed {$c['refreshed']}");
 
         return self::SUCCESS;
     }

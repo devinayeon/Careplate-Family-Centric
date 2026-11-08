@@ -132,3 +132,37 @@ it('derives the snapshot version from the archive name', function () {
     expect(FoundationSnapshot::versionFromUrl(SYN_ZIP_URL))->toBe('2099-12-31')
         ->and(fn () => FoundationSnapshot::versionFromUrl('https://example.test/random.zip'))->toThrow(RuntimeException::class);
 });
+
+it('only accepts the official https host for --url outside the testing environment', function () {
+    $dir = synDataDir();
+    Http::fake();
+    app()->detectEnvironment(fn () => 'production');
+
+    foreach (['https://evil.test/FoodData_Central_foundation_food_json_2099-12-31.zip', 'http://fdc.nal.usda.gov/FoodData_Central_foundation_food_json_2099-12-31.zip'] as $url) {
+        $this->artisan('ai:import-foods', ['--download' => true, '--url' => $url, '--data-dir' => $dir])
+            ->expectsOutputToContain('https://fdc.nal.usda.gov/')->assertExitCode(2);
+    }
+
+    Http::assertNothingSent();
+    app()->detectEnvironment(fn () => 'testing');
+    File::deleteDirectory($dir);
+});
+
+it('refreshes pending candidates through --refresh-pending and reports it', function () {
+    $dir = synDataDir();
+    synCurationFile($dir);
+    Http::fake([SYN_ZIP_URL => Http::response('SYNTHETIC-ZIP-BYTES', 200)]);
+    synFakeTar($dir);
+    $options = ['--url' => SYN_ZIP_URL, '--data-dir' => $dir];
+    $this->artisan('ai:import-foods', $options + ['--download' => true])->assertSuccessful();
+    $submission = FoodSubmission::where('source_id', '900001')->firstOrFail();
+    $stale = $submission->candidate;
+    unset($stale['requires_review'], $stale['review_reasons']);
+    $submission->update(['candidate' => $stale]);
+
+    $this->artisan('ai:import-foods', $options)->expectsOutputToContain('changed 1, refreshed 0')->assertSuccessful();
+    $this->artisan('ai:import-foods', $options + ['--refresh-pending' => true])->expectsOutputToContain('changed 0, refreshed 1')->assertSuccessful();
+
+    expect($submission->fresh()->candidate)->toHaveKey('review_reasons');
+    File::deleteDirectory($dir);
+});

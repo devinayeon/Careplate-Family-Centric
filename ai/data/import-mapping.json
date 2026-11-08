@@ -2,12 +2,14 @@
   "artifact_status": "planning_template",
   "schema_version": "careplate-fdc-import-plan-v1",
   "reviewed_as_of": "2026-11-06",
-  "actual_snapshot_acquired": false,
+  "actual_snapshot_acquired": true,
   "snapshot_nutrient_identity_validation": "required_on_day_2_before_approval",
   "source_system": "USDA_FDC",
   "source_url": "https://fdc.nal.usda.gov/download-datasets/",
   "candidate_snapshot_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2026-10-29.zip",
-  "source_snapshot_sha256": null,
+  "source_snapshot_sha256": "dd414cc9f1a132626bad354ef6655972c78b44aff14f16114dc899708663c579",
+  "source_snapshot_version": "2026-10-29",
+  "source_snapshot_manifest": "ai/data/snapshot.manifest.json",
   "allowed_data_types": ["Foundation", "SR Legacy"],
   "canonical_food_basis": "100g",
   "basis_scope": "edible_portion_only",
@@ -34,7 +36,7 @@
       "preference": [
         {"nutrient_id": 2048, "method": "Atwater specific factors", "allowed_data_types": ["Foundation", "SR Legacy"]},
         {"nutrient_id": 2047, "method": "Atwater general factors", "allowed_data_types": ["Foundation", "SR Legacy"]},
-        {"nutrient_id": 1008, "method": "Legacy energy", "allowed_data_types": ["SR Legacy"]}
+        {"nutrient_id": 1008, "method": "Legacy energy", "allowed_data_types": ["SR Legacy", "Foundation"], "note": "On Foundation records 1008 is accepted only as a flagged fallback when 2048 and 2047 are absent; the candidate then carries requires_review with review_reason energy_legacy_1008."}
       ],
       "unit": "kcal",
       "missing_value": null,

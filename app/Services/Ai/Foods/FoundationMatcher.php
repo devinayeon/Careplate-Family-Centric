@@ -23,7 +23,7 @@ class FoundationMatcher
     /**
      * @param  array<string, string>  $row  curation row
      * @param  list<array<string, mixed>>  $foods
-     * @return array{status: 'matched', food: array<string, mixed>, kind: 'unique'|'variant', alternatives: list<array{fdc_id: string, description: string}>}|array{status: 'skipped', reason: string}
+     * @return array{status: 'matched', food: array<string, mixed>, kind: 'unique'|'variant', alternatives: list<array{fdc_id: string, description: string}>, extra_terms: list<string>}|array{status: 'skipped', reason: string}
      */
     public function match(array $row, array $foods): array
     {
@@ -41,6 +41,8 @@ class FoundationMatcher
         $terms = array_values(array_unique($terms));
         $opposite = in_array('raw', $terms, true) ? 'cooked' : (in_array('cooked', $terms, true) ? 'raw' : null);
 
+        // Description terms the curation row never asked for and the required state does not explain.
+        $explained = array_merge($terms, $this->tokens($state));
         $candidates = [];
         foreach ($foods as $food) {
             $description = (string) ($food['description'] ?? '');
@@ -50,7 +52,7 @@ class FoundationMatcher
                 || ($opposite !== null && in_array($opposite, $words, true))) {
                 continue;
             }
-            $candidates[] = ['food' => $food, 'extra' => array_values(array_diff($words, $terms))];
+            $candidates[] = ['food' => $food, 'extra' => array_values(array_diff($words, $terms)), 'unasked' => array_values(array_diff($words, $explained))];
         }
         if ($candidates === []) {
             return ['status' => 'skipped', 'reason' => 'no Foundation record has every query term in the required state ('.trim($query).')'];
@@ -59,7 +61,7 @@ class FoundationMatcher
         usort($candidates, fn (array $a, array $b) => [count($a['extra']), (int) $a['food']['fdcId']] <=> [count($b['extra']), (int) $b['food']['fdcId']]);
         $best = $candidates[0];
         if (count($candidates) === 1) {
-            return ['status' => 'matched', 'food' => $best['food'], 'kind' => 'unique', 'alternatives' => []];
+            return ['status' => 'matched', 'food' => $best['food'], 'kind' => 'unique', 'alternatives' => [], 'extra_terms' => $best['unasked']];
         }
 
         $differing = array_unique(array_merge(...array_column($candidates, 'extra')));
@@ -73,7 +75,7 @@ class FoundationMatcher
         }
 
         return [
-            'status' => 'matched', 'food' => $best['food'], 'kind' => 'variant',
+            'status' => 'matched', 'food' => $best['food'], 'kind' => 'variant', 'extra_terms' => $best['unasked'],
             'alternatives' => array_map(
                 fn (array $c) => ['fdc_id' => (string) $c['food']['fdcId'], 'description' => (string) $c['food']['description']],
                 array_slice($candidates, 1),
