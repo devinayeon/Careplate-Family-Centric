@@ -14,6 +14,11 @@ class ReviewCandidate
 {
     public const NUTRIENTS = ['energy_kcal', 'protein_g', 'fat_g', 'carbohydrate_g', 'sodium_mg', 'sugars_total_g'];
 
+    /** Column fit: foods.energy_method is varchar(255); aliases and the description feed the text search_text. */
+    private const MAX_ALIASES = 20;
+
+    private const MAX_DESCRIPTION = 10000;
+
     public function __construct(private readonly SnapshotManifest $manifest) {}
 
     /**
@@ -29,7 +34,8 @@ class ReviewCandidate
         $name = is_string($c['name'] ?? null) ? trim($c['name']) : '';
         $aliases = $c['aliases'] ?? null;
         if ($name === '' || mb_strlen($name) > 255 || ! is_array($aliases) || ! array_is_list($aliases)
-            || array_filter($aliases, fn ($a) => ! is_string($a)) !== [] || ($c['basis'] ?? null) !== '100g'
+            || count($aliases) > self::MAX_ALIASES
+            || array_filter($aliases, fn ($a) => ! is_string($a) || mb_strlen($a) > 255) !== [] || ($c['basis'] ?? null) !== '100g'
             || ! is_array($c['nutrients'] ?? null)) {
             throw self::refuse('CANDIDATE_INVALID');
         }
@@ -40,7 +46,8 @@ class ReviewCandidate
         }
         $method = $c['nutrients']['energy_method'] ?? null;
         $description = $c['source_description'] ?? null;
-        if (($method !== null && ! is_string($method)) || ($description !== null && ! is_string($description))) {
+        if (($method !== null && (! is_string($method) || mb_strlen($method) > 255))
+            || ($description !== null && (! is_string($description) || mb_strlen($description) > self::MAX_DESCRIPTION))) {
             throw self::refuse('CANDIDATE_INVALID');
         }
 
@@ -59,14 +66,17 @@ class ReviewCandidate
         ];
     }
 
-    /** Unknown stays null; a value must be a non-negative decimal string (or int), never a float. */
+    /**
+     * Unknown stays null; a value must be a non-negative decimal string (or int), never a float. At most 4 decimals
+     * (the foods columns are decimal(12,4)): MySQL would round a longer value silently, so it is refused instead.
+     */
     private function nutrient(mixed $value): ?string
     {
         if ($value === null) {
             return null;
         }
         $value = is_int($value) ? (string) $value : $value;
-        if (! is_string($value) || preg_match('/^\d{1,8}(\.\d{1,8})?$/', $value) !== 1) {
+        if (! is_string($value) || preg_match('/^\d{1,8}(\.\d{1,4})?$/', $value) !== 1) {
             throw self::refuse('CANDIDATE_INVALID');
         }
 

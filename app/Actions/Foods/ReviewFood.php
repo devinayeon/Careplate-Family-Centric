@@ -35,6 +35,7 @@ class ReviewFood
     {
         $submissionId = $id instanceof FoodSubmission ? (string) $id->getKey() : $id;
         $note = $this->required($note);
+        $this->assertAuditId($auditId);
         $hash = ReviewSnapshot::hash('approve', $submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags);
 
         return $this->atomic(function () use ($submissionId, $actor, $auditId, $expectedRevision, $note, $acknowledgeFlags, $hash) {
@@ -85,6 +86,7 @@ class ReviewFood
     {
         $foodId = $id instanceof Food ? (string) $id->getKey() : $id;
         $reason = $this->required($reason);
+        $this->assertAuditId($auditId);
         $hash = ReviewSnapshot::hash('revoke', $foodId, $actor, $auditId, $expectedRevision, $reason, false);
 
         return $this->atomic(function () use ($foodId, $actor, $auditId, $expectedRevision, $reason, $hash) {
@@ -125,14 +127,26 @@ class ReviewFood
         }
     }
 
+    /** Same limit as ReviewDecisionRequest, so the CLI cannot exceed what the audit columns hold. */
     private function required(string $text): string
     {
         $text = trim($text);
         if ($text === '') {
             throw AiException::for('INVALID_INPUT', 'Data yang dikirim tidak valid (NOTE_REQUIRED).');
         }
+        if (mb_strlen($text) > 1000) {
+            throw AiException::for('INVALID_INPUT', 'Data yang dikirim tidak valid (NOTE_TOO_LONG).');
+        }
 
         return $text;
+    }
+
+    /** verifier_audit_id and actor_audit_id are varchar(255). */
+    private function assertAuditId(string $auditId): void
+    {
+        if (mb_strlen($auditId) > 255) {
+            throw AiException::for('INVALID_INPUT', 'Data yang dikirim tidak valid (AUDIT_ID_TOO_LONG).');
+        }
     }
 
     /** @return array{food_id: string, revision: int, status: string, sync_status: string} */
