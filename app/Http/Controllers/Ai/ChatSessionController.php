@@ -8,9 +8,11 @@ use App\Models\ChatSession;
 use App\Services\Ai\Chat\ChatHistory;
 use App\Services\Ai\Chat\HistoryCursor;
 use App\Services\Ai\Chat\SessionEraser;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use PDOException;
 
 /**
  * Chat sessions of the authenticated owner. The owner always comes from auth; no body field is accepted.
@@ -26,10 +28,15 @@ class ChatSessionController extends Controller
             throw AiException::for('INVALID_INPUT');
         }
 
-        $session = ChatSession::create([
-            'user_id' => $request->user()->getKey(), 'title' => null, 'state' => 'active',
-            'generation' => 1, 'next_sequence' => 1,
-        ])->refresh();
+        try {
+            $session = ChatSession::create([
+                'user_id' => $request->user()->getKey(), 'title' => null, 'state' => 'active',
+                'generation' => 1, 'next_sequence' => 1,
+            ])->refresh();
+        } catch (QueryException|PDOException $e) {
+            // SQLite lock contention is a retryable DB_BUSY; every other database error propagates unchanged.
+            throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
+        }
 
         return response()->json(ChatHistory::session($session), 201);
     }

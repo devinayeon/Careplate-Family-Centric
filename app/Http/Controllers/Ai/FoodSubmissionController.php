@@ -6,8 +6,10 @@ use App\Exceptions\Ai\AiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ai\SubmitFoodRequest;
 use App\Models\FoodSubmission;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
+use PDOException;
 
 /**
  * POST /ai/v1/food-submissions: creates a PENDING submission only. It never touches foods, so the item is not
@@ -35,6 +37,9 @@ class FoodSubmissionController extends Controller
             } catch (UniqueConstraintViolationException) {
                 // Lost a race with an identical insert: judge the winner below.
                 $submission = $this->existing($source) ?? throw AiException::for('IDEMPOTENCY_CONFLICT');
+            } catch (QueryException|PDOException $e) {
+                // SQLite lock contention is a retryable DB_BUSY; every other database error propagates unchanged.
+                throw AiException::isDatabaseLocked($e) ? AiException::for('DB_BUSY', previous: $e) : $e;
             }
         }
 
