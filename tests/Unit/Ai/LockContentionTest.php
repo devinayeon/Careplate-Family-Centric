@@ -50,6 +50,15 @@ it('does not treat other database errors as contention', function (PDOException 
     'sqlite disk I/O error' => fn () => lcPdo('SQLSTATE[HY000]: General error: 10 disk I/O error', ['HY000', 10, 'disk I/O error']),
 ]);
 
+it('ignores contention text that only appears in the SQL bindings of another error', function () {
+    $unique = lcPdo('SQLSTATE[23000]: Integrity constraint violation: 19 UNIQUE constraint failed: t.x', ['23000', 19, 'UNIQUE constraint failed: t.x']);
+    $query = new QueryException('sqlite', 'insert into "t" ("x") values (?)', ['database is locked'], $unique);
+
+    expect($query->getMessage())->toContain('database is locked')
+        ->and(AiException::isLockContention($query))->toBeFalse()
+        ->and(AiException::isLockContention(new DeadlockException($query->getMessage(), 0, $query)))->toBeFalse();
+});
+
 it('ignores contention-like text on an exception that is not a database error', function () {
     expect(AiException::isLockContention(new RuntimeException('database is locked')))->toBeFalse()
         ->and(AiException::isLockContention(new RuntimeException('Deadlock found')))->toBeFalse();

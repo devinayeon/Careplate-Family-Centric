@@ -2,6 +2,8 @@
 
 namespace App\Exceptions\Ai;
 
+use Illuminate\Database\DeadlockException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use PDOException;
 use RuntimeException;
@@ -71,7 +73,7 @@ class AiException extends RuntimeException
 
     /**
      * True for lock contention, where nothing was committed and the same call may be retried: SQLite "database
-     * (table) is locked" (BEGIN IMMEDIATE / busy_timeout, matched by message), MySQL lock wait timeout (driver
+     * (table) is locked" (BEGIN IMMEDIATE / busy_timeout, driver code 5/6 or the raw driver message), MySQL lock wait timeout (driver
      * code 1205), deadlock (1213) or any SQLSTATE 40001 (matched by errorInfo). Walks the previous chain, because
      * Laravel rethrows contention inside a nested transaction as a DeadlockException around the QueryException.
      */
@@ -85,7 +87,13 @@ class AiException extends RuntimeException
             if (is_array($info) && (($info[0] ?? null) === '40001' || in_array($info[1] ?? null, [1205, 1213], true))) {
                 return true;
             }
-            if (str_contains($error->getMessage(), 'database is locked') || str_contains($error->getMessage(), 'database table is locked')) {
+            // SQLite: driver code 5 (SQLITE_BUSY) / 6 (SQLITE_LOCKED), or the driver's own message on a raw
+            // PDOException. Never the message of a QueryException/DeadlockException: it quotes the SQL bindings.
+            if (($info[0] ?? null) === 'HY000' && in_array($info[1] ?? null, [5, 6], true)) {
+                return true;
+            }
+            $wrapped = $error instanceof QueryException || $error instanceof DeadlockException;
+            if (! $wrapped && (str_contains($error->getMessage(), 'database is locked') || str_contains($error->getMessage(), 'database table is locked'))) {
                 return true;
             }
         }
