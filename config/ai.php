@@ -51,5 +51,9 @@ return [
             'per_minute' => 10,
             'per_day' => 100,
         ],
+        'submit' => [
+            'per_minute' => 5,
+            'per_day' => 30,
+        ],
     ],
 ];

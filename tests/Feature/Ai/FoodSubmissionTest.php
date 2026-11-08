@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Http;
 require_once __DIR__.'/FoodSubmissionSupport.php';
 
 beforeEach(function () {
-    rfManifest();
+    fsManifest();
     Http::fake();
 });
 
@@ -101,6 +101,7 @@ test('validation rejections', function (string $field, array $body) {
         'url credentials' => ['source' => ['source_url' => 'https://user:pw@example.test/x']],
         'url oversize' => ['source' => ['source_url' => 'https://example.test/'.str_repeat('a', 500)]],
         'provider unknown' => ['source' => ['provider' => 'WIKI']],
+        'provider USDA_FDC is importer-only' => ['source' => ['provider' => 'USDA_FDC']],
         'source_id empty' => ['source' => ['source_id' => '']],
         'source_id oversize' => ['source' => ['source_id' => str_repeat('1', 101)]],
         'version oversize' => ['source' => ['snapshot_version' => str_repeat('1', 101)]],
@@ -110,6 +111,9 @@ test('validation rejections', function (string $field, array $body) {
     foreach ($cases as $label => $override) {
         yield $label => [$label, array_replace_recursive(fsBody(), $override)];
     }
+    $body = fsBody();
+    unset($body['aliases']);
+    yield 'aliases key missing' => ['missing', $body];
     $body = fsBody();
     unset($body['nutrients']['sodium_mg']);
     yield 'nutrient key missing' => ['missing', $body];
@@ -123,6 +127,12 @@ test('nulls and zero are valid nutrients and unknown stays null', function () {
 
     $n = FoodSubmission::query()->findOrFail($r->json('submission_id'))->candidate['nutrients'];
     expect($n['sodium_mg'])->toBe('0')->and($n['protein_g'])->toBeNull()->and($n['energy_kcal'])->toBe('12.5');
+});
+
+test('empty aliases are valid per the contract', function () {
+    $r = fsSubmit(fsUser(), ['aliases' => []] + fsBody());
+    $r->assertStatus(201);
+    expect(FoodSubmission::query()->findOrFail($r->json('submission_id'))->candidate['aliases'])->toBe([]);
 });
 
 test('a source not in the manifest is accepted as pending', function () {
@@ -145,7 +155,7 @@ test('duplicate triple: same user identical retry returns the existing submissio
 });
 
 test('submitting a triple that an importer left pending is 409 and does not leak it', function () {
-    rfSubmission(['revision_counter' => 1]);
+    rfSubmission(['revision_counter' => 1, 'source_provider' => 'MANUAL']);
 
     chatError(fsSubmit(fsUser(), fsBody()), 409, 'IDEMPOTENCY_CONFLICT');
 });

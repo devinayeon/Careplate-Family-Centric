@@ -20,8 +20,9 @@ Route::prefix('ai/v1')
             ->name('scan');
 
         // Submission only creates a pending row; publishing is admin-only below and always goes through ReviewFood.
+        // The per-user throttle bounds pending-row spam (observed: it runs before the permission alias, so a 403 user only spends their own bucket).
         Route::post('food-submissions', [FoodSubmissionController::class, 'store'])
-            ->middleware('permission:submit-food')
+            ->middleware(['permission:submit-food', 'throttle:ai-submit'])
             ->name('food-submissions.store');
 
         // Permission AND admin role (nutritionist has neither). Ids stay plain strings: no model binding before the gate.

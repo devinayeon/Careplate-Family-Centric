@@ -11,6 +11,8 @@ use Illuminate\Foundation\Http\FormRequest;
  * Body of POST /ai/v1/food-submissions (contracts FoodCandidate). The contract is closed: any other key
  * (status, verified_by, revision, food_id, user_id, decision, ...) at any level is a 422. Nutrients become
  * decimal strings, never floats; the source URL is metadata only and is never fetched.
+ * Provider USDA_FDC is reserved for the importer (user rows could otherwise squat triples and be bulk-approved);
+ * a MANUAL source cannot pass approval until a manifest entry for it exists.
  */
 class SubmitFoodRequest extends FormRequest
 {
@@ -31,12 +33,12 @@ class SubmitFoodRequest extends FormRequest
     {
         $rules = [
             'name' => ['required', 'string', 'min:1', 'max:120'],
-            'aliases' => ['required', 'array', 'max:8'],
+            'aliases' => ['present', 'array', 'max:8'],
             'aliases.*' => ['required', 'string', 'min:1', 'max:80'],
             'basis' => ['required', 'string', 'in:100g'],
             'nutrients' => ['required', 'array'],
             'source' => ['required', 'array'],
-            'source.provider' => ['required', 'string', 'in:USDA_FDC,MANUAL'],
+            'source.provider' => ['required', 'string', 'in:MANUAL'],
             'source.source_id' => ['required', 'string', 'min:1', 'max:100'],
             'source.source_url' => [
                 'required', 'string', 'max:500', 'url:http,https', 'regex:/^https?:\/\//i',

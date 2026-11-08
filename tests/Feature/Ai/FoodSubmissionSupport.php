@@ -2,6 +2,7 @@
 
 use App\Models\FoodSubmission;
 use App\Models\User;
+use App\Services\Ai\Foods\SnapshotManifest;
 use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Testing\TestResponse;
 
@@ -9,6 +10,21 @@ use Illuminate\Testing\TestResponse;
 
 require_once __DIR__.'/ReviewFoodSupport.php';
 require_once __DIR__.'/ChatApiSupport.php';
+
+/** Like rfManifest() but lists the ids under provider MANUAL: the only way a user-submitted row can pass approval. */
+function fsManifest(array $ids = ['900001', '900002']): void
+{
+    $path = sys_get_temp_dir().'/fs-manifest-'.bin2hex(random_bytes(4)).'.json';
+    file_put_contents($path, json_encode([
+        'schema_version' => SnapshotManifest::SCHEMA,
+        'snapshots' => [[
+            'source_provider' => 'MANUAL', 'snapshot_version' => '2099-12-31', 'data_type' => 'Foundation',
+            'url' => 'https://example.test/x.zip', 'sha256' => RF_SHA, 'retrieved_at' => '2099-12-31T00:00:00+00:00',
+            'record_count' => count($ids), 'raw_json_file' => 'x.json', 'imported_source_ids' => $ids,
+        ]],
+    ]));
+    app()->instance(SnapshotManifest::class, new SnapshotManifest($path));
+}
 
 function fsUser(string $role = 'family_head'): User
 {
@@ -29,7 +45,7 @@ function fsBody(array $overrides = []): array
             'protein_g' => 10, 'carbohydrate_g' => 1.9, 'sodium_mg' => 7,
         ],
         'source' => [
-            'provider' => 'USDA_FDC', 'source_id' => '900001', 'source_url' => 'https://example.test/food/900001',
+            'provider' => 'MANUAL', 'source_id' => '900001', 'source_url' => 'https://example.test/food/900001',
             'snapshot_version' => '2099-12-31', 'source_sha256' => RF_SHA,
         ],
     ], $overrides);

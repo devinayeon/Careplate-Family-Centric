@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        foreach (['scan', 'chat'] as $feature) {
+        foreach (['scan', 'chat', 'submit'] as $feature) {
             // Distinct keys per window: Laravel counts hits per key, so sharing one would merge them.
             RateLimiter::for('ai-'.$feature, fn (Request $request) => [
                 Limit::perMinute((int) config("ai.quotas.$feature.per_minute"))->by("ai:$feature:minute:".self::quotaKey($request)),

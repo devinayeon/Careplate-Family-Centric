@@ -10,7 +10,7 @@ require_once __DIR__.'/FoodSubmissionSupport.php';
 beforeEach(function () {
     chatSetUp();
     chatFake();
-    rfManifest();
+    fsManifest();
 });
 
 /** Submits and approves (with acknowledgement) as admin; returns [admin, submission, approve response]. */
