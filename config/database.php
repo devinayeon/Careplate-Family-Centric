@@ -61,6 +61,8 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // A contended row lock fails after 5 s (InnoDB default 50 s), like SQLite's busy_timeout.
+                Mysql::ATTR_INIT_COMMAND => 'SET SESSION innodb_lock_wait_timeout = 5',
             ]) : [],
         ],
 
