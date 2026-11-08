@@ -26,7 +26,7 @@ it('approves a submission: food becomes visible to Food::verified with a search_
     $result = rfApprove($submission, ['actor' => $actor, 'audit' => 'user:admin']);
 
     $food = Food::verified()->sole();
-    expect($result)->toBe(['food_id' => $food->id, 'revision' => 1, 'status' => 'verified', 'sync_status' => 'ready'])
+    expect(dbCanonical($result))->toBe(dbCanonical(['food_id' => $food->id, 'revision' => 1, 'status' => 'verified', 'sync_status' => 'ready']))
         ->and($food->name)->toBe('Beras putih mentah')
         ->and($food->current_revision)->toBe(1)
         ->and($food->energy_method)->toBe('Atwater specific')
@@ -74,7 +74,7 @@ it('revokes: hides the food, clears search_text, bumps the revision and appends 
     $result = app(ReviewFood::class)->revoke($food->id, null, 'user:admin', 1, 'Nilai salah.');
 
     $food->refresh();
-    expect($result)->toBe(['food_id' => $food->id, 'revision' => 2, 'status' => 'revoked', 'sync_status' => 'ready'])
+    expect(dbCanonical($result))->toBe(dbCanonical(['food_id' => $food->id, 'revision' => 2, 'status' => 'revoked', 'sync_status' => 'ready']))
         ->and(Food::verified()->count())->toBe(0)
         ->and($food->status)->toBe('revoked')
         ->and($food->search_text)->toBeNull()

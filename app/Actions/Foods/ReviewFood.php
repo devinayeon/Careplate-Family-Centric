@@ -71,7 +71,8 @@ class ReviewFood
                 'decided_by' => $actor?->getKey(), 'decided_at' => now(), 'revision_counter' => $submission->revision_counter + 1,
             ])->save();
 
-            return $result;
+            // The caller gets the stored value, so the first answer equals every replay on every database.
+            return $this->storedResult($submission->refresh()->decision_result);
         });
     }
 
@@ -100,9 +101,9 @@ class ReviewFood
 
             $food->forceFill(['status' => 'revoked', 'current_revision' => $expectedRevision + 1, 'search_text' => null])->save();
             $result = $this->result($food);
-            $this->appendRevision($food, 'revoke', $actor, $auditId, $reason, $hash, $result);
+            $revision = $this->appendRevision($food, 'revoke', $actor, $auditId, $reason, $hash, $result);
 
-            return $result;
+            return $this->storedResult($revision->refresh()->result);
         });
     }
 
@@ -140,10 +141,19 @@ class ReviewFood
         return ['food_id' => $food->id, 'revision' => $food->current_revision, 'status' => $food->status, 'sync_status' => 'ready'];
     }
 
-    /** @param  array<string, mixed>  $result */
-    private function appendRevision(Food $food, string $action, ?User $actor, string $auditId, string $note, string $hash, array $result): void
+    /**
+     * @param  array<string, mixed>|null  $stored  a result column read back from the database
+     * @return array{food_id: string, revision: int, status: string, sync_status: string}
+     */
+    private function storedResult(?array $stored): array
     {
-        FoodRevision::create([
+        return $stored ?? throw AiException::for('INTERNAL');
+    }
+
+    /** @param  array<string, mixed>  $result */
+    private function appendRevision(Food $food, string $action, ?User $actor, string $auditId, string $note, string $hash, array $result): FoodRevision
+    {
+        return FoodRevision::create([
             'food_id' => $food->id, 'revision' => $food->current_revision, 'action' => $action, 'status' => $food->status,
             'snapshot' => ReviewSnapshot::of($food), 'actor_id' => $actor?->getKey(), 'actor_audit_id' => $auditId,
             'note' => $note, 'decision_hash' => $hash, 'result' => $result,

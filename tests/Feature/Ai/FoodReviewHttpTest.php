@@ -3,9 +3,11 @@
 use App\Models\Food;
 use App\Models\FoodRevision;
 use App\Models\FoodSubmission;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 require_once __DIR__.'/FoodSubmissionSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(function () {
     chatSetUp();
@@ -53,8 +55,10 @@ test('approve returns the stored contract Decision and the food is immediately s
     [, $submission, $response] = frApproved();
 
     $json = $response->json();
-    expect(array_keys($json))->toBe(['food_id', 'revision', 'status', 'sync_status'])
-        ->and($json['status'])->toBe('verified')->and($json['revision'])->toBe(1)->and($json['sync_status'])->toBe('ready')
+    // Exact key order on SQLite; MySQL hands JSON object keys back in its own order (not a contract), same key set.
+    $keys = ['food_id', 'revision', 'status', 'sync_status'];
+    DB::getDriverName() === 'sqlite' ? expect(array_keys($json))->toBe($keys) : expect(array_keys($json))->toEqualCanonicalizing($keys);
+    expect($json['status'])->toBe('verified')->and($json['revision'])->toBe(1)->and($json['sync_status'])->toBe('ready')
         ->and($response->headers->get('Cache-Control'))->toContain('no-store');
     expect($submission->fresh()->status)->toBe('approved')->and($submission->fresh()->revision_counter)->toBe(2);
 
@@ -79,7 +83,7 @@ test('revoke hides the food and a new chat turn can no longer cite it', function
 
     $revoked = fsRevoke($admin, $foodId, ['expected_revision' => 1, 'reason' => 'Nilai salah.'])->assertOk();
 
-    expect($revoked->json())->toBe(['food_id' => $foodId, 'revision' => 2, 'status' => 'revoked', 'sync_status' => 'ready']);
+    expect(dbCanonical($revoked->json()))->toBe(dbCanonical(['food_id' => $foodId, 'revision' => 2, 'status' => 'revoked', 'sync_status' => 'ready']));
     $this->actingAs(fsUser('nutritionist'))->getJson('/ai/v1/foods?q=tahu')->assertOk()->assertExactJson(['data' => []]);
     [$user, $session] = chatActor();
     $json = chatOk(chatAsk($user, $session, 'Berapa protein 50 gram tahu contoh?', 2));
