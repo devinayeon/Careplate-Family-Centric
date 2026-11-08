@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\Ai\AiErrorRenderer;
+use App\Exceptions\Ai\AiException;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,5 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*', 'ai/*') || $request->expectsJson(),
         );
 
+        // Expected AI failures render as envelopes; reporting them would log traces of label-handling frames.
+        $exceptions->dontReport(AiException::class);
         $exceptions->render(AiErrorRenderer::render(...));
     })->create();
