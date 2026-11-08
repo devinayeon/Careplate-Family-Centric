@@ -7,6 +7,8 @@ declare(strict_types=1);
 // HTTP is plain curl; Laravel is only booted to create/delete throwaway users. Prints status codes and sanitised summaries only.
 
 use App\Models\ChatSession;
+use App\Models\Food;
+use App\Models\FoodRevision;
 use App\Models\FoodSubmission;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -37,9 +39,11 @@ function expectStatus(string $label, array $result, int|array $expected, string 
     return $body;
 }
 
-function makeUser(string $label, string $role, string $password): User
+/** Registers the user in $users right after creation, so a later failure still cleans it up. */
+function makeUser(array &$users, string $label, string $role, string $password): User
 {
     $user = User::create(['name' => 'Smoke '.$label, 'email' => 'smoke-'.$label.'-'.bin2hex(random_bytes(4)).'@example.test', 'password' => $password]);
+    $users[$label] = $user;
     $user->assignRole($role);
 
     return $user;
@@ -52,14 +56,16 @@ $users = [];
 $clients = [];
 $tag = bin2hex(random_bytes(4));
 $exit = 0;
+$booted = false;
 try {
     smokeBoot($root);
+    $booted = true;
     [$process, , $pid, $log] = smokeServerStart($root);
     say('server up on '.SMOKE_BASE);
 
     $password = bin2hex(random_bytes(12));
     foreach (['a' => 'family_head', 'b' => 'family_head', 'admin' => 'admin'] as $label => $role) {
-        $users[$label] = makeUser($label, $role, $password);
+        makeUser($users, $label, $role, $password);
         $clients[$label] = new SmokeClient;
         expectStatus("login $label", [$clients[$label]->login($users[$label]->email, $password), null], [200, 204, 302]);
     }
@@ -117,9 +123,16 @@ try {
     ]), 201);
     say('     status='.$submission['status'].' revision_counter='.$submission['revision_counter']);
 
-    $approve = expectStatus('admin approve (not in manifest)', $admin->send('POST', '/ai/v1/admin/food-submissions/'.$submission['submission_id'].'/approve', ['expected_revision' => 1, 'reviewer_note' => 'Uji asap']), [422, 409]);
-    say('     refused: '.($approve['error']['code'] ?? '?').' '.($approve['error']['message'] ?? ''));
-    expectStatus('A cannot approve (403)', $a->send('POST', '/ai/v1/admin/food-submissions/'.$submission['submission_id'].'/approve', ['expected_revision' => 1, 'reviewer_note' => 'x']), 403);
+    // Admin approve only runs when the source triple is provably absent from the manifest (then it must be refused);
+    // otherwise a surprise approval would add a food to the demo catalog.
+    $approvePath = '/ai/v1/admin/food-submissions/'.$submission['submission_id'].'/approve';
+    if (smokeManifestHasSource($root.'/ai/data/snapshot.manifest.json', 'MANUAL', 'smoke-'.$tag, 'smoke-'.$tag)) {
+        say('SKIP admin approve: source triple is in the manifest, approving would mutate the catalog.');
+    } else {
+        $approve = expectStatus('admin approve (not in manifest)', $admin->send('POST', $approvePath, ['expected_revision' => 1, 'reviewer_note' => 'Uji asap']), 422);
+        say('     refused: '.($approve['error']['code'] ?? '?').' '.($approve['error']['message'] ?? ''));
+    }
+    expectStatus('A cannot approve (403)', $a->send('POST', $approvePath, ['expected_revision' => 1, 'reviewer_note' => 'x']), 403);
 
     $foods = expectStatus('GET /foods?q=smoke name', $a->send('GET', '/ai/v1/foods?q='.rawurlencode($name)), 200);
     $catalog = expectStatus('GET /foods?q=ayam', $a->send('GET', '/ai/v1/foods?q=ayam'), 200);
@@ -132,11 +145,16 @@ try {
     expectStatus('deleted session turns', $a->send('GET', $turnsPath), 404);
     say('SMOKE OK');
 } catch (Throwable $error) {
-    say('SMOKE FAILED: '.$error->getMessage());
+    // Foreign exception messages can embed SQL bindings (password hashes): print the type only.
+    say('SMOKE FAILED: '.($error instanceof SmokeFailure ? $error->getMessage() : get_debug_type($error).' (details withheld)'));
     $exit = 1;
 } finally {
-    if ($users !== []) {
+    if ($booted) {
         try {
+            // Anything carrying the smoke tag goes, even a surprise approval (revisions first, then foods, then submissions).
+            $foodIds = Food::query()->where('source_id', 'smoke-'.$tag)->pluck('id')->all();
+            FoodRevision::query()->whereIn('food_id', $foodIds)->delete();
+            Food::query()->whereIn('id', $foodIds)->delete();
             $ids = array_map(fn (User $user) => $user->getKey(), $users);
             FoodSubmission::query()->whereIn('user_id', $ids)->orWhere('source_id', 'smoke-'.$tag)->delete();
             ChatSession::query()->whereIn('user_id', $ids)->delete();
@@ -144,10 +162,12 @@ try {
                 DB::table('model_has_roles')->where('model_id', $user->getKey())->where('model_type', User::class)->delete();
                 $user->delete();
             }
-            say(sprintf('cleanup: users left=%d sessions left=%d submissions left=%d', User::whereIn('id', $ids)->count(),
-                ChatSession::whereIn('user_id', $ids)->count(), FoodSubmission::where('source_id', 'smoke-'.$tag)->count()));
+            say(sprintf('cleanup: users left=%d sessions left=%d submissions left=%d tagged foods left=%d', User::whereIn('id', $ids)->count(),
+                ChatSession::whereIn('user_id', $ids)->count(), FoodSubmission::where('source_id', 'smoke-'.$tag)->count(),
+                Food::where('source_id', 'smoke-'.$tag)->count()));
+            say(sprintf('catalog: foods=%d revisions=%d', Food::count(), FoodRevision::count()));
         } catch (Throwable $error) {
-            say('cleanup FAILED ('.get_debug_type($error).'); remove users smoke-*@example.test by hand.');
+            say('cleanup FAILED ('.get_debug_type($error).'); remove users smoke-*@example.test and rows tagged smoke-'.$tag.' by hand.');
             $exit = 1;
         }
     }

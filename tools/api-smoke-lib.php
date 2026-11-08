@@ -8,9 +8,44 @@ use Illuminate\Contracts\Console\Kernel;
 
 const SMOKE_BASE = 'http://127.0.0.1:8001';
 
+/** Harness-authored failure: its message is safe to print (unlike a foreign exception message). */
+final class SmokeFailure extends RuntimeException {}
+
 function smokeFail(string $message): never
 {
-    throw new RuntimeException($message);
+    throw new SmokeFailure($message);
+}
+
+/** True when something already accepts TCP connections on host:port. */
+function smokePortOpen(string $host, int $port, float $timeout = 0.5): bool
+{
+    $socket = @stream_socket_client("tcp://$host:$port", $errno, $error, $timeout);
+    if ($socket === false) {
+        return false;
+    }
+    fclose($socket);
+
+    return true;
+}
+
+/** True when the manifest lists the exact (provider, snapshot_version, source_id) triple. */
+function smokeManifestHasSource(string $manifestPath, string $provider, string $snapshot, string $sourceId): bool
+{
+    $manifest = json_decode((string) @file_get_contents($manifestPath), true);
+    foreach (is_array($manifest) ? ($manifest['snapshots'] ?? []) : [] as $entry) {
+        if (is_array($entry) && ($entry['source_provider'] ?? null) === $provider && ($entry['snapshot_version'] ?? null) === $snapshot
+            && in_array($sourceId, array_map('strval', (array) ($entry['imported_source_ids'] ?? [])), true)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/** The artisan serve banner names the bound address: proves the answering server is the child we started. */
+function smokeLogProvesOurServer(string $log, string $base): bool
+{
+    return str_contains($log, 'Server running on ['.$base.']');
 }
 
 /** Boots the app against the git-ignored demo SQLite file only (same forced environment as tools/ai-dev.php). */
@@ -43,6 +78,9 @@ function smokeBoot(string $root): void
 /** @return array{0: resource, 1: array<int, resource>, 2: int, 3: string} */
 function smokeServerStart(string $root): array
 {
+    if (smokePortOpen('127.0.0.1', 8001)) {
+        smokeFail('Port 8001 already accepts connections (a foreign server?). Stop it first; the smoke only runs against its own server.');
+    }
     $log = sys_get_temp_dir().DIRECTORY_SEPARATOR.'smoke-server-'.bin2hex(random_bytes(4)).'.log';
     $pipes = [];
     $process = proc_open([PHP_BINARY, $root.'/tools/ai-dev.php', 'serve'], [['file', 'php://stdin', 'r'], ['file', $log, 'w'], ['file', $log, 'a']], $pipes, $root);
@@ -53,6 +91,7 @@ function smokeServerStart(string $root): array
     for ($i = 0; $i < 60; $i++) {
         usleep(500000);
         if (! (proc_get_status($process)['running'] ?? false)) {
+            smokeServerStop($process, $pid, $log);
             smokeFail('Dev server exited early (is port 8001 already in use?).');
         }
         $ch = curl_init(SMOKE_BASE.'/up');
@@ -61,9 +100,16 @@ function smokeServerStart(string $root): array
         $up = curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 200;
         curl_close($ch);
         if ($up) {
+            // Our own child must still be alive and its banner must name this address.
+            if (! (proc_get_status($process)['running'] ?? false) || ! smokeLogProvesOurServer((string) @file_get_contents($log), SMOKE_BASE)) {
+                smokeServerStop($process, $pid, $log);
+                smokeFail('/up answered but not from the server this harness started; stopping.');
+            }
+
             return [$process, $pipes, $pid, $log];
         }
     }
+    smokeServerStop($process, $pid, $log);
     smokeFail('Dev server did not answer /up within 30 s.');
 }
 
@@ -92,6 +138,7 @@ final class SmokeClient
     {
         $this->jar = sys_get_temp_dir().DIRECTORY_SEPARATOR.'smoke-jar-'.bin2hex(random_bytes(6)).'.txt';
         touch($this->jar);
+        @chmod($this->jar, 0600);
     }
 
     public function destroy(): void

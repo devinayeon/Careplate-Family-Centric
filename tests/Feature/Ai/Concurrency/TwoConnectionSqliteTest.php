@@ -16,6 +16,7 @@ require_once __DIR__.'/../ReviewFoodSupport.php';
 // lock (A and B are both open PDO handles in one process, so B truly hits SQLITE_BUSY after the 200 ms busy_timeout).
 
 beforeEach(function () {
+    $this->ccPath = null; // defined even if ccBoot() throws, so afterEach never hits an undefined property
     $this->ccPath = ccBoot();
     test()->travelTo('2026-11-08 10:00:00');
 });
