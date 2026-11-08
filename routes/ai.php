@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\FoodReviewController;
 use App\Http\Controllers\Ai\ChatSessionController;
 use App\Http\Controllers\Ai\ChatTurnController;
 use App\Http\Controllers\Ai\FoodController;
+use App\Http\Controllers\Ai\FoodSubmissionController;
 use App\Http\Controllers\Ai\ScanController;
 use App\Http\Middleware\Ai\AiResponseHeaders;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +18,22 @@ Route::prefix('ai/v1')
         Route::post('scan', ScanController::class)
             ->middleware(['permission:scan-nutrition', 'throttle:ai-scan'])
             ->name('scan');
+
+        // Submission only creates a pending row; publishing is admin-only below and always goes through ReviewFood.
+        Route::post('food-submissions', [FoodSubmissionController::class, 'store'])
+            ->middleware('permission:submit-food')
+            ->name('food-submissions.store');
+
+        // Permission AND admin role (nutritionist has neither). Ids stay plain strings: no model binding before the gate.
+        Route::prefix('admin')
+            ->name('admin.')
+            ->middleware(['permission:verify-food', 'role:admin'])
+            ->group(function (): void {
+                Route::post('food-submissions/{submission}/approve', [FoodReviewController::class, 'approve'])
+                    ->whereUuid('submission')->name('food-submissions.approve');
+                Route::post('foods/{food}/revoke', [FoodReviewController::class, 'revoke'])
+                    ->whereUuid('food')->name('foods.revoke');
+            });
 
         Route::get('foods', FoodController::class)
             ->middleware('permission:nutrition-chat')
