@@ -21,7 +21,7 @@ use Throwable;
  */
 class EvalRun extends Command
 {
-    protected $signature = 'ai:eval {suite : scan or chat} {--split=all : dev, holdout or all} {--manifest=ai/evals/ocr/manifest.csv : scan manifest under ai/evals} {--runs=1 : repeat every scan image N times (1 to 5)} {--out-dir= : result directory (default ai/evals/results)}';
+    protected $signature = 'ai:eval {suite : scan or chat} {--split=all : dev, holdout or all} {--manifest=ai/evals/ocr/manifest.csv : scan manifest under ai/evals} {--runs=1 : repeat every scan image N times (1 to 5)} {--pause=0 : seconds to wait between scan requests (0 to 60)} {--out-dir= : result directory (default ai/evals/results)}';
 
     protected $description = 'Run an AI evaluation suite live (one request per sample image) and save the result JSON.';
 
@@ -47,6 +47,12 @@ class EvalRun extends Command
 
             return self::INVALID;
         }
+        $pause = filter_var($this->option('pause'), FILTER_VALIDATE_INT);
+        if ($pause === false || $pause < 0 || $pause > 60) {
+            $this->error('--pause must be a whole number of seconds from 0 to 60.');
+
+            return self::INVALID;
+        }
         $manifest = $this->manifestPath((string) $this->option('manifest'));
         if ($manifest === null) {
             $this->error('--manifest must be an existing .csv file under ai/evals.');
@@ -63,7 +69,7 @@ class EvalRun extends Command
         $this->line(sprintf('%d images x %d runs = %d requests', count($rows), $runs, count($rows) * $runs));
         $items = (new ScanEvalRunner($preparer, $comparer))->run($rows, $runs, fn (array $i) => $this->line(
             sprintf('%s run %d %-9s %s', $i['id'], $i['run'], $i['split'], $i['outcome']),
-        ));
+        ), $pause);
 
         $stats = (new ScanRunStats($comparer))->build($items);
         $file = $this->write($split, $runs, $manifest, $rows, $items, $stats);

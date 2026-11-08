@@ -133,3 +133,12 @@ it('runs the synthetic Indonesian manifest and records its kind and truth status
         ->and($raw)->not->toContain('base64')->not->toContain(GEMINI_FAKE_KEY);
     File::deleteDirectory($dir);
 });
+
+it('rejects --pause outside 0..60 seconds before any request', function (string $pause) {
+    geminiConfigure();
+    Http::fake();
+
+    $this->artisan('ai:eval', ['suite' => 'scan', '--pause' => $pause])->assertExitCode(2);
+
+    Http::assertNothingSent();
+})->with(['-1', '61', 'abc']);

@@ -25,9 +25,10 @@ class ScanEvalRunner
     /**
      * @param  list<Row>  $rows
      * @param  callable(array<string, mixed>): void  $progress  called after every request
+     * @param  int  $pauseSeconds  wait between requests, for keys with a requests-per-minute quota (never used in tests)
      * @return list<array<string, mixed>>
      */
-    public function run(array $rows, int $runs, callable $progress): array
+    public function run(array $rows, int $runs, callable $progress, int $pauseSeconds = 0): array
     {
         $recorder = new RecordingGeminiClient;
         $extractor = new LabelExtractor($recorder, app(LabelNormalizer::class), app(NutritionEvaluator::class));
@@ -35,6 +36,9 @@ class ScanEvalRunner
         $items = [];
         for ($run = 1; $run <= $runs; $run++) {
             foreach ($rows as $row) {
+                if ($items !== [] && $pauseSeconds > 0) {
+                    sleep($pauseSeconds);
+                }
                 $items[] = $this->one($row, $run, $extractor, $recorder);
                 $progress($items[array_key_last($items)]);
             }
