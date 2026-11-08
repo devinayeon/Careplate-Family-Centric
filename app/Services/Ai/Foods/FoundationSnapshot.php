@@ -54,7 +54,13 @@ class FoundationSnapshot
             throw new RuntimeException('Download failed: HTTP '.$response->status().' for '.$url);
         }
 
-        return hash_file('sha256', $part);
+        $hash = hash_file('sha256', $part);
+        if ($hash === false) {
+            $this->discard($url);
+            throw new RuntimeException('Download failed: the archive could not be read.');
+        }
+
+        return $hash;
     }
 
     public function discard(string $url): void

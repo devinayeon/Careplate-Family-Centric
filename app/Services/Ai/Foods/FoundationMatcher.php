@@ -27,7 +27,7 @@ class FoundationMatcher
      */
     public function match(array $row, array $foods): array
     {
-        $query = preg_split('/\bwithout\b/i', (string) $row['search_query_en'])[0];
+        $query = (preg_split('/\bwithout\b/i', (string) $row['search_query_en']) ?: [''])[0];
         $terms = $this->tokens($query);
         $state = strtolower((string) ($row['required_state'] ?? ''));
         $hasRaw = preg_match('/\braw\b/', $state) === 1;

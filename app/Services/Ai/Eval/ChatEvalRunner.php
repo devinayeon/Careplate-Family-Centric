@@ -85,7 +85,10 @@ final class ChatEvalRunner
         return $items;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param  array<string, mixed>  $case
+     * @return array<string, mixed>
+     */
     public function runCase(array $case, bool $modelAvailable): array
     {
         $item = [
@@ -135,6 +138,7 @@ final class ChatEvalRunner
     /**
      * Sends every turn of the case into one fresh session; the result belongs to the last turn.
      *
+     * @param  array<string, mixed>  $case
      * @return array<string, mixed>
      */
     private function turns(User $user, array $case): array
@@ -185,6 +189,7 @@ final class ChatEvalRunner
      * Concrete expectation from the map entry and the live catalog row; [null, reason] when the premise is missing.
      * Values use the production AnswerRenderer::derive: this checks wiring and rounding, not the arithmetic (AnswerRendererTest does).
      *
+     * @param  array<string, mixed>  $case
      * @return array{0: array<string, mixed>|null, 1: string|null}
      */
     private function resolve(array $case): array

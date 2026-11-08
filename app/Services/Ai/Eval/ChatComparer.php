@@ -256,7 +256,7 @@ final class ChatComparer
         foreach ($run as $item) {
             foreach ($sum as $field => $value) {
                 $reported = $item['usage'][$field] ?? null;
-                if ($reported !== null) {
+                if (is_int($reported)) {
                     $sum[$field] = ($value ?? 0) + $reported;
                 }
             }

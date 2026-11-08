@@ -189,7 +189,7 @@ class UsdaFoundationImporter
     }
 
     /**
-     * @param  array<string, mixed>  $stored
+     * @param  array<mixed>  $stored
      * @param  array<string, mixed>  $fresh
      * @return list<string>
      */
