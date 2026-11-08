@@ -10,6 +10,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use PDOException;
 
 /**
  * Conditional-update (CAS) primitives behind TurnGate. Every write states the exact row version it expects
@@ -33,7 +34,8 @@ class TurnSlot
             return DB::transaction($fn);
         } catch (UniqueConstraintViolationException $e) {
             throw AiException::for('SESSION_BUSY', previous: $e);
-        } catch (QueryException $e) {
+        } catch (QueryException|PDOException $e) {
+            // BEGIN IMMEDIATE (transaction_mode) fails as a raw PDOException, not a QueryException, once busy_timeout runs out.
             if (str_contains($e->getMessage(), 'database is locked') || str_contains($e->getMessage(), 'database table is locked')) {
                 throw AiException::for('SESSION_BUSY', previous: $e);
             }
