@@ -36,7 +36,7 @@ Reading the chat result honestly:
 
 ## Indonesian label sets (BPOM "Informasi Nilai Gizi")
 
-`ocr-id/manifest.csv` holds 8 real photos of Indonesian packaging (Open Food Facts contributor photos, CC BY-SA 3.0, `kind=web_sample_id`, 3 dev / 5 holdout, product-disjoint). `ocr-id/synthetic/manifest.csv` holds 6 labels rendered by `ocr-id/synthetic/generate.php` (`kind=synthetic_id`, `truth_status=exact_by_construction`). Licences, attribution and changes are in `ocr-id/NOTICE.md`. This is not the USDA chat catalog and not the FDA/Wikimedia set in `ocr/`.
+`ocr-id/manifest.csv` holds 8 real photos of Indonesian packaging (Open Food Facts contributor photos, CC BY-SA 3.0, `kind=web_sample_id`, 3 dev / 5 holdout, product-disjoint). `ocr-id/synthetic/manifest.csv` holds 6 labels rendered by `ocr-id/synthetic/generate.php` (`kind=synthetic_id`, `truth_status=exact_by_construction`). Licences, attribution and changes are in `ocr-id/NOTICE.md`. This is not the USDA chat catalog and not the FDA/Wikimedia set in `ocr/`. The condensed results and the honest reading are in `ai/README.md` (sections Indonesian labels, Provider quota, Chat and Indonesian foods). The USDA catalog is only used by the chat eval; the scan eval never touches it.
 
 Limits you must keep in mind:
 
@@ -63,7 +63,7 @@ The 3-run protocol on `gemini-3.6-flash` (real and synthetic sets, plus the orig
 
 ### Re-scoring and valid readings
 
-Provider failures (HTTP 429 quota, timeouts, disabled) say nothing about the model, so since scorer version 2 they are excluded from field scores, abstentions, latency and token totals and reported as `provider_errors` (with `provider_errors_by_code`); `valid_readings` is the real n per group and per image. `AI_OUTPUT_INVALID` is the model's own unusable output and stays scored. The result files in this folder were re-scored offline (no request, no key needed) with `php tools/ai-dev.php ai ai:eval scan --rescore=ai/evals/results/<file>.json`; the item rows are untouched, `summary` is recomputed, `scorer_version` and `rescored_at` are recorded. After re-scoring: the `gemini-3.6-flash` real run is 9 valid readings and 15 provider errors (every scored field 9/9, latency p50 7.4 s, p95 12.0 s over the 9) and the `gemini-3-flash-preview` synthetic run is 7 valid readings and 11 provider errors.
+Provider failures (HTTP 429 quota, timeouts, disabled) say nothing about the model, so since scorer version 2 they are excluded from field scores, abstentions, latency and token totals and reported as `provider_errors` (with `provider_errors_by_code`); `valid_readings` is the real n per group and per image. `AI_OUTPUT_INVALID` is the model's own unusable output and stays scored. Timeouts (`AI_TIMEOUT`) are provider-side failures too: they are excluded from the latency p50/p95 and token totals, so the p95 reflects completed readings only and understates what a user waits when the provider is slow. The result files in this folder were re-scored offline (no request, no key needed) with `php tools/ai-dev.php ai ai:eval scan --rescore=ai/evals/results/<file>.json`; the item rows are untouched, `summary` is recomputed, `scorer_version` and `rescored_at` are recorded. After re-scoring: the `gemini-3.6-flash` real run is 9 valid readings and 15 provider errors (every scored field 9/9, latency p50 7.4 s, p95 12.0 s over the 9) and the `gemini-3-flash-preview` synthetic run is 7 valid readings and 11 provider errors.
 
 ### Prompt v1.1 status (pending a gemini-3.6-flash regression run)
 
