@@ -6,7 +6,7 @@
     "runs": 1,
     "kind": "web_sample_id",
     "truth_status": "unverified_by_human",
-    "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples.",
+    "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples. Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.",
     "model_config": "gemini-3.1-flash-lite",
     "model_versions_reported": [
         "gemini-3.1-flash-lite"
@@ -15,6 +15,9 @@
     "requests": 8,
     "summary": {
         "images": 8,
+        "valid_readings": 8,
+        "provider_errors": 0,
+        "provider_errors_by_code": [],
         "fields": {
             "energy_kcal": {
                 "correct": 7,
@@ -96,6 +99,9 @@
         "by_kind": {
             "web_sample_id": {
                 "images": 8,
+                "valid_readings": 8,
+                "provider_errors": 0,
+                "provider_errors_by_code": [],
                 "fields": {
                     "energy_kcal": {
                         "correct": 7,
@@ -182,6 +188,8 @@
             "ID-01": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -221,6 +229,8 @@
             "ID-02": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -260,6 +270,8 @@
             "ID-03": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -299,6 +311,8 @@
             "ID-04": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -338,6 +352,8 @@
             "ID-05": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 0,
                 "fields": {
                     "energy_kcal": {
@@ -377,6 +393,8 @@
             "ID-06": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -416,6 +434,8 @@
             "ID-07": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -455,6 +475,8 @@
             "ID-08": {
                 "kind": "web_sample_id",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 0,
                 "fields": {
                     "energy_kcal": {
@@ -1166,5 +1188,7 @@
                 }
             }
         }
-    ]
+    ],
+    "scorer_version": 2,
+    "rescored_at": "2026-11-08T18:31:06+00:00"
 }

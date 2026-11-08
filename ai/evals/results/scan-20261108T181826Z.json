@@ -6,7 +6,7 @@
     "runs": 1,
     "kind": "web_sample",
     "truth_status": "unverified_by_human",
-    "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging.",
+    "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging. Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.",
     "model_config": "gemini-3.1-flash-lite",
     "model_versions_reported": [
         "gemini-3.1-flash-lite"
@@ -15,6 +15,9 @@
     "requests": 8,
     "summary": {
         "images": 8,
+        "valid_readings": 8,
+        "provider_errors": 0,
+        "provider_errors_by_code": [],
         "fields": {
             "energy_kcal": {
                 "correct": 6,
@@ -96,6 +99,9 @@
         "by_kind": {
             "web_sample": {
                 "images": 8,
+                "valid_readings": 8,
+                "provider_errors": 0,
+                "provider_errors_by_code": [],
                 "fields": {
                     "energy_kcal": {
                         "correct": 6,
@@ -182,6 +188,8 @@
             "SMP-01": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -221,6 +229,8 @@
             "SMP-02": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 0,
                 "fields": {
                     "energy_kcal": {
@@ -260,6 +270,8 @@
             "SMP-03": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -295,6 +307,8 @@
             "SMP-04": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -334,6 +348,8 @@
             "SMP-05": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -373,6 +389,8 @@
             "SMP-06": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -412,6 +430,8 @@
             "SMP-07": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -451,6 +471,8 @@
             "SMP-08": {
                 "kind": "web_sample",
                 "runs": 1,
+                "valid_readings": 1,
+                "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
@@ -1146,5 +1168,7 @@
                 }
             }
         }
-    ]
+    ],
+    "scorer_version": 2,
+    "rescored_at": "2026-11-08T18:31:09+00:00"
 }

@@ -60,3 +60,34 @@ The configured model `gemini-3.6-flash` is on a free-tier key limited to 20 requ
 - `scan-20261108T180056Z.json`, `...180216Z.json`, `...180454Z.json` (prompt sha `c599e583`, before) and `...181603Z.json`, `...181701Z.json`, `...181826Z.json` (prompt sha `4f4184e1`, after): `gemini-3.1-flash-lite`, `--runs=1`, real Indonesian, synthetic, and the original `ocr/` set. This is a different (smaller) model, used for the prompt before/after comparison because it was the only one with quota left. It is not the shipped model.
 
 The 3-run protocol on `gemini-3.6-flash` (real and synthetic sets, plus the original set once for the prompt regression) has to be repeated when the daily quota is back. Use `--pause=13` on keys with a per-minute limit.
+
+### Re-scoring and valid readings
+
+Provider failures (HTTP 429 quota, timeouts, disabled) say nothing about the model, so since scorer version 2 they are excluded from field scores, abstentions, latency and token totals and reported as `provider_errors` (with `provider_errors_by_code`); `valid_readings` is the real n per group and per image. `AI_OUTPUT_INVALID` is the model's own unusable output and stays scored. The result files in this folder were re-scored offline (no request, no key needed) with `php tools/ai-dev.php ai ai:eval scan --rescore=ai/evals/results/<file>.json`; the item rows are untouched, `summary` is recomputed, `scorer_version` and `rescored_at` are recorded. After re-scoring: the `gemini-3.6-flash` real run is 9 valid readings and 15 provider errors (every scored field 9/9, latency p50 7.4 s, p95 12.0 s over the 9) and the `gemini-3-flash-preview` synthetic run is 7 valid readings and 11 provider errors.
+
+### Prompt v1.1 status (pending a gemini-3.6-flash regression run)
+
+`ai/prompts/ocr-system.txt` v1.1 (sha `4f4184e1`) adds three rules: prefer the printed kkal when kJ and kkal are both printed, "Per 100 g" is a basis and not a serving size, and Garam/Salt/Zout/Sel without Natrium/Sodium is not sodium (evidence names the printed row). It is kept PENDING a regression run on `gemini-3.6-flash`:
+
+- The `gemini-3.6-flash` (real, 9 valid readings) and `gemini-3-flash-preview` (synthetic, 7 valid readings) result files were produced with the OLD prompt (sha `c599e583`). No `gemini-3.6-flash` reading exists with prompt v1.1.
+- The free-tier quota (20 requests/day/model on `gemini-3.6-flash`; 5/minute on `gemini-3-flash-preview`) blocked the protocol (3 runs of the real and synthetic sets, plus 1 run of the original set).
+- The only before/after evidence is on `gemini-3.1-flash-lite`, 1 run per image (a different, smaller model), prompt `c599e583` before and `4f4184e1` after:
+
+| set | prompt | energy | fat | sugar | protein | carb | sodium | serving | basis | unsafe | notes |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| real (8) | before | 7/8 | 8/8 | 7/8 | 8/8 | 7/8 | 8/8 | 8/8 | 8/8 | 0 | ID-08 energy 397.7 (kJ converted), ID-05 sugar/carb 0 |
+| real (8) | after | 8/8 | 8/8 | 7/8 | 8/8 | 7/8 | 8/8 | 8/8 | 8/8 | 0 | ID-05 sugar/carb 0 |
+| synthetic (6) | before | 5/6 | 6/6 | 6/6 | 6/6 | 6/6 | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6 | 0 | SYN-02 energy 85.086 (kJ converted) |
+| synthetic (6) | after | 6/6 | 6/6 | 6/6 | 6/6 | 6/6 | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6 | 0 | none |
+| original (8, 1 abstention) | before | 6/6 | 7/7 | 6/6 | 7/7 | 7/7 | 5/5 (+2/3 null) | 5/5 (+1/3 null) | 7/7 | 3 | SMP-01 sodium 10 mg less_than (salt read as sodium), SMP-01 serving 100 g, SMP-02 serving 8 ml |
+| original (8) | after | 6/6 | 7/7 | 6/6 | 7/7 | 7/7 | 5/5 (+3/3 null) | 5/5 (+2/3 null) | 7/7 | 1 | SMP-02 serving 8 ml (unchanged) |
+
+- Unresolved: ID-05 (Mizone) sugar and carbohydrate. The digits are half hidden by glare; the annotation (9 g) is the annotator's best reading. `gemini-3.6-flash` read 9 g (1 reading), `gemini-3.1-flash-lite` read 0 g in all of its runs. Needs a human look at the photo.
+
+Commands to finish the protocol when the quota resets (50 requests; spread over days on a free key, or use a paid key; `--pause=13` respects a 5/minute limit). Run the original set first with the OLD prompt only if a 3.6 baseline for the original set is wanted (the earlier 3.6 baseline is `scan-20261108T071717Z.json`, prompt `c599e583`):
+
+    php tools/ai-dev.php ai ai:eval scan --manifest=ai/evals/ocr-id/manifest.csv --runs=3 --pause=13
+    php tools/ai-dev.php ai ai:eval scan --manifest=ai/evals/ocr-id/synthetic/manifest.csv --runs=3 --pause=13
+    php tools/ai-dev.php ai ai:eval scan --runs=1 --pause=13
+
+If `gemini-3.6-flash` regresses on the original set or the Indonesian sets, revert `ai/prompts/ocr-system.txt` to the version at commit 718dc98.

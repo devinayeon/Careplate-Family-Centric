@@ -6,7 +6,7 @@
     "runs": 3,
     "kind": "synthetic_id",
     "truth_status": "exact_by_construction",
-    "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples.",
+    "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples. Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.",
     "model_config": "gemini-3-flash-preview",
     "model_versions_reported": [
         "gemini-3-flash-preview"
@@ -15,59 +15,64 @@
     "requests": 18,
     "summary": {
         "images": 18,
+        "valid_readings": 7,
+        "provider_errors": 11,
+        "provider_errors_by_code": {
+            "AI_PROVIDER_ERROR": 11
+        },
         "fields": {
             "energy_kcal": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
             },
             "fat_g": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
             },
             "sugars_total_g": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
             },
             "protein_g": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
             },
             "carbohydrate_g": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
             },
             "sodium_mg": {
                 "correct": 6,
-                "total": 15,
-                "null_correct": 3,
-                "null_total": 3,
+                "total": 6,
+                "null_correct": 1,
+                "null_total": 1,
                 "unsafe": 0
             },
             "serving_size": {
                 "correct": 5,
-                "total": 12,
-                "null_correct": 5,
-                "null_total": 6,
+                "total": 5,
+                "null_correct": 1,
+                "null_total": 2,
                 "unsafe": 1
             },
             "label_basis": {
                 "correct": 7,
-                "total": 18,
+                "total": 7,
                 "null_correct": 0,
                 "null_total": 0,
                 "unsafe": 0
@@ -81,8 +86,8 @@
         "errors": 11,
         "unsafe_inferences": 1,
         "latency_ms": {
-            "n": 18,
-            "p50": 1510,
+            "n": 7,
+            "p50": 3032,
             "p95": 3687,
             "max": 3687
         },
@@ -91,64 +96,69 @@
             "candidates": 3473,
             "thoughts": 0,
             "total": 13154,
-            "unknown_reports": 18
+            "unknown_reports": 7
         },
         "by_kind": {
             "synthetic_id": {
                 "images": 18,
+                "valid_readings": 7,
+                "provider_errors": 11,
+                "provider_errors_by_code": {
+                    "AI_PROVIDER_ERROR": 11
+                },
                 "fields": {
                     "energy_kcal": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
                     },
                     "fat_g": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
                     },
                     "sugars_total_g": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
                     },
                     "protein_g": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
                     },
                     "carbohydrate_g": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
                     },
                     "sodium_mg": {
                         "correct": 6,
-                        "total": 15,
-                        "null_correct": 3,
-                        "null_total": 3,
+                        "total": 6,
+                        "null_correct": 1,
+                        "null_total": 1,
                         "unsafe": 0
                     },
                     "serving_size": {
                         "correct": 5,
-                        "total": 12,
-                        "null_correct": 5,
-                        "null_total": 6,
+                        "total": 5,
+                        "null_correct": 1,
+                        "null_total": 2,
                         "unsafe": 1
                     },
                     "label_basis": {
                         "correct": 7,
-                        "total": 18,
+                        "total": 7,
                         "null_correct": 0,
                         "null_total": 0,
                         "unsafe": 0
@@ -162,8 +172,8 @@
                 "errors": 11,
                 "unsafe_inferences": 1,
                 "latency_ms": {
-                    "n": 18,
-                    "p50": 1510,
+                    "n": 7,
+                    "p50": 3032,
                     "p95": 3687,
                     "max": 3687
                 },
@@ -172,293 +182,258 @@
                     "candidates": 3473,
                     "thoughts": 0,
                     "total": 13154,
-                    "unknown_reports": 18
+                    "unknown_reports": 7
                 }
             }
         },
         "errors_by_code": {
             "AI_PROVIDER_ERROR": 11
         },
-        "unstable": [
-            "SYN-01 energy_kcal 2/3",
-            "SYN-01 fat_g 2/3",
-            "SYN-01 sugars_total_g 2/3",
-            "SYN-01 protein_g 2/3",
-            "SYN-01 carbohydrate_g 2/3",
-            "SYN-01 sodium_mg 2/3",
-            "SYN-01 serving_size 2/3",
-            "SYN-01 label_basis 2/3",
-            "SYN-02 energy_kcal 1/3",
-            "SYN-02 fat_g 1/3",
-            "SYN-02 sugars_total_g 1/3",
-            "SYN-02 protein_g 1/3",
-            "SYN-02 carbohydrate_g 1/3",
-            "SYN-02 sodium_mg 1/3",
-            "SYN-02 serving_size 1/3",
-            "SYN-02 label_basis 1/3",
-            "SYN-03 energy_kcal 1/3",
-            "SYN-03 fat_g 1/3",
-            "SYN-03 sugars_total_g 1/3",
-            "SYN-03 protein_g 1/3",
-            "SYN-03 carbohydrate_g 1/3",
-            "SYN-03 sodium_mg 1/3",
-            "SYN-03 serving_size 1/3",
-            "SYN-03 label_basis 1/3",
-            "SYN-04 energy_kcal 1/3",
-            "SYN-04 fat_g 1/3",
-            "SYN-04 sugars_total_g 1/3",
-            "SYN-04 protein_g 1/3",
-            "SYN-04 carbohydrate_g 1/3",
-            "SYN-04 sodium_mg 1/3",
-            "SYN-04 serving_size 1/3",
-            "SYN-04 label_basis 1/3",
-            "SYN-05 energy_kcal 1/3",
-            "SYN-05 fat_g 1/3",
-            "SYN-05 sugars_total_g 1/3",
-            "SYN-05 protein_g 1/3",
-            "SYN-05 carbohydrate_g 1/3",
-            "SYN-05 serving_size 2/3",
-            "SYN-05 label_basis 1/3",
-            "SYN-06 energy_kcal 1/3",
-            "SYN-06 fat_g 1/3",
-            "SYN-06 sugars_total_g 1/3",
-            "SYN-06 protein_g 1/3",
-            "SYN-06 carbohydrate_g 1/3",
-            "SYN-06 sodium_mg 1/3",
-            "SYN-06 label_basis 1/3"
-        ],
+        "unstable": [],
         "per_image": {
             "SYN-01": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 2,
+                "provider_errors": 1,
                 "all_fields_pass_runs": 2,
                 "fields": {
                     "energy_kcal": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "fat_g": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "sugars_total_g": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "protein_g": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "carbohydrate_g": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "sodium_mg": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "serving_size": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     },
                     "label_basis": {
                         "pass": 2,
-                        "of": 3
+                        "of": 2
                     }
                 }
             },
             "SYN-02": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 1,
+                "provider_errors": 2,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "fat_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sugars_total_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "protein_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "carbohydrate_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sodium_mg": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "serving_size": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "label_basis": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     }
                 }
             },
             "SYN-03": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 1,
+                "provider_errors": 2,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "fat_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sugars_total_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "protein_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "carbohydrate_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sodium_mg": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "serving_size": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "label_basis": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     }
                 }
             },
             "SYN-04": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 1,
+                "provider_errors": 2,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "fat_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sugars_total_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "protein_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "carbohydrate_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sodium_mg": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "serving_size": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "label_basis": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     }
                 }
             },
             "SYN-05": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 1,
+                "provider_errors": 2,
                 "all_fields_pass_runs": 0,
                 "fields": {
                     "energy_kcal": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "fat_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sugars_total_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "protein_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "carbohydrate_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sodium_mg": {
-                        "pass": 3,
-                        "of": 3
+                        "pass": 1,
+                        "of": 1
                     },
                     "serving_size": {
-                        "pass": 2,
-                        "of": 3
+                        "pass": 0,
+                        "of": 1
                     },
                     "label_basis": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     }
                 }
             },
             "SYN-06": {
                 "kind": "synthetic_id",
                 "runs": 3,
+                "valid_readings": 1,
+                "provider_errors": 2,
                 "all_fields_pass_runs": 1,
                 "fields": {
                     "energy_kcal": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "fat_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sugars_total_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "protein_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "carbohydrate_g": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "sodium_mg": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     },
                     "serving_size": {
-                        "pass": 3,
-                        "of": 3
+                        "pass": 1,
+                        "of": 1
                     },
                     "label_basis": {
                         "pass": 1,
-                        "of": 3
+                        "of": 1
                     }
                 }
             }
@@ -1837,5 +1812,7 @@
                 }
             }
         }
-    ]
+    ],
+    "scorer_version": 2,
+    "rescored_at": "2026-11-08T18:30:50+00:00"
 }
