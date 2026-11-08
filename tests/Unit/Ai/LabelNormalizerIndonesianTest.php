@@ -55,7 +55,20 @@ it('keeps Garam (Natrium) as sodium but never turns a Garam-only row into sodium
     ['Sodio (sal) 120 mg', 120, 'mg', 120],
     ['Sódio (sal) 120 mg', 120, 'mg', 120],
     ['Sal 0,3 g', 0.3, 'g', null],
+    ['Na 120 mg', 120, 'mg', 120],
+    ['Na (natrium) 120 mg', 120, 'mg', 120],
+    ['Zout (na bereiding) 0,8 g', 0.8, 'g', null],
+    ['Kochsalz 1,2 g', 1.2, 'g', null],
+    ['Speisesalz 1,2 g', 1.2, 'g', null],
+    ['Kochsalz (Natrium) 480 mg', 480, 'mg', 480],
 ]);
+
+it('warns and leaves sodium unknown for Zout (na bereiding) and Kochsalz', function (string $evidence) {
+    $r = idNorm(idLabel(['sodium' => rawNutrient(1, 'g', 'exact', $evidence)]));
+
+    expect($r['normalized_per_serving']['sodium_mg'])->toBeNull()
+        ->and($r['warnings'])->toContain('Kadar garam tidak sama dengan natrium; natrium dianggap belum terbaca.');
+})->with(['Zout (na bereiding) 0,8 g', 'Kochsalz 1,2 g']);
 
 it('converts a kJ energy reading to kcal and keeps a printed kkal reading as is', function () {
     $kj = idNorm(idLabel(['energy' => rawNutrient(356, 'kJ', 'exact', '356 kJ')]));

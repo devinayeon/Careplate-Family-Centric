@@ -20,12 +20,13 @@ class LabelNormalizer
     private const KJ_PER_KCAL = '4.184';
 
     /** Matches salt wording (Indonesian, English, and the Dutch/French/Spanish/German words seen on imported packs) that is not accompanied by sodium wording. */
-    private const SALT = '/\b(garam|salt|zout|sel|sal|salz)\b/iu';
+    private const SALT = '/\b(garam|salt|zout|sel|sal|\w*salz)\b/iu';
 
     /** Sodium chloride is salt even when it names sodium ("natrium klorida"): its grams are not sodium grams. */
     private const CHLORIDE = '/\b(klorida|chloride|nacl)\b/iu';
 
-    private const SODIUM = '/\b(natrium|sodium|sodio|sódio|na)\b/iu';
+    /** Bare "Na" counts only as the symbol before a value or bracket ("Na 120 mg"); Dutch "na bereiding" (after preparation) does not. */
+    private const SODIUM = '/\b(natrium|sodium|sodio|sódio)\b|\bna\b(?=\s*[\d(])/iu';
 
     public function __construct(private readonly RawLabelValidator $validator = new RawLabelValidator) {}
 
