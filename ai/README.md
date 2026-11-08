@@ -1,8 +1,8 @@
 # Careplate AI MVP: handoff
 
-Backend only (Laravel 13, SQLite or MySQL 8, Pest). No UI was built or changed. This file is for the frontend team and the competition judges. Everything below was checked against the code or a command run on 2026-11-08; the limits section is part of the contract, read it before writing product copy.
+Backend only (Laravel 13, SQLite or MySQL 8, Pest). No UI was built or changed. This file is for the frontend team and the competition judges. Everything below was checked against the code or a command run on 2026-11-08/09; the limits section is part of the contract, read it before writing product copy.
 
-Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite (and MySQL 8.0.43 in part, see Databases). Full SQLite suite on 2026-11-09: 941 tests, 915 passed, 9 failed, 17 skipped (the 17 are the MySQL-only tests, which skip with SQLite or with the throwaway MySQL server stopped). The 9 failures are old and not AI related (8 Vite manifest tests that need `public/build/manifest.json`, and 1 `RegistrationTest` registration test). Pint reports the same 3 old files, PHPStan the same 1 old error (`VerifyEmailController`). Every other test passes. The full MySQL suite was NOT run at the final commit (see Databases). Read Provider quota before demoing: the free-tier key allows about 20 requests per day per model.
+Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite (and MySQL 8.0.43 in part, see Databases). Full SQLite suite on 2026-11-09: 941 tests, 915 passed, 9 failed, 17 skipped (the 17 are the MySQL-only tests, which skip with SQLite or with the throwaway MySQL server stopped). The 9 failures are old and not AI related (8 Vite manifest tests that need `public/build/manifest.json`, and 1 `RegistrationTest` registration test). Pint reports the same 3 old files, PHPStan the same 1 old error (`VerifyEmailController`). Every other test passes. The full MySQL suite was NOT run at the final commit (see Databases). Read Provider quota before demoing: the free-tier key allowed about 20 requests per day on `gemini-3.6-flash` (observed; other models may differ).
 
 ## What exists
 
@@ -167,8 +167,8 @@ Config knobs (`config/ai.php`, `.env.ai.example`): `AI_ENABLED`, `AI_GEMINI_KEY`
 Two engines are supported by the same code. The default and the demo are SQLite.
 
 - SQLite: one instance, one persistent volume. Write transactions use `transaction_mode=IMMEDIATE` (PHP 8.4 or newer), `busy_timeout` 5 s. No multi-instance hosting.
-- MySQL 8: InnoDB, `utf8mb4_unicode_ci`, strict mode. Tested on a throwaway MySQL 8.0.43 (`127.0.0.1:3407`, sql_mode with STRICT_TRANS_TABLES and ONLY_FULL_GROUP_BY, isolation REPEATABLE-READ). Other versions, other isolation levels and the team's real server were not tested. The `mariadb` connection in `config/database.php` is not tuned (no lock wait setting) and was not tested.
-- The app's MySQL connection runs `SET SESSION innodb_lock_wait_timeout = 5` on connect, so a blocked write fails after about 5 s instead of the InnoDB default of 50 s.
+- MySQL 8: InnoDB, `utf8mb4_unicode_ci`, strict mode. Tested on a throwaway MySQL 8.0.43 (`127.0.0.1:3407`, sql_mode with STRICT_TRANS_TABLES and ONLY_FULL_GROUP_BY, isolation REPEATABLE-READ). Other versions, other isolation levels and the team's real server were not tested. The `mariadb` connection in `config/database.php` is not tuned (no lock wait setting) and was not tested. Both `mysql` and `mariadb` pin the session time zone to `+00:00` (the app runs in UTC), so TIMESTAMP values do not depend on the server's SYSTEM zone or DST; the live `@@session.time_zone` check was not run (MySQL server unavailable).
+- The app's MySQL connection runs `SET SESSION innodb_lock_wait_timeout = 5` on connect, so a blocked write fails after about 5 s instead of the InnoDB default of 50 s. This setting is configured; it was not re-verified live after commit de5f816 (MySQL server unavailable).
 
 Row locks (`lockForUpdate()` compiles to nothing on SQLite, where the IMMEDIATE write lock already serialises). One order everywhere:
 - chat: session row, then turn row, then cited food rows (shared lock). A competing turn, delete or finalize waits or fails as a retryable error, and it never acts on a stale snapshot.
@@ -183,7 +183,7 @@ Behaviour differences you will see on MySQL:
 
 Known limits on MySQL:
 - Approving two NEW foods with adjacent source triples at the same moment can deadlock on a gap lock. One call gets a retryable `DB_BUSY`; the admin repeats it.
-- The `ai:purge-chats` sub-selects use unindexed columns. Fine at MVP volume; run it off-peak. A rare deadlock with a chat turn gives that turn a retryable `SESSION_BUSY` or fails one purge chunk (earlier chunks stay committed, the next run continues).
+- `ai:purge-chats` filters chat turns and sessions by columns without a dedicated index (it does select by primary key and `chat_sessions.active_turn_id`, which has an index since migration `2026_11_09_000002`). Fine at MVP volume; run it off-peak. A rare deadlock with a chat turn gives that turn a retryable `SESSION_BUSY` or fails one purge chunk (earlier chunks stay committed, the next run continues).
 - The two-connection concurrency tests run in one PHP process: a waiting connection times out after 1 s and the test asserts the retryable error. A real wait followed by success is not shown by a test.
 
 Run the suite on MySQL only against a throwaway server that you own, never a shared or team database:
@@ -198,11 +198,11 @@ Status of the MySQL runs: the last COMPLETE MySQL suite was 860 passed, 9 baseli
 
 ## Provider quota
 
-The Gemini key used for development is a free-tier key. Observed: about 20 requests per day per model (HTTP 429 from the provider, shown to clients as 502 `AI_PROVIDER_ERROR`), and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 60 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
+The Gemini key used for development is a free-tier key. Observed: about 20 requests per day on `gemini-3.6-flash` (free tier; other models may differ), rejected by the provider with HTTP 429 and shown to clients as 502 `AI_PROVIDER_ERROR`, and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 60 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
 
 - For the competition demo and for real users use a paid-tier key (this also removes the free-tier content-use clause, see Privacy facts), or temporarily lower the AI quotas in `config/ai.php`.
-- Database-mode chat answers (a food in the catalog) never call the model and keep working without the provider; `GET /ai/v1/foods` too. Scan and general-knowledge chat need the provider.
-- 429 errors in eval runs are reported as `provider_errors`, not as model failures (see `ai/evals/README.md`).
+- Database-mode chat answers (a catalog food asked about by name) never call the model and keep working without the provider; `GET /ai/v1/foods` too. Scan and general-knowledge chat need the provider. Mixed mode (a catalog food plus an education question) calls the model once; only the database part survives a provider failure: the answer then holds the catalog facts and citation without the education text, plus a warning that the explanation is unavailable.
+- Provider failures in eval runs (`AI_PROVIDER_ERROR`, which includes quota rejections, `AI_TIMEOUT`, `AI_DISABLED`) are reported as `provider_errors`, not as model failures. Other errors stay scored and are also listed as `harness_errors` (see `ai/evals/README.md`).
 
 ## Chat and Indonesian foods
 
@@ -228,11 +228,11 @@ Local foods such as tempe, tahu, nasi matang, telur, bayam and yogurt are NOT in
 | FOOD-001 nasi putih matang | no cooked white rice record (raw rice is not offered as cooked) |
 | FOOD-003 pisang | ambiguous: overripe vs ripe records |
 | FOOD-007 telur | no raw fresh whole egg record |
-| FOOD-011 oat kering | no "dry" oats record |
+| FOOD-011 oat kering | no Foundation record has every query term in the required state (oats dry) |
 | FOOD-014 pepaya | no papaya in Foundation |
 | FOOD-015 bayam | spinach descriptions carry no raw state |
 | FOOD-017 daging sapi giling | ambiguous: 90/10 vs 80/20 |
-| FOOD-018 yogurt plain | no unsweetened record |
+| FOOD-018 yogurt plain | no Foundation record has every query term in the required state (yogurt plain unsweetened) |
 | FOOD-019 tahu | not in Foundation |
 | FOOD-020 tempe | not in Foundation |
 
@@ -242,15 +242,15 @@ Some of these could be added from another source (USDA SR Legacy was not tried),
 
 Scan was first evaluated on 8 US, Canadian and EU web images (`ai/evals/ocr/`: FDA, Wikimedia Commons). The Indonesian sets are separate (`ai/evals/ocr-id/`, details in `ai/evals/README.md`): 8 real photos from Open Food Facts contributors (CC BY-SA 3.0, truth transcribed by an AI assistant, `unverified_by_human`; ID-05 is partly hidden by glare, ID-08 is an export-style English/French label) and 6 synthetic BPOM-format labels (exact truth by construction, clean renders).
 
-| Model, set, runs | Requests | Valid readings | Result |
+| Model, set, runs | Requests | Scored requests | Result |
 |---|---:|---:|---|
-| `gemini-3.6-flash` (shipped), real, 3 runs | 24 | 9 | every scored field correct on those 9; 15 requests HTTP 429; ID-08 never read |
-| `gemini-3-flash-preview`, synthetic, 3 runs | 18 | 7 | 1 unsafe inference: serving size 100 g taken from "Per 100 g"; 11 requests HTTP 429 |
+| `gemini-3.6-flash` (shipped), real, 3 runs | 24 | 9 | every scored field correct on those 9; 15 provider errors (`AI_PROVIDER_ERROR`, quota rejections seen in the run log); ID-08 never read |
+| `gemini-3-flash-preview`, synthetic, 3 runs | 18 | 7 | 1 unsafe inference: serving size 100 g taken from "Per 100 g"; 11 provider errors (`AI_PROVIDER_ERROR`, HTTP 429 seen in the run log) |
 | `gemini-3.1-flash-lite`, 1 run, prompt v1.1 before/after | 8 + 6 + 8 per prompt | all | unsafe inferences on the original set 3 to 1; table in `ai/evals/README.md` |
 
 - The shipped model was never read on the synthetic set, and prompt v1.1 was never run on `gemini-3.6-flash`. v1.1 (`ai/prompts/ocr-system.txt`, sha `4f4184e1`) is kept PENDING that regression run; if the shipped model regresses, revert the file to the version at commit `718dc98`. The commands to finish are in `ai/evals/README.md`.
 - Salt vs sodium: a label row named garam, zout, sel, sal or salz without natrium, sodium or sodio is salt, not sodium: sodium stays unknown (`null`) and a warning is returned. `Garam (Natrium)` and the sodium words are sodium.
-- This is not a validated accuracy figure for Indonesian packaging. 9 valid readings on 8 photos is a smoke test: repeated runs measure stability of the same pictures, not independent samples, and the truth of the real photos was not checked by a human.
+- This is not a validated accuracy figure for Indonesian packaging. 9 scored requests on 8 photos is a smoke test: repeated runs measure stability of the same pictures, not independent samples, and the truth of the real photos was not checked by a human.
 
 ## Honest limits
 
