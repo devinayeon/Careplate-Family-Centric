@@ -36,10 +36,13 @@ function dbBreakTable(string $table): string
     return "doesn't exist";
 }
 
-/** Recursively sorts associative keys. MySQL JSON columns return object keys in its own order; JSON objects are unordered. */
+/**
+ * Recursively sorts associative keys on MySQL only: its JSON columns return object keys in their own order and JSON
+ * objects are unordered. On SQLite this is a no-op, so the exact key order stays asserted there.
+ */
 function dbCanonical(mixed $value): mixed
 {
-    if (! is_array($value)) {
+    if (DB::getDriverName() === 'sqlite' || ! is_array($value)) {
         return $value;
     }
     $value = array_map('dbCanonical', $value);
