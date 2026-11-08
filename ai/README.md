@@ -116,13 +116,13 @@ Envelope: `{"error":{"code","message","retryable"},"request_id":"req_..."}`. Mes
 | 413 | IMAGE_TOO_LARGE | no | smaller photo |
 | 415 | UNSUPPORTED_MEDIA_TYPE | no | JPEG or PNG only |
 | 419 | CSRF_MISMATCH | no | refresh the CSRF cookie, log in again if needed |
-| 422 | INVALID_INPUT | no | fix the input; admin approve uses this with a reason code in the message (`SOURCE_NOT_IN_MANIFEST`, `SOURCE_SHA_MISMATCH`, `REVIEW_ACK_REQUIRED`, `CANDIDATE_INVALID`, `SOURCE_MISSING`, `NOTE_REQUIRED`) |
+| 422 | INVALID_INPUT | no | fix the input; admin approve uses this with a reason code in the message (`SOURCE_NOT_IN_MANIFEST`, `SOURCE_SHA_MISMATCH`, `REVIEW_ACK_REQUIRED`, `CANDIDATE_INVALID`, `SOURCE_MISSING`, `NOTE_REQUIRED`); every other 422 carries only the generic message "Data yang dikirim tidak valid." The envelope has no per-field errors, so validation detail is never returned |
 | 422 | AMOUNT_CONFLICT | no | body amount and text amount disagree |
 | 422 | OCR_UNREADABLE | no | retake the photo |
 | 429 | RATE_LIMITED | yes | wait `Retry-After`; the model was not called |
 | 500 | INTERNAL | no | unexpected server error |
 | 502 | AI_PROVIDER_ERROR, AI_OUTPUT_INVALID | yes | provider failed or returned unusable output |
-| 503 | DB_BUSY | yes | admin approve/revoke hit SQLite lock contention; nothing was written; repeat the same call |
+| 503 | DB_BUSY | yes | SQLite lock contention on admin approve/revoke, food submission or session creation; nothing was written; repeat the same call |
 | 503 | KNOWLEDGE_UNAVAILABLE | yes | catalog not available |
 | 503 | AI_DISABLED, POLICY_CONFIG_INVALID | no | feature off or policy config invalid; the catalog list still works |
 | 504 | AI_TIMEOUT | yes | provider too slow (scan deadline 25 s, chat 20 s) |
@@ -181,7 +181,8 @@ Model
 - `gemini-3.8-flash` was the planned model but did not respond on the project key (no answer in 45 to 50 s, tested twice). `gemini-3.6-flash` answers in about 1 s on preflight and was used for every evaluation, so it is the frozen default. The model id is validated against a strict pattern before it is placed in the request URL.
 
 Operations
-- SQLite, one instance, one persistent volume. No multi-instance or ephemeral-disk hosting. Write transactions use `transaction_mode=IMMEDIATE`, which needs PHP 8.4 or newer (on older PHP Laravel silently falls back to deferred transactions). Chat lock contention returns `SESSION_BUSY`; admin lock contention returns `DB_BUSY`.
+- SQLite, one instance, one persistent volume. No multi-instance or ephemeral-disk hosting. Write transactions use `transaction_mode=IMMEDIATE`, which needs PHP 8.4 or newer (on older PHP Laravel silently falls back to deferred transactions). Chat lock contention returns `SESSION_BUSY`; admin, food-submission and session-creation lock contention returns `DB_BUSY`.
+- PHP ini for the 5 MiB scan contract: `upload_max_filesize` >= 5M and `post_max_size` >= 6M (the upload is multipart; the base64 expansion happens server side). With the stock `upload_max_filesize=2M`, a 2 to 5 MiB photo is answered 413 IMAGE_TOO_LARGE. `max_execution_time` must sit comfortably above the 25 s scan deadline (and the 20 s chat deadline). A fatal execution timeout cannot be caught: the request dies without an envelope and a chat turn stays `pending` until its lease expires.
 - `memory_limit` must be at least 256M for the scan route (the ImagePreparer guard decodes up to 16 MP).
 - Stored chat turns carry an HMAC `request_hash` keyed with `app.key`. Rotating `APP_KEY` breaks replay of stored turns (they will read as a different request).
 - Concurrency tests use two PDO handles in one PHP process, not separate OS processes.
