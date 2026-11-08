@@ -56,8 +56,9 @@ class ChatService
                 throw $this->lateResult($turn);
             }
             // Commit, then answer with the STORED result (spec 04): the first response and every replay are the same
-            // value on every database, whatever order the JSON column hands object keys back in.
-            $response = ChatTurn::query()->find($turn->getKey())?->response ?? throw AiException::for('INTERNAL');
+            // value on every database, whatever order the JSON column hands object keys back in. A delete committed
+            // in between has already erased it: that is a late result like any other (404), never rebuilt.
+            $response = ChatTurn::query()->find($turn->getKey())?->response ?? throw $this->lateResult($turn);
         } catch (AiException $e) {
             $this->abort($turn, $e->errorCode);
             $this->log($requestId, $e->errorCode, null, $start);
