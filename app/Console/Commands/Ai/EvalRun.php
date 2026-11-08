@@ -21,7 +21,7 @@ use Throwable;
  */
 class EvalRun extends Command
 {
-    protected $signature = 'ai:eval {suite : scan or chat} {--split=all : dev, holdout or all} {--manifest=ai/evals/ocr/manifest.csv : scan manifest under ai/evals} {--runs=1 : repeat every scan image N times (1 to 5)} {--pause=0 : seconds to wait between scan requests (0 to 60)} {--out-dir= : result directory (default ai/evals/results)}';
+    protected $signature = 'ai:eval {suite : scan or chat} {--split=all : dev, holdout or all} {--manifest=ai/evals/ocr/manifest.csv : scan manifest under ai/evals} {--runs=1 : repeat every scan image N times (1 to 5)} {--pause=0 : seconds to wait between scan requests (0 to 60)} {--rescore= : recompute the summary of a saved scan result file offline (no request is sent)} {--out-dir= : result directory (default ai/evals/results)}';
 
     protected $description = 'Run an AI evaluation suite live (one request per sample image) and save the result JSON.';
 
@@ -34,6 +34,9 @@ class EvalRun extends Command
             $this->error('Unknown suite. Use "scan" or "chat".');
 
             return self::INVALID;
+        }
+        if ((string) $this->option('rescore') !== '') {
+            return $this->rescore((string) $this->option('rescore'), $comparer);
         }
         $split = (string) $this->option('split');
         if (! in_array($split, ['dev', 'holdout', 'all'], true)) {
@@ -90,12 +93,55 @@ class EvalRun extends Command
             && str_starts_with($path, $root.DIRECTORY_SEPARATOR) ? $path : null;
     }
 
+    /**
+     * Recomputes summary and per-image aggregates of a saved result from its stored items; the items stay as they are.
+     * No provider request is made, so this works without a key.
+     */
+    private function rescore(string $option, ScanComparer $comparer): int
+    {
+        $dir = realpath((string) ($this->option('out-dir') ?: base_path('ai/evals/results')));
+        $absolute = preg_match('#^([A-Za-z]:)?[\\\\/]#', $option) === 1;
+        $path = realpath($absolute ? $option : base_path($option));
+        $payload = $path !== false && $dir !== false && is_file($path) && str_ends_with($path, '.json')
+            && str_starts_with($path, $dir.DIRECTORY_SEPARATOR) ? json_decode((string) file_get_contents($path), true) : null;
+        $items = is_array($payload) && ($payload['suite'] ?? null) === 'scan' ? ($payload['items'] ?? null) : null;
+        if (! is_array($items) || ! array_is_list($items) || $items === [] || count(array_filter($items, fn ($i) => isset($i['id'], $i['kind'], $i['run'], $i['outcome'], $i['fields']))) !== count($items)) {
+            $this->error('--rescore must name a scan result JSON with per-request items (id, kind, run, outcome, fields) inside the result directory.');
+
+            return self::INVALID;
+        }
+
+        $stats = (new ScanRunStats($comparer))->build($items);
+        $note = ' Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.';
+        $payload['summary'] = self::summaryPayload($stats);
+        $payload['scorer_version'] = ScanRunStats::SCORER_VERSION;
+        $payload['rescored_at'] = gmdate('c');
+        $payload['caveat'] = rtrim((string) ($payload['caveat'] ?? '')).(str_contains((string) ($payload['caveat'] ?? ''), 'Re-scored offline') ? '' : $note);
+        file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).'
+');
+
+        $this->report($stats);
+        $this->line('re-scored: '.basename($path));
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * @param  array<string, mixed>  $stats
+     * @return array<string, mixed>
+     */
+    private static function summaryPayload(array $stats): array
+    {
+        return $stats['overall'] + ['by_kind' => $stats['by_kind'], 'errors_by_code' => $stats['errors_by_code'],
+            'unstable' => $stats['unstable'], 'per_image' => $stats['per_image']];
+    }
+
     /** @param array<string, mixed> $stats */
     private function report(array $stats): void
     {
         $groups = ['all' => $stats['overall']] + $stats['by_kind'];
         foreach ($groups as $name => $summary) {
-            $this->line("== {$name} ({$summary['images']} requests)");
+            $this->line("== {$name} ({$summary['images']} requests, {$summary['valid_readings']} valid readings, {$summary['provider_errors']} provider errors ".json_encode($summary['provider_errors_by_code']).')');
             $this->table(['field', 'correct n/N', 'null ok', 'unsafe'], array_map(
                 fn ($k, $f) => [$k, $f['correct'].'/'.$f['total'], $f['null_correct'].'/'.$f['null_total'], $f['unsafe']],
                 array_keys($summary['fields']),
@@ -137,8 +183,8 @@ class EvalRun extends Command
             'model_versions_reported' => $versions,
             'prompt_sha256' => hash_file('sha256', base_path('ai/prompts/ocr-system.txt')),
             'requests' => count($items),
-            'summary' => $stats['overall'] + ['by_kind' => $stats['by_kind'], 'errors_by_code' => $stats['errors_by_code'],
-                'unstable' => $stats['unstable'], 'per_image' => $stats['per_image']],
+            'scorer_version' => ScanRunStats::SCORER_VERSION,
+            'summary' => self::summaryPayload($stats),
             'items' => $items,
         ];
         file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)."\n");

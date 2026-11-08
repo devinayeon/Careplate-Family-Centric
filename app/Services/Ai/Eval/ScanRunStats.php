@@ -9,6 +9,9 @@ namespace App\Services\Ai\Eval;
  */
 class ScanRunStats
 {
+    /** 1 counted provider errors as model results; 2 excludes them (see ScanComparer::isProviderError). */
+    public const SCORER_VERSION = 2;
+
     private const PASSING = ['match', 'correct_null'];
 
     public function __construct(private readonly ScanComparer $comparer = new ScanComparer) {}
@@ -51,11 +54,18 @@ class ScanRunStats
      */
     private function perImage(array $items): array
     {
-        /** @var array<string, array{kind: string, runs: int, all_fields_pass_runs: int, fields: array<string, array{pass: int, of: int}>}> $images */
+        /** @var array<string, array{kind: string, runs: int, valid_readings: int, provider_errors: int, all_fields_pass_runs: int, fields: array<string, array{pass: int, of: int}>}> $images */
         $images = [];
         foreach ($items as $item) {
-            $row = $images[$item['id']] ?? ['kind' => $item['kind'], 'runs' => 0, 'all_fields_pass_runs' => 0, 'fields' => []];
+            $row = $images[$item['id']] ?? ['kind' => $item['kind'], 'runs' => 0, 'valid_readings' => 0, 'provider_errors' => 0, 'all_fields_pass_runs' => 0, 'fields' => []];
             $row['runs']++;
+            if (ScanComparer::isProviderError($item)) {
+                $row['provider_errors']++;
+                $images[$item['id']] = $row;
+
+                continue;
+            }
+            $row['valid_readings']++;
             $allPass = true;
             foreach ($item['fields'] as $name => $field) {
                 if ($field['result'] === 'not_scored') {

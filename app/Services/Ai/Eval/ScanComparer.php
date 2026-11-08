@@ -48,11 +48,29 @@ class ScanComparer
     }
 
     /**
-     * @param  list<array<string, mixed>>  $items  compare() results, each with optional split, latency_ms, usage
+     * A request the provider or infrastructure failed (HTTP 429, timeout, disabled): it says nothing about the model,
+     * so it is excluded from field, abstention, latency and token scoring. AI_OUTPUT_INVALID is the model's own
+     * unusable output and stays scored (as a missing reading).
+     *
+     * @param  array<string, mixed>  $item  a compare() result
+     */
+    public static function isProviderError(array $item): bool
+    {
+        return $item['outcome'] === 'error' && $item['error_code'] !== 'AI_OUTPUT_INVALID';
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $all  compare() results, each with optional split, latency_ms, usage; provider errors are counted but not scored
      * @return array<string, mixed>
      */
-    public function summarize(array $items): array
+    public function summarize(array $all): array
     {
+        $items = array_values(array_filter($all, fn ($i) => ! self::isProviderError($i)));
+        $providerCodes = [];
+        foreach (array_filter($all, fn ($i) => self::isProviderError($i)) as $failed) {
+            $providerCodes[(string) $failed['error_code']] = ($providerCodes[(string) $failed['error_code']] ?? 0) + 1;
+        }
+        ksort($providerCodes);
         $fieldNames = [...self::NUTRIENTS, 'serving_size', 'label_basis'];
         $fields = [];
         foreach ($fieldNames as $name) {
@@ -74,14 +92,17 @@ class ScanComparer
         $latencies = array_values(array_filter(array_column($items, 'latency_ms'), 'is_int'));
 
         return [
-            'images' => count($items),
+            'images' => count($all),
+            'valid_readings' => count($items),
+            'provider_errors' => count($all) - count($items),
+            'provider_errors_by_code' => $providerCodes,
             'fields' => $fields,
             'abstained' => count(array_filter($items, fn ($i) => $i['abstained'])),
             'false_abstentions' => count(array_filter($items, fn ($i) => $i['abstained'] && $i['expected_outcome'] === 'extract')),
             'negative_total' => count($negatives),
             'negative_correct' => count(array_filter($negatives, fn ($i) => $i['negative_correct'])),
             'invalid_output' => count(array_filter($items, fn ($i) => $i['invalid_output'])),
-            'errors' => count(array_filter($items, fn ($i) => $i['outcome'] === 'error')),
+            'errors' => count(array_filter($all, fn ($i) => $i['outcome'] === 'error')),
             'unsafe_inferences' => array_sum(array_column($items, 'unsafe_count')),
             'latency_ms' => $this->latency($latencies),
             'usage' => $this->usage($items),
