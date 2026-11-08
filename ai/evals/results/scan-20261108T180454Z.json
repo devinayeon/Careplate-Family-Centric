@@ -6,7 +6,7 @@
     "runs": 1,
     "kind": "web_sample",
     "truth_status": "unverified_by_human",
-    "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging. Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.",
+    "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging. Re-scored offline: only provider errors (AI_PROVIDER_ERROR, AI_TIMEOUT, AI_DISABLED; for example a free-tier quota rejection) are excluded from field scores, latency and tokens and listed as provider_errors; every other request is scored (scored_requests is the n) and harness or pipeline errors are also listed as harness_errors.",
     "model_config": "gemini-3.1-flash-lite",
     "model_versions_reported": [
         "gemini-3.1-flash-lite"
@@ -15,9 +15,11 @@
     "requests": 8,
     "summary": {
         "images": 8,
-        "valid_readings": 8,
+        "scored_requests": 8,
         "provider_errors": 0,
         "provider_errors_by_code": [],
+        "harness_errors": 0,
+        "harness_errors_by_code": [],
         "fields": {
             "energy_kcal": {
                 "correct": 6,
@@ -99,9 +101,11 @@
         "by_kind": {
             "web_sample": {
                 "images": 8,
-                "valid_readings": 8,
+                "scored_requests": 8,
                 "provider_errors": 0,
                 "provider_errors_by_code": [],
+                "harness_errors": 0,
+                "harness_errors_by_code": [],
                 "fields": {
                     "energy_kcal": {
                         "correct": 6,
@@ -188,7 +192,7 @@
             "SMP-01": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 0,
                 "fields": {
@@ -229,7 +233,7 @@
             "SMP-02": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 0,
                 "fields": {
@@ -270,7 +274,7 @@
             "SMP-03": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -307,7 +311,7 @@
             "SMP-04": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -348,7 +352,7 @@
             "SMP-05": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -389,7 +393,7 @@
             "SMP-06": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -430,7 +434,7 @@
             "SMP-07": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -471,7 +475,7 @@
             "SMP-08": {
                 "kind": "web_sample",
                 "runs": 1,
-                "valid_readings": 1,
+                "scored_requests": 1,
                 "provider_errors": 0,
                 "all_fields_pass_runs": 1,
                 "fields": {
@@ -1170,6 +1174,6 @@
             }
         }
     ],
-    "scorer_version": 2,
-    "rescored_at": "2026-11-08T18:31:07+00:00"
+    "scorer_version": 3,
+    "rescored_at": "2026-11-08T23:26:09+00:00"
 }

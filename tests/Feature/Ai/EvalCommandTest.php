@@ -180,14 +180,14 @@ it('re-scores a saved result file offline without sending any request', function
     $after = json_decode(file_get_contents($path), true);
     expect($after['items'])->toBe($before['items'])
         ->and($after['summary']['images'])->toBe(3)
-        ->and($after['summary']['valid_readings'])->toBe(2)
+        ->and($after['summary']['scored_requests'])->toBe(2)
         ->and($after['summary']['provider_errors'])->toBe(1)
         ->and($after['summary']['provider_errors_by_code'])->toBe(['AI_PROVIDER_ERROR' => 1])
         ->and($after['summary']['fields']['energy_kcal'])->toMatchArray(['correct' => 2, 'total' => 2])
         ->and($after['summary']['latency_ms']['n'])->toBe(2)
-        ->and($after['summary']['per_image']['SMP-01'])->toMatchArray(['runs' => 3, 'valid_readings' => 2, 'provider_errors' => 1])
+        ->and($after['summary']['per_image']['SMP-01'])->toMatchArray(['runs' => 3, 'scored_requests' => 2, 'provider_errors' => 1])
         ->and($after['summary']['unstable'])->toBe([])
-        ->and($after['scorer_version'])->toBe(2)
+        ->and($after['scorer_version'])->toBe(3)
         ->and($after['rescored_at'])->toMatch('/^\d{4}-\d\d-\d\dT/')
         ->and($after['caveat'])->toStartWith('original caveat.')->toContain('quota');
     File::deleteDirectory($dir);

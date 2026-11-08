@@ -112,11 +112,12 @@ class EvalRun extends Command
         }
 
         $stats = (new ScanRunStats($comparer))->build($items);
-        $note = ' Re-scored offline: provider errors (for example HTTP 429 from the free-tier quota of 20 requests/day/model) are excluded from field scores, latency and tokens and listed as provider_errors; valid_readings is the real n.';
+        $note = ' Re-scored offline: only provider errors (AI_PROVIDER_ERROR, AI_TIMEOUT, AI_DISABLED; for example a free-tier quota rejection) are excluded from field scores, latency and tokens and listed as provider_errors; every other request is scored (scored_requests is the n) and harness or pipeline errors are also listed as harness_errors.';
         $payload['summary'] = self::summaryPayload($stats);
         $payload['scorer_version'] = ScanRunStats::SCORER_VERSION;
         $payload['rescored_at'] = gmdate('c');
-        $payload['caveat'] = rtrim((string) ($payload['caveat'] ?? '')).(str_contains((string) ($payload['caveat'] ?? ''), 'Re-scored offline') ? '' : $note);
+        $caveat = (string) ($payload['caveat'] ?? '');
+        $payload['caveat'] = rtrim(str_contains($caveat, ' Re-scored offline') ? substr($caveat, 0, (int) strpos($caveat, ' Re-scored offline')) : $caveat).$note;
         file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR).'
 ');
 
@@ -141,7 +142,7 @@ class EvalRun extends Command
     {
         $groups = ['all' => $stats['overall']] + $stats['by_kind'];
         foreach ($groups as $name => $summary) {
-            $this->line("== {$name} ({$summary['images']} requests, {$summary['valid_readings']} valid readings, {$summary['provider_errors']} provider errors ".json_encode($summary['provider_errors_by_code']).')');
+            $this->line("== {$name} ({$summary['images']} requests, {$summary['scored_requests']} scored, {$summary['provider_errors']} provider errors ".json_encode($summary['provider_errors_by_code']).", {$summary['harness_errors']} harness errors ".json_encode($summary['harness_errors_by_code']).')');
             $this->table(['field', 'correct n/N', 'null ok', 'unsafe'], array_map(
                 fn ($k, $f) => [$k, $f['correct'].'/'.$f['total'], $f['null_correct'].'/'.$f['null_total'], $f['unsafe']],
                 array_keys($summary['fields']),

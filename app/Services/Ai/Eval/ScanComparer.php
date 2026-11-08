@@ -47,20 +47,30 @@ class ScanComparer
         ];
     }
 
+    /** Codes that mean the provider or its quota failed, not the model or this code. */
+    private const PROVIDER_CODES = ['AI_PROVIDER_ERROR', 'AI_TIMEOUT', 'AI_DISABLED'];
+
     /**
-     * A request the provider or infrastructure failed (HTTP 429, timeout, disabled): it says nothing about the model,
-     * so it is excluded from field, abstention, latency and token scoring. AI_OUTPUT_INVALID is the model's own
-     * unusable output and stays scored (as a missing reading).
+     * A request the provider failed (HTTP error or quota, timeout, disabled) says nothing about the model, so it is
+     * excluded from field, abstention, latency and token scoring. Every other error stays scored (as a missing reading):
+     * AI_OUTPUT_INVALID is the model's own unusable output; INTERNAL, POLICY_CONFIG_INVALID, INVALID_INPUT and IMAGE_*
+     * are harness or pipeline faults that must stay visible, so they are also counted in `harness_errors`.
      *
      * @param  array<string, mixed>  $item  a compare() result
      */
     public static function isProviderError(array $item): bool
     {
-        return $item['outcome'] === 'error' && $item['error_code'] !== 'AI_OUTPUT_INVALID';
+        return $item['outcome'] === 'error' && in_array($item['error_code'], self::PROVIDER_CODES, true);
+    }
+
+    /** @param  array<string, mixed>  $item  a compare() result */
+    private static function isHarnessError(array $item): bool
+    {
+        return $item['outcome'] === 'error' && ! self::isProviderError($item) && $item['error_code'] !== 'AI_OUTPUT_INVALID';
     }
 
     /**
-     * @param  list<array<string, mixed>>  $all  compare() results, each with optional split, latency_ms, usage; provider errors are counted but not scored
+     * @param  list<array<string, mixed>>  $all  compare() results, each with optional split, latency_ms, usage; provider errors are counted but not scored; harness errors stay scored and are also counted
      * @return array<string, mixed>
      */
     public function summarize(array $all): array
@@ -71,6 +81,11 @@ class ScanComparer
             $providerCodes[(string) $failed['error_code']] = ($providerCodes[(string) $failed['error_code']] ?? 0) + 1;
         }
         ksort($providerCodes);
+        $harnessCodes = [];
+        foreach (array_filter($items, fn ($i) => self::isHarnessError($i)) as $failed) {
+            $harnessCodes[(string) $failed['error_code']] = ($harnessCodes[(string) $failed['error_code']] ?? 0) + 1;
+        }
+        ksort($harnessCodes);
         $fieldNames = [...self::NUTRIENTS, 'serving_size', 'label_basis'];
         $fields = [];
         foreach ($fieldNames as $name) {
@@ -93,9 +108,11 @@ class ScanComparer
 
         return [
             'images' => count($all),
-            'valid_readings' => count($items),
+            'scored_requests' => count($items),
             'provider_errors' => count($all) - count($items),
             'provider_errors_by_code' => $providerCodes,
+            'harness_errors' => array_sum($harnessCodes),
+            'harness_errors_by_code' => $harnessCodes,
             'fields' => $fields,
             'abstained' => count(array_filter($items, fn ($i) => $i['abstained'])),
             'false_abstentions' => count(array_filter($items, fn ($i) => $i['abstained'] && $i['expected_outcome'] === 'extract')),

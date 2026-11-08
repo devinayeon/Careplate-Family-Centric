@@ -120,12 +120,12 @@ it('does not score provider errors as model results, even when interleaved betwe
     expect($energy)->toMatchArray(['correct' => 1, 'total' => 2])
         ->and($stats['overall']['fields']['serving_size'])->toMatchArray(['correct' => 2, 'total' => 2])
         ->and($stats['overall']['images'])->toBe(3)
-        ->and($stats['overall']['valid_readings'])->toBe(2)
+        ->and($stats['overall']['scored_requests'])->toBe(2)
         ->and($stats['overall']['provider_errors'])->toBe(1)
         ->and($stats['overall']['provider_errors_by_code'])->toBe(['AI_PROVIDER_ERROR' => 1])
-        ->and($stats['by_kind']['real_id']['valid_readings'])->toBe(2)
+        ->and($stats['by_kind']['real_id']['scored_requests'])->toBe(2)
         ->and($stats['per_image']['A']['runs'])->toBe(3)
-        ->and($stats['per_image']['A']['valid_readings'])->toBe(2)
+        ->and($stats['per_image']['A']['scored_requests'])->toBe(2)
         ->and($stats['per_image']['A']['provider_errors'])->toBe(1)
         ->and($stats['per_image']['A']['fields']['energy_kcal'])->toBe(['pass' => 1, 'of' => 2])
         ->and($stats['per_image']['A']['all_fields_pass_runs'])->toBe(1)
@@ -151,7 +151,7 @@ it('reports a group made only of provider errors with no scored fields and no la
 
     $stats = (new ScanRunStats)->build($items);
 
-    expect($stats['overall']['valid_readings'])->toBe(0)
+    expect($stats['overall']['scored_requests'])->toBe(0)
         ->and($stats['overall']['provider_errors'])->toBe(2)
         ->and($stats['overall']['fields']['energy_kcal'])->toMatchArray(['correct' => 0, 'total' => 0, 'null_total' => 0])
         ->and($stats['overall']['latency_ms'])->toBe(['n' => 0, 'p50' => null, 'p95' => null, 'max' => null])
@@ -164,7 +164,7 @@ it('keeps an invalid model output as a scored failure, not a provider error', fu
 
     $stats = (new ScanRunStats)->build($items);
 
-    expect($stats['overall']['valid_readings'])->toBe(2)
+    expect($stats['overall']['scored_requests'])->toBe(2)
         ->and($stats['overall']['provider_errors'])->toBe(0)
         ->and($stats['overall']['invalid_output'])->toBe(1)
         ->and($stats['overall']['fields']['energy_kcal'])->toMatchArray(['correct' => 1, 'total' => 2]);
@@ -180,4 +180,24 @@ it('leaves latency and token totals to valid readings only', function () {
 
     expect($s['latency_ms'])->toBe(['n' => 1, 'p50' => 1000, 'p95' => 1000, 'max' => 1000])
         ->and($s['usage'])->toBe(['prompt' => 100, 'candidates' => 10, 'thoughts' => 5, 'total' => 115, 'unknown_reports' => 0]);
+});
+
+it('excludes only provider and quota-side codes; harness and pipeline errors stay scored and are reported as harness_errors', function () {
+    $codes = ['AI_PROVIDER_ERROR', 'AI_TIMEOUT', 'AI_DISABLED'];
+    foreach ($codes as $code) {
+        expect(ScanComparer::isProviderError(runItem('A', 'real_id', 1, code: $code)))->toBeTrue($code);
+    }
+    foreach (['INTERNAL', 'POLICY_CONFIG_INVALID', 'INVALID_INPUT', 'IMAGE_UNSUPPORTED', 'IMAGE_TOO_LARGE', 'AI_OUTPUT_INVALID', 'OCR_UNREADABLE'] as $code) {
+        expect(ScanComparer::isProviderError(runItem('A', 'real_id', 1, code: $code)))->toBeFalse($code);
+    }
+
+    $items = [runItem('A', 'real_id', 1), runItem('A', 'real_id', 2, code: 'INTERNAL'), runItem('A', 'real_id', 3, code: 'AI_OUTPUT_INVALID'), runItem('A', 'real_id', 4, code: 'AI_PROVIDER_ERROR')];
+    $overall = (new ScanRunStats)->build($items)['overall'];
+
+    expect($overall['images'])->toBe(4)
+        ->and($overall['scored_requests'])->toBe(3)
+        ->and($overall['provider_errors'])->toBe(1)
+        ->and($overall['harness_errors'])->toBe(1)
+        ->and($overall['harness_errors_by_code'])->toBe(['INTERNAL' => 1])
+        ->and($overall['fields']['energy_kcal'])->toMatchArray(['correct' => 1, 'total' => 3]);
 });
