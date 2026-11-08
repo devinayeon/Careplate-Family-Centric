@@ -52,6 +52,9 @@ it('keeps Garam (Natrium) as sodium but never turns a Garam-only row into sodium
     ['Zout/Sel < 0,01 g', 0.01, 'g', null],
     ['Sel 0,3 g', 0.3, 'g', null],
     ['Salz 0,3 g', 0.3, 'g', null],
+    ['Sodio (sal) 120 mg', 120, 'mg', 120],
+    ['Sódio (sal) 120 mg', 120, 'mg', 120],
+    ['Sal 0,3 g', 0.3, 'g', null],
 ]);
 
 it('converts a kJ energy reading to kcal and keeps a printed kkal reading as is', function () {

@@ -25,7 +25,7 @@ class LabelNormalizer
     /** Sodium chloride is salt even when it names sodium ("natrium klorida"): its grams are not sodium grams. */
     private const CHLORIDE = '/\b(klorida|chloride|nacl)\b/iu';
 
-    private const SODIUM = '/\b(natrium|sodium|na)\b/iu';
+    private const SODIUM = '/\b(natrium|sodium|sodio|sódio|na)\b/iu';
 
     public function __construct(private readonly RawLabelValidator $validator = new RawLabelValidator) {}
 
