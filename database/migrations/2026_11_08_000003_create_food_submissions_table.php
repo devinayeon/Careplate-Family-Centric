@@ -26,7 +26,7 @@ return new class extends Migration
             $table->timestamp('decided_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['source_provider', 'source_id', 'snapshot_version']);
+            $table->unique(['source_provider', 'source_id', 'snapshot_version'], 'food_submissions_source_unique');
         });
     }
 
