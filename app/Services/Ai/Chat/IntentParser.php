@@ -93,7 +93,7 @@ class IntentParser
         preg_match_all(IntentLexicon::GRAM, $text, $m);
         $found = [];
         foreach ($m[1] as $raw) {
-            $amount = $this->decimal(str_replace(',', '.', $raw));
+            $amount = $this->decimal($this->textNumber($raw));
             if ($body !== null && Decimal::cmp($amount, $body) !== 0) {
                 throw AiException::for('AMOUNT_CONFLICT');
             }
@@ -101,6 +101,19 @@ class IntentParser
         }
 
         return array_values($found);
+    }
+
+    /**
+     * Indonesian grouping "1.000" / "1.250,5" is thousands; otherwise a comma is a decimal point ("2,5").
+     * An ambiguous "2,500" stays "2.500", which decimal() rejects (more than two decimals).
+     */
+    private function textNumber(string $raw): string
+    {
+        if (preg_match('/^[1-9]\d{0,2}(?:\.\d{3})+(?:,(\d+))?$/', $raw, $m) === 1) {
+            return str_replace('.', '', explode(',', $raw)[0]).(isset($m[1]) ? '.'.$m[1] : '');
+        }
+
+        return str_replace(',', '.', $raw);
     }
 
     /** @return string canonical decimal text of a body amount, rejecting non-numeric shapes */
@@ -123,10 +136,11 @@ class IntentParser
         if (preg_match('/^(\d+)(?:\.(\d+))?$/', $value, $m) !== 1) {
             throw AiException::for('INVALID_INPUT');
         }
-        $fraction = rtrim($m[2] ?? '', '0');
-        if (strlen($fraction) > 2) {
+        // Judged before trimming zeros: "2.500" is ambiguous (2.5 or 2500), never silently read.
+        if (strlen($m[2] ?? '') > 2) {
             throw AiException::for('INVALID_INPUT');
         }
+        $fraction = rtrim($m[2] ?? '', '0');
         $amount = (ltrim($m[1], '0') ?: '0').($fraction === '' ? '' : '.'.$fraction);
         if (Decimal::cmp($amount, '0') <= 0 || Decimal::cmp($amount, (string) config('ai.chat.max_amount_g', 2000)) > 0) {
             throw AiException::for('INVALID_INPUT');

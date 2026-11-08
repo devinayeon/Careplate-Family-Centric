@@ -188,3 +188,37 @@ test('a message with an unmanageable number of food words is a clarification, no
         ->and($intent->reason)->toBe(Intent::REASON_TOO_LONG)
         ->and($intent->foodPhrases)->toBe([]);
 });
+
+test('indonesian thousands grouping and decimals in gram amounts are read, never misread', function (string $message, string $amount) {
+    expect(parseIntent($message)->amountG)->toBe($amount);
+})->with([
+    ['protein 1.000 gram tahu contoh', '1000'],
+    ['protein 1.500 gram tahu contoh', '1500'],
+    ['protein 2.000 gram tahu contoh', '2000'],
+    ['protein 1.250,5 gram tahu contoh', '1250.5'],
+    ['protein 2,5 gram tahu contoh', '2.5'],
+    ['protein 2.5 gram tahu contoh', '2.5'],
+    ['protein 0.5 gram tahu contoh', '0.5'],
+    ['protein 12,50 gram tahu contoh', '12.5'],
+    ['protein 100.50 g tahu contoh', '100.5'],
+]);
+
+test('grouped or ambiguous gram amounts above the maximum or with three decimals are INVALID_INPUT', function (string $message) {
+    expect(cfThrown(fn () => parseIntent($message))->errorCode)->toBe('INVALID_INPUT');
+})->with([
+    ['protein 2.500 gram tahu contoh'],
+    ['protein 12.500 gram tahu contoh'],
+    ['protein 1.000.000 gram tahu contoh'],
+    ['protein 2,500 gram tahu contoh'],
+    ['protein 1,000 gram tahu contoh'],
+    ['protein 0.500 gram tahu contoh'],
+]);
+
+test('a grouped text amount agrees with an equal body amount and conflicts with a different one', function () {
+    expect(parseIntent('protein 1.000 gram tahu contoh', 1000)->amountG)->toBe('1000')
+        ->and(cfThrown(fn () => parseIntent('protein 1.000 gram tahu contoh', 1))->errorCode)->toBe('AMOUNT_CONFLICT');
+});
+
+test('a body amount given as a three-decimal string is INVALID_INPUT', function () {
+    expect(cfThrown(fn () => parseIntent('protein tahu contoh', '1.000'))->errorCode)->toBe('INVALID_INPUT');
+});

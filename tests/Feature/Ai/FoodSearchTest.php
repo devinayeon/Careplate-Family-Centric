@@ -91,6 +91,45 @@ test('at most five candidates are returned', function () {
         ->and(cfNames($match->candidates)[0])->toBe('Nasi varian 1');
 });
 
+test('a common word shared by more than 200 foods does not push the intended food out of the prefilter', function () {
+    foreach (range(1, 250) as $i) {
+        cfFood(['name' => sprintf('Aneka sayur mentah %03d', $i)]);
+    }
+    $wortel = cfFood(['name' => 'Wortel mentah']);
+
+    $match = search()->resolve(['wortel mentah']);
+
+    expect($match->state)->toBe(FoodMatch::FOUND)->and($match->candidates[0]->is($wortel))->toBeTrue();
+});
+
+test('a phrase that would need more than 200 rows is ambiguous, never found or no_match', function () {
+    foreach (range(1, 205) as $i) {
+        cfFood(['name' => sprintf('Nasi varian %03d', $i)]);
+    }
+
+    $broad = search()->resolve(['nasi']);
+
+    expect($broad->state)->toBe(FoodMatch::AMBIGUOUS)
+        ->and($broad->candidates)->toHaveCount(5)
+        ->and(cfNames($broad->candidates)[0])->toBe('Nasi varian 001');
+});
+
+test('exactly 200 matching rows is not treated as truncated', function () {
+    foreach (range(1, 200) as $i) {
+        cfFood(['name' => sprintf('Beras jenis %03d', $i)]);
+    }
+
+    expect(search()->resolve(['beras'])->state)->toBe(FoodMatch::AMBIGUOUS)
+        ->and(search()->resolve(['beras jenis 007'])->state)->toBe(FoodMatch::FOUND);
+});
+
+test('every token of a run must be present: a run with one unknown word matches nothing', function () {
+    cfFood(['name' => 'Wortel mentah']);
+    cfFood(['name' => 'Apel mentah']);
+
+    expect(search()->resolve(['wortel apel'])->state)->toBe(FoodMatch::NO_MATCH);
+});
+
 test('pending and revoked foods are never returned by any entry point', function () {
     cfFood(['name' => 'Tahu contoh']);
     cfFood(['name' => 'Tahu pending', 'status' => 'pending']);

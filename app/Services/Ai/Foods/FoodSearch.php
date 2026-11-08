@@ -48,6 +48,8 @@ class FoodSearch
      * Resolve food phrases (content runs from IntentParser) to verified foods.
      * Every phrase must equal a name/alias, or be a contiguous part of one; an exact alias beats partial matches.
      * One food => found; several (or several foods across phrases) => ambiguous; a phrase nobody knows => no_match.
+     * The SQL prefilter needs ALL tokens of a run, and fetches one row more than its cap: if the cap is exceeded
+     * the catalog is too broad for this phrase and the answer is ambiguous, never found or no_match.
      *
      * @param  list<string>  $phrases
      */
@@ -60,33 +62,60 @@ class FoodSearch
                 $runs[] = $tokens;
             }
         }
-        $probe = array_slice(array_values(array_unique(array_filter(
-            array_merge([], ...$runs),
-            fn (string $t) => mb_strlen($t) >= 2,
-        ))), 0, self::MAX_TOKENS);
-        if ($runs === [] || $probe === []) {
+        if ($runs === []) {
             return new FoodMatch(FoodMatch::NO_MATCH);
         }
 
-        $rows = $this->guard(fn () => Food::query()->verified()
-            ->where(function ($q) use ($probe): void {
-                foreach ($probe as $token) {
-                    $q->orWhereRaw(self::LIKE, ['%'.self::escapeLike($token).'%']);
-                }
-            })
-            ->orderBy('name')->orderBy('id')->limit(self::PREFILTER_ROWS)->get());
-
         $chosen = [];
+        $pool = [];
         foreach ($runs as $run) {
+            $rows = $this->prefilter($run);
+            if ($rows === null) {
+                return new FoodMatch(FoodMatch::NO_MATCH);
+            }
+            $truncated = $rows->count() > self::PREFILTER_ROWS;
+            $rows = $rows->take(self::PREFILTER_ROWS);
             $hits = $this->hits($rows, $run);
+            if ($truncated) {
+                $show = $hits === [] ? $rows : $rows->filter(fn (Food $f) => isset($hits[$f->getKey()]));
+
+                return new FoodMatch(FoodMatch::AMBIGUOUS, array_values($show->take(self::MAX_CANDIDATES)->all()));
+            }
             if ($hits === []) {
                 return new FoodMatch(FoodMatch::NO_MATCH);
             }
             $chosen += $hits;
+            foreach ($rows as $row) {
+                $pool[$row->getKey()] = $row;
+            }
         }
-        $candidates = array_values($rows->filter(fn (Food $f) => isset($chosen[$f->getKey()]))->take(self::MAX_CANDIDATES)->all());
+        $candidates = array_values(collect($pool)->filter(fn (Food $f, $id) => isset($chosen[$id]))
+            ->sortBy([['name', 'asc'], ['id', 'asc']])->take(self::MAX_CANDIDATES)->all());
 
         return new FoodMatch(count($chosen) === 1 ? FoodMatch::FOUND : FoodMatch::AMBIGUOUS, $candidates);
+    }
+
+    /**
+     * Verified rows whose search_text contains every token of the run, name then id, one row over the cap.
+     * Null when the run has no token long enough to filter on.
+     *
+     * @param  list<string>  $run
+     * @return Collection<int, Food>|null
+     */
+    private function prefilter(array $run): ?Collection
+    {
+        $probe = array_slice(array_values(array_unique(array_filter($run, fn (string $t) => mb_strlen($t) >= 2))), 0, self::MAX_TOKENS);
+        if ($probe === []) {
+            return null;
+        }
+
+        return $this->guard(fn () => Food::query()->verified()
+            ->where(function ($q) use ($probe): void {
+                foreach ($probe as $token) {
+                    $q->whereRaw(self::LIKE, ['%'.self::escapeLike($token).'%']);
+                }
+            })
+            ->orderBy('name')->orderBy('id')->limit(self::PREFILTER_ROWS + 1)->get());
     }
 
     /**

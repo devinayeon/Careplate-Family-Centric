@@ -63,8 +63,8 @@ final class IntentLexicon
     /** Diagnosis, medication, dose and condition wording: answered by referral, never by numbers. */
     public const CLINICAL = '/\b(dosis|dose|dosage|insulin|metformin|obat|obatan|diagnosis|diagnosa|didiagnosis|didiagnosa|mendiagnosis|terapi|penyakit|diabetes|diabetesi|hipertensi|ginjal|stroke|kanker|hamil|menyusui|dokter|medis|klinis|penderita|pengidap|pasien|medication|medicine|diagnosed|diagnose|therapy|pregnant|disease|doctor|patient|gula darah|darah tinggi|asam urat)\b/u';
 
-    /** A quantity in grams: 50 gram, 50g, 12,5 g. */
-    public const GRAM = '/(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(?:gram|grams|gr|g)\b/u';
+    /** A quantity in grams: 50 gram, 50g, 12,5 g; Indonesian grouping 1.000 / 1.250,5 is read as thousands. */
+    public const GRAM = '/(?<![\d.,])([1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?)\s*(?:gram|grams|gr|g)\b/u';
 
     /** A quantity in volume. */
     public const VOLUME = '/(?<![\d.,])\d+(?:[.,]\d+)?\s*(?:ml|cc|liter|l)\b/u';
