@@ -14,7 +14,7 @@ Route::prefix('ai/v1')
     ->name('ai.')
     ->middleware(['web', 'auth', AiResponseHeaders::class])
     ->group(function (): void {
-        // Permission before throttle: only allowed users spend scan quota; both run before any provider call.
+        // Real order: Authenticate > ThrottleRequests > SubstituteBindings > Permission > Authorize. Throttle runs before the permission alias, so a 403 user spends their own scan quota; both run before any provider call.
         Route::post('scan', ScanController::class)
             ->middleware(['permission:scan-nutrition', 'throttle:ai-scan'])
             ->name('scan');
@@ -51,7 +51,7 @@ Route::prefix('ai/v1')
                     ->middleware('can:delete,session')->name('destroy');
                 Route::get('{session}/turns', [ChatTurnController::class, 'index'])
                     ->middleware('can:view,session')->name('turns.index');
-                // Policy before throttle: a foreign session is 404 and spends no quota; the quota 429 comes before any provider call.
+                // Throttle runs before the policy (SubstituteBindings > Authorize), so a POST to a foreign session is 404 but still spends the caller's own quota; the quota 429 comes before any provider call.
                 Route::post('{session}/turns', [ChatTurnController::class, 'store'])
                     ->middleware(['can:view,session', 'throttle:ai-chat'])->name('turns.store');
             });
