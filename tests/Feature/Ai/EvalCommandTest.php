@@ -76,3 +76,60 @@ it('records provider failures per image instead of aborting the run', function (
         ->and($json['items'][0]['outcome'])->toBe('error');
     File::deleteDirectory($dir);
 });
+
+it('repeats every image --runs times and aggregates per field and per kind', function () {
+    geminiConfigure();
+    Http::swap(new Factory);
+    Http::fake([GEMINI_URL => Http::response(geminiOk(rawLabel()))]);
+    $dir = evalOutDir();
+
+    $this->artisan('ai:eval', ['suite' => 'scan', '--split' => 'dev', '--runs' => 2, '--out-dir' => $dir])->assertSuccessful();
+
+    Http::assertSentCount(6);
+    $json = json_decode(file_get_contents(glob($dir.'/scan-*.json')[0]), true);
+    expect($json['requests'])->toBe(6)
+        ->and($json['runs'])->toBe(2)
+        ->and($json['summary']['images'])->toBe(6)
+        ->and(array_column($json['items'], 'run'))->toBe([1, 1, 1, 2, 2, 2])
+        ->and(array_keys($json['summary']['by_kind']))->toBe(['web_sample'])
+        ->and($json['summary']['per_image']['SMP-01']['runs'])->toBe(2)
+        ->and($json['manifest'])->toBe('ai/evals/ocr/manifest.csv');
+    File::deleteDirectory($dir);
+});
+
+it('rejects --runs outside 1..5 before any request', function (string $runs) {
+    geminiConfigure();
+    Http::fake();
+
+    $this->artisan('ai:eval', ['suite' => 'scan', '--runs' => $runs])->assertExitCode(2);
+
+    Http::assertNothingSent();
+})->with(['0', '6', '-1', 'abc', '2.5']);
+
+it('only reads manifests under ai/evals so no other image can be sent', function (string $path) {
+    geminiConfigure();
+    Http::fake();
+
+    $this->artisan('ai:eval', ['suite' => 'scan', '--manifest' => $path])->assertExitCode(2);
+
+    Http::assertNothingSent();
+})->with(['composer.json', '../outside.csv', 'ai/evals/../../composer.json', 'ai/evals/nope.csv']);
+
+it('runs the synthetic Indonesian manifest and records its kind and truth status', function () {
+    geminiConfigure();
+    Http::swap(new Factory);
+    Http::fake([GEMINI_URL => Http::response(geminiOk(rawLabel()))]);
+    $dir = evalOutDir();
+
+    $this->artisan('ai:eval', ['suite' => 'scan', '--manifest' => 'ai/evals/ocr-id/synthetic/manifest.csv', '--runs' => 2, '--out-dir' => $dir])->assertSuccessful();
+
+    Http::assertSentCount(12);
+    $raw = file_get_contents(glob($dir.'/scan-*.json')[0]);
+    $json = json_decode($raw, true);
+    expect($json['kind'])->toBe('synthetic_id')
+        ->and($json['truth_status'])->toBe('exact_by_construction')
+        ->and($json['manifest'])->toBe('ai/evals/ocr-id/synthetic/manifest.csv')
+        ->and($json['items'][0]['kind'])->toBe('synthetic_id')
+        ->and($raw)->not->toContain('base64')->not->toContain(GEMINI_FAKE_KEY);
+    File::deleteDirectory($dir);
+});

@@ -5,11 +5,11 @@ namespace App\Services\Ai\Eval;
 use RuntimeException;
 
 /**
- * Reads ai/evals/ocr/manifest.csv. Empty cells are null (not visible on the label), never 0.
+ * Reads a scan eval manifest (default ai/evals/ocr/manifest.csv); images sit in an images/ folder next to it. Empty cells are null (not visible on the label), never 0.
  *
  * @phpstan-import-type Truth from ScanComparer
  *
- * @phpstan-type Row array{id: string, file: string, path: string, split: string, condition: string, sha256: string, truth: Truth}
+ * @phpstan-type Row array{id: string, file: string, path: string, split: string, condition: string, sha256: string, kind: string, truth_status: string, truth: Truth}
  */
 class ScanManifest
 {
@@ -39,6 +39,8 @@ class ScanManifest
                 'split' => $row['split'],
                 'condition' => $row['condition'],
                 'sha256' => $row['sha256'],
+                'kind' => $row['kind'],
+                'truth_status' => $row['truth_status'],
                 'truth' => self::truth($row),
             ];
         }
