@@ -4,10 +4,10 @@ use App\Actions\Foods\ReviewFood;
 use App\Exceptions\Ai\AiException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 require_once __DIR__.'/ReviewFoodSupport.php';
 require_once __DIR__.'/ChatFoodSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(fn () => rfManifest());
 
@@ -18,7 +18,7 @@ beforeEach(fn () => rfManifest());
 function rfFailOnInsert(string $table, Throwable $error): void
 {
     DB::listen(function ($query) use ($table, $error) {
-        if (str_starts_with($query->sql, 'insert into "'.$table.'"')) {
+        if (dbIsInsertInto($query->sql, $table)) {
             throw $error;
         }
     });
@@ -48,13 +48,13 @@ it('maps "database table is locked" during revoke to DB_BUSY', function () {
 it('does NOT remap a non-lock QueryException from approve or revoke', function () {
     $submission = rfSubmission();
     $food = cfFood(['current_revision' => 3]);
-    Schema::drop('food_revisions');
+    $missing = dbBreakTable('food_revisions');
 
     $approve = fn () => app(ReviewFood::class)->approve($submission->id, null, 'script:test', 2, 'Sumber dicocokkan.');
     $revoke = fn () => app(ReviewFood::class)->revoke($food->id, null, 'script:test', 3, 'Alasan.');
 
-    expect($approve)->toThrow(QueryException::class, 'no such table')
-        ->and($revoke)->toThrow(QueryException::class, 'no such table');
+    expect($approve)->toThrow(QueryException::class, $missing)
+        ->and($revoke)->toThrow(QueryException::class, $missing);
 });
 
 it('does NOT remap an unrelated PDOException', function () {

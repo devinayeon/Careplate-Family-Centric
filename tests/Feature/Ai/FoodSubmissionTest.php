@@ -5,6 +5,7 @@ use App\Models\FoodSubmission;
 use Illuminate\Support\Facades\Http;
 
 require_once __DIR__.'/FoodSubmissionSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(function () {
     fsManifest();
@@ -39,10 +40,10 @@ test('201 returns the contract Submission and stores a pending row owned by the 
         ->and($row->source_sha256)->toBe(RF_SHA)->and($row->food_id)->toBeNull()
         ->and($row->candidate['requires_review'])->toBeTrue()->and($row->candidate['review_reasons'])->toBe(['user_submission'])
         ->and($row->candidate['basis'])->toBe('100g')->and($row->candidate['name'])->toBe('Tahu contoh')
-        ->and($row->candidate['nutrients'])->toBe([
+        ->and(dbCanonical($row->candidate['nutrients']))->toBe(dbCanonical([
             'energy_kcal' => '80', 'protein_g' => '10', 'fat_g' => '4.8', 'carbohydrate_g' => '1.9',
             'sodium_mg' => '7', 'sugars_total_g' => null, 'energy_method' => null,
-        ]);
+        ]));
 });
 
 test('a pending submission creates no food and GET /ai/v1/foods does not return it', function () {

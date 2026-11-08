@@ -4,9 +4,9 @@ use App\Exceptions\Ai\AiException;
 use App\Models\Food;
 use App\Services\Ai\Foods\FoodMatch;
 use App\Services\Ai\Foods\FoodSearch;
-use Illuminate\Support\Facades\Schema;
 
 require_once __DIR__.'/ChatFoodSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 function search(): FoodSearch
 {
@@ -188,7 +188,7 @@ test('list caps limit at five, orders by name then id and rejects a query over 2
 
 test('a database failure is KNOWLEDGE_UNAVAILABLE 503, never an empty result', function () {
     cfFood(['name' => 'Tahu contoh']);
-    Schema::drop('foods');
+    dbBreakTable('foods');
 
     foreach ([
         fn () => search()->find('10000000-0000-4000-8000-000000000001'),

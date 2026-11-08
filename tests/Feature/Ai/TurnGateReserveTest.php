@@ -5,6 +5,7 @@ use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Support\Facades\Http;
 
 require_once __DIR__.'/ChatTurnSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(function () {
     test()->seed(AiPermissionSeeder::class);
@@ -69,7 +70,7 @@ test('same key and hash on a completed turn replays the stored response without 
 
     expect($r->isReplay())->toBeTrue()->and($r->isNew())->toBeFalse()
         ->and($r->turn->id)->toBe($turn->id)
-        ->and($r->response())->toBe(ctResponse('general'))
+        ->and(dbCanonical($r->response()))->toBe(dbCanonical(ctResponse('general')))
         ->and($r->error())->toBeNull()
         ->and(ChatTurn::count())->toBe(1)
         ->and(ctFresh($session)->next_sequence)->toBe(2);

@@ -60,7 +60,7 @@ test('scan content never reaches the database, logs, cache or leftover temp file
     $base64 = collect($sent)->first(fn ($p) => isset($p['inlineData']))['inlineData']['data'];
     $needles = [$marker, substr($base64, 200, 60), 'inlineData'];
 
-    $tables = collect(DB::select("select name from sqlite_master where type = 'table'"))->pluck('name');
+    $tables = collect(Schema::getTables())->pluck('name');
     foreach ($tables as $table) {
         $dump = json_encode(DB::table($table)->get());
         foreach ($needles as $needle) {

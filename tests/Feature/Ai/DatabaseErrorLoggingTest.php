@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 require_once __DIR__.'/ChatApiSupport.php';
 require_once __DIR__.'/GeminiTestSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 const DB_MARKER = 'CANARY-CHAT-MARKER-71c4d9';
 
@@ -29,7 +30,7 @@ it('keeps chat text out of the logs when a database error is reported on an ai r
     [$logged] = captureLogs();
     [$user, $session] = chatActor();
     DB::listen(function ($query) {
-        if (str_starts_with($query->sql, 'insert into "chat_turns"')) {
+        if (dbIsInsertInto($query->sql, 'chat_turns')) {
             throw dbMarkerError();
         }
     });

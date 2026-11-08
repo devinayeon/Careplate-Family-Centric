@@ -3,10 +3,10 @@
 use App\Models\User;
 use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Testing\TestResponse;
 
 require_once __DIR__.'/ChatFoodSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(fn () => test()->seed(AiPermissionSeeder::class));
 
@@ -113,7 +113,7 @@ test('the endpoint never calls the model provider', function () {
 });
 
 test('a database failure is 503 KNOWLEDGE_UNAVAILABLE, never an empty list', function () {
-    Schema::drop('foods');
+    dbBreakTable('foods');
 
     $r = foodsGet(foodsUser(), '?q=tahu');
 

@@ -80,7 +80,11 @@ test('all ai tables have exactly the planned columns', function () {
 
 test('sqlite connection keeps foreign keys on', function () {
     expect((int) DB::selectOne('pragma foreign_keys')->foreign_keys)->toBe(1);
-});
+})->skip(fn () => DB::getDriverName() !== 'sqlite', 'SQLite-specific: PRAGMA foreign_keys; the mysql twin below checks foreign_key_checks.');
+
+test('mysql connection keeps foreign key checks on', function () {
+    expect((int) DB::selectOne('select @@foreign_key_checks as v')->v)->toBe(1);
+})->skip(fn () => DB::getDriverName() !== 'mysql', 'MySQL-specific: foreign_key_checks session variable.');
 
 test('models use uuid primary keys', function () {
     $food = schemaFood();

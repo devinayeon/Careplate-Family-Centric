@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 require_once __DIR__.'/ReviewFoodSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(fn () => rfManifest());
 
@@ -42,7 +43,7 @@ it('approves a submission: food becomes visible to Food::verified with a search_
         ->and($revision->actor_audit_id)->toBe('user:admin')
         ->and($revision->note)->toBe('Sumber dicocokkan.')
         ->and($revision->decision_hash)->toMatch('/^[0-9a-f]{64}$/')
-        ->and($revision->result)->toBe($result)
+        ->and(dbCanonical($revision->result))->toBe(dbCanonical($result))
         ->and($revision->snapshot['status'])->toBe('verified')
         ->and($revision->snapshot['source']['id'])->toBe('900001')
         ->and($revision->snapshot['facts']['nutrients']['sugars_total_g'])->toBeNull();
@@ -51,7 +52,7 @@ it('approves a submission: food becomes visible to Food::verified with a search_
     expect($submission->status)->toBe('approved')
         ->and($submission->food_id)->toBe($food->id)
         ->and($submission->revision_counter)->toBe(3)
-        ->and($submission->decision_result)->toBe($result)
+        ->and(dbCanonical($submission->decision_result))->toBe(dbCanonical($result))
         ->and($submission->decision_hash)->toBe($revision->decision_hash)
         ->and($submission->decided_by)->toBe($actor->id)
         ->and($submission->decided_at)->not->toBeNull();
@@ -80,7 +81,7 @@ it('revokes: hides the food, clears search_text, bumps the revision and appends 
         ->and($food->current_revision)->toBe(2);
     $row = FoodRevision::where('revision', 2)->sole();
     expect([$row->action, $row->status, $row->note, $row->actor_audit_id])->toBe(['revoke', 'revoked', 'Nilai salah.', 'user:admin'])
-        ->and($row->result)->toBe($result)
+        ->and(dbCanonical($row->result))->toBe(dbCanonical($result))
         ->and($row->decision_hash)->toMatch('/^[0-9a-f]{64}$/')
         ->and(FoodRevision::count())->toBe(2);
 });

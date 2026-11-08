@@ -6,6 +6,7 @@ use Database\Seeders\AiPermissionSeeder;
 use Illuminate\Support\Facades\Http;
 
 require_once __DIR__.'/ChatTurnSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(function () {
     test()->seed(AiPermissionSeeder::class);
@@ -27,9 +28,9 @@ test('finalize stores the response, citations, refs and mode, clears the slot an
 
     expect($ok)->toBeTrue()
         ->and($t->status)->toBe('completed')
-        ->and($t->response)->toBe(ctResponse())
-        ->and($t->citations)->toBe([ctCitation($food)])
-        ->and($t->food_refs)->toBe([ctFoodRef($food)])
+        ->and(dbCanonical($t->response))->toBe(dbCanonical(ctResponse()))
+        ->and(dbCanonical($t->citations))->toBe(dbCanonical([ctCitation($food)]))
+        ->and(dbCanonical($t->food_refs))->toBe(dbCanonical([ctFoodRef($food)]))
         ->and($t->mode)->toBe('database')
         ->and($t->error_code)->toBeNull()
         ->and($s->active_turn_id)->toBeNull()->and($s->active_token)->toBeNull()

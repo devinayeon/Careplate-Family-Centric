@@ -17,11 +17,19 @@ require_once __DIR__.'/../ReviewFoodSupport.php';
 
 beforeEach(function () {
     $this->ccPath = null; // defined even if ccBoot() throws, so afterEach never hits an undefined property
+    if (DB::getDriverName() !== 'sqlite') {
+        test()->markTestSkipped('SQLite-specific: two PDO handles on one SQLite file (IMMEDIATE locks, busy_timeout); the MySQL twin runs on careplate_ai_cc.');
+    }
     $this->ccPath = ccBoot();
     test()->travelTo('2026-11-08 10:00:00');
 });
 
-afterEach(fn () => ccShutdown($this->ccPath));
+afterEach(function () {
+    // Skipped (non-SQLite) runs never booted cc_a/cc_b; ccShutdown would repoint the default connection at sqlite.
+    if (DB::getDriverName() === 'sqlite') {
+        ccShutdown($this->ccPath);
+    }
+});
 
 /** Runs $competing once, the first time cc_a executes a statement starting with $sqlPrefix (A is inside its transaction). */
 function ccWhenAWrites(string $sqlPrefix, Closure $competing): object

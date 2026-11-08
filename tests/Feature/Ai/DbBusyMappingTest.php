@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 require_once __DIR__.'/FoodSubmissionSupport.php';
+require_once __DIR__.'/DbPortabilitySupport.php';
 
 beforeEach(function () {
     fsManifest();
@@ -17,7 +18,7 @@ beforeEach(function () {
 function dbFailOnInsert(string $table, Throwable $error): void
 {
     DB::listen(function ($query) use ($table, $error) {
-        if (str_starts_with($query->sql, 'insert into "'.$table.'"')) {
+        if (dbIsInsertInto($query->sql, $table)) {
             throw $error;
         }
     });
