@@ -3,8 +3,8 @@
 return [
     'enabled' => (bool) env('AI_ENABLED', false),
 
-    // `openai` = OpenAI-compatible chat/completions gateway (Qwen); `gemini` = Google generateContent.
-    'provider' => env('AI_PROVIDER', 'openai'),
+    // `gemini` = Google generateContent (default); `openai` = OpenAI-compatible chat/completions gateway (Qwen).
+    'provider' => env('AI_PROVIDER', 'gemini'),
 
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
@@ -14,7 +14,7 @@ return [
 
     'gemini' => [
         'api_key' => env('AI_GEMINI_KEY'),
-        'model' => env('AI_GEMINI_MODEL', 'gemini-3.6-flash'),
+        'model' => env('AI_GEMINI_MODEL', 'gemini-3.5-flash-lite'),
         'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
         'thinking_level' => 'low',
 
