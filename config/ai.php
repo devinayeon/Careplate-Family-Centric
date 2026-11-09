@@ -7,7 +7,7 @@ return [
 
     'gemini' => [
         'api_key' => env('AI_GEMINI_KEY'),
-        'model' => env('AI_GEMINI_MODEL', 'gemini-3.8-flash'),
+        'model' => env('AI_GEMINI_MODEL', 'gemini-3.6-flash'),
         'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
         'thinking_level' => 'low',
 
@@ -50,6 +50,10 @@ return [
         'chat' => [
             'per_minute' => 10,
             'per_day' => 100,
+        ],
+        'submit' => [
+            'per_minute' => 5,
+            'per_day' => 30,
         ],
     ],
 ];
