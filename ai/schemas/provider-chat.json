@@ -1,22 +1,15 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Careplate provider narrative only",
-  "type": "object",
-  "properties": {
-    "kind": {
-      "enum": [
-        "educational",
-        "clarification",
-        "referral"
-      ]
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Careplate provider narrative only",
+    "type": "object",
+    "properties": {
+        "kind": {
+            "enum": ["educational", "clarification", "referral"]
+        },
+        "text": {
+            "type": "string"
+        }
     },
-    "text": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "kind",
-    "text"
-  ],
-  "additionalProperties": false
+    "required": ["kind", "text"],
+    "additionalProperties": false
 }

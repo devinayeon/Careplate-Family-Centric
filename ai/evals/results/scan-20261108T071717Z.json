@@ -6,9 +6,7 @@
     "truth_status": "unverified_by_human",
     "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging.",
     "model_config": "gemini-3.6-flash",
-    "model_versions_reported": [
-        "gemini-3.6-flash"
-    ],
+    "model_versions_reported": ["gemini-3.6-flash"],
     "prompt_sha256": "c599e583179a49acf1faf2ec55154bceb8403185d08b880057c553eea54303c7",
     "requests": 8,
     "summary": {
@@ -367,14 +365,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        55,
-                        "g"
-                    ],
-                    "got": [
-                        55,
-                        "g"
-                    ]
+                    "truth": [55, "g"],
+                    "got": [55, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -444,14 +436,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        30,
-                        "g"
-                    ],
-                    "got": [
-                        30,
-                        "g"
-                    ]
+                    "truth": [30, "g"],
+                    "got": [30, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -521,14 +507,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        50,
-                        "g"
-                    ],
-                    "got": [
-                        50,
-                        "g"
-                    ]
+                    "truth": [50, "g"],
+                    "got": [50, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -598,14 +578,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        94,
-                        "g"
-                    ],
-                    "got": [
-                        94,
-                        "g"
-                    ]
+                    "truth": [94, "g"],
+                    "got": [94, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -675,14 +649,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        200,
-                        "g"
-                    ],
-                    "got": [
-                        200,
-                        "g"
-                    ]
+                    "truth": [200, "g"],
+                    "got": [200, "g"]
                 },
                 "label_basis": {
                     "result": "match",

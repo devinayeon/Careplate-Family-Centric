@@ -73,14 +73,14 @@ Provider failures (`AI_PROVIDER_ERROR`, which includes a quota rejection, `AI_TI
 - The free-tier quota (20 requests/day/model on `gemini-3.6-flash`; 5/minute on `gemini-3-flash-preview`) blocked the protocol (3 runs of the real and synthetic sets, plus 1 run of the original set).
 - The only before/after evidence is on `gemini-3.1-flash-lite`, 1 run per image (a different, smaller model), prompt `c599e583` before and `4f4184e1` after:
 
-| set | prompt | energy | fat | sugar | protein | carb | sodium | serving | basis | unsafe | notes |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| real (8) | before | 7/8 | 8/8 | 7/8 | 8/8 | 7/8 | 8/8 | 8/8 | 8/8 | 0 | ID-08 energy 397.7 (kJ converted), ID-05 sugar/carb 0 |
-| real (8) | after | 8/8 | 8/8 | 7/8 | 8/8 | 7/8 | 8/8 | 8/8 | 8/8 | 0 | ID-05 sugar/carb 0 |
-| synthetic (6) | before | 5/6 | 6/6 | 6/6 | 6/6 | 6/6 | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6 | 0 | SYN-02 energy 85.086 (kJ converted) |
-| synthetic (6) | after | 6/6 | 6/6 | 6/6 | 6/6 | 6/6 | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6 | 0 | none |
-| original (8, 1 abstention) | before | 6/6 | 7/7 | 6/6 | 7/7 | 7/7 | 5/5 (+2/3 null) | 5/5 (+1/3 null) | 7/7 | 3 | SMP-01 sodium 10 mg less_than (salt read as sodium), SMP-01 serving 100 g, SMP-02 serving 8 ml |
-| original (8) | after | 6/6 | 7/7 | 6/6 | 7/7 | 7/7 | 5/5 (+3/3 null) | 5/5 (+2/3 null) | 7/7 | 1 | SMP-02 serving 8 ml (unchanged) |
+| set                        | prompt | energy | fat | sugar | protein | carb | sodium          | serving         | basis | unsafe | notes                                                                                          |
+| -------------------------- | ------ | ------ | --- | ----- | ------- | ---- | --------------- | --------------- | ----- | ------ | ---------------------------------------------------------------------------------------------- |
+| real (8)                   | before | 7/8    | 8/8 | 7/8   | 8/8     | 7/8  | 8/8             | 8/8             | 8/8   | 0      | ID-08 energy 397.7 (kJ converted), ID-05 sugar/carb 0                                          |
+| real (8)                   | after  | 8/8    | 8/8 | 7/8   | 8/8     | 7/8  | 8/8             | 8/8             | 8/8   | 0      | ID-05 sugar/carb 0                                                                             |
+| synthetic (6)              | before | 5/6    | 6/6 | 6/6   | 6/6     | 6/6  | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6   | 0      | SYN-02 energy 85.086 (kJ converted)                                                            |
+| synthetic (6)              | after  | 6/6    | 6/6 | 6/6   | 6/6     | 6/6  | 5/5 (+1/1 null) | 4/4 (+2/2 null) | 6/6   | 0      | none                                                                                           |
+| original (8, 1 abstention) | before | 6/6    | 7/7 | 6/6   | 7/7     | 7/7  | 5/5 (+2/3 null) | 5/5 (+1/3 null) | 7/7   | 3      | SMP-01 sodium 10 mg less_than (salt read as sodium), SMP-01 serving 100 g, SMP-02 serving 8 ml |
+| original (8)               | after  | 6/6    | 7/7 | 6/6   | 7/7     | 7/7  | 5/5 (+3/3 null) | 5/5 (+2/3 null) | 7/7   | 1      | SMP-02 serving 8 ml (unchanged)                                                                |
 
 - Unresolved: ID-05 (Mizone) sugar and carbohydrate. The digits are half hidden by glare; the annotation (9 g) is the annotator's best reading. `gemini-3.6-flash` read 9 g (1 reading), `gemini-3.1-flash-lite` read 0 g in all of its runs. Needs a human look at the photo.
 

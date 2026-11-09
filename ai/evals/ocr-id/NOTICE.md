@@ -10,16 +10,16 @@ Source: Open Food Facts (https://world.openfoodfacts.org), products sold in Indo
 
 All stored copies are adapted: re-encoded with GD as JPEG quality 85 (no EXIF metadata remains; the downloads had none to begin with). Only the Energen image was also downscaled. No crop, no retouching.
 
-| File | Product (code) | Contributor (upload date) | Licence | Changes |
-|---|---|---|---|---|
-| id-01-energen-coklat.jpg | Energen Coklat 34 g (8996001440049) | hanafidesar (2024-01-07) | CC BY-SA 3.0 | Re-encode q85, downscaled 3072x4080 to 2611x3468 to stay under 1.5 MB |
-| id-02-teh-pucuk.jpg | Teh Pucuk Harum Jasmine 350 ml (8996001600146) | openfoodfacts-contributors (2025-11-27) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-03-coca-cola-zero.jpg | Coca-Cola Zero (8992761111298) | openfoodfacts-contributors (2019-09-08) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-04-ultra-milk.jpg | Ultra Milk Full Cream (8998009010613) | sayaivan (2026-06-24) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-05-mizone.jpg | Mizone (8992752112518) | nasfahmi (2024-02-22) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-06-indomie-ayam-bawang.jpg | Indomie Ayam Bawang (0089686010015) | sayaivan (2025-10-02) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-07-kecap-bango.jpg | Kecap Manis, Bango (8999999002503) | macrofactor (2025-05-02) | CC BY-SA 3.0 | Re-encode q85, no resize |
-| id-08-indomie-dual-column.jpg | Mi goreng Fried Noodles, Indomie (0089686170924) | eatshalal (2023-09-28) | CC BY-SA 3.0 | Re-encode q85, no resize |
+| File                          | Product (code)                                   | Contributor (upload date)               | Licence      | Changes                                                               |
+| ----------------------------- | ------------------------------------------------ | --------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| id-01-energen-coklat.jpg      | Energen Coklat 34 g (8996001440049)              | hanafidesar (2024-01-07)                | CC BY-SA 3.0 | Re-encode q85, downscaled 3072x4080 to 2611x3468 to stay under 1.5 MB |
+| id-02-teh-pucuk.jpg           | Teh Pucuk Harum Jasmine 350 ml (8996001600146)   | openfoodfacts-contributors (2025-11-27) | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-03-coca-cola-zero.jpg      | Coca-Cola Zero (8992761111298)                   | openfoodfacts-contributors (2019-09-08) | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-04-ultra-milk.jpg          | Ultra Milk Full Cream (8998009010613)            | sayaivan (2026-06-24)                   | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-05-mizone.jpg              | Mizone (8992752112518)                           | nasfahmi (2024-02-22)                   | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-06-indomie-ayam-bawang.jpg | Indomie Ayam Bawang (0089686010015)              | sayaivan (2025-10-02)                   | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-07-kecap-bango.jpg         | Kecap Manis, Bango (8999999002503)               | macrofactor (2025-05-02)                | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
+| id-08-indomie-dual-column.jpg | Mi goreng Fried Noodles, Indomie (0089686170924) | eatshalal (2023-09-28)                  | CC BY-SA 3.0 | Re-encode q85, no resize                                              |
 
 The exact image URL of each file is in the manifest `source_url` column. The files carry no endorsement by the contributors or the brands. The contributor name is the Open Food Facts account name from the image metadata, not verified further.
 

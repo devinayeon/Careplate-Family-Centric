@@ -6,31 +6,31 @@ Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite and MySQL 8.0.43 (see Data
 
 ## What exists
 
-| Feature | Summary |
-|---|---|
-| Scan | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored. |
-| Chat | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
-| Foods | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims). |
-| Submissions | `POST /ai/v1/food-submissions`: a user proposes a food; it stays `pending` and is not searchable. |
-| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail. |
-| Purge | `ai:purge-chats` deletes chats past retention (daily schedule entry exists). |
+| Feature      | Summary                                                                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                 |
+| Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
+| Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                        |
+| Submissions  | `POST /ai/v1/food-submissions`: a user proposes a food; it stays `pending` and is not searchable.                                                              |
+| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                     |
+| Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                   |
 
 ## Routes
 
 Base: same origin as the Laravel app (local: `http://127.0.0.1:8001`). All routes sit in the `web`, `auth` group: session cookie, CSRF, JSON errors. Every response has `Cache-Control: no-store, private` and `X-Request-Id`.
 
-| Method and path | Needs | Success | Notes |
-|---|---|---|---|
-| POST `/ai/v1/scan` | `scan-nutrition`, throttle `ai-scan` | 200 | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP |
-| GET `/ai/v1/foods` | `nutrition-chat` | 200 | `q` (<=200 chars, optional), `limit` 1 to 5 |
-| POST `/ai/v1/chat/sessions` | `nutrition-chat` | 201 | empty JSON object body |
-| GET `/ai/v1/chat/sessions` | `nutrition-chat` | 200 | `cursor`, `limit` 1 to 20; own sessions only |
-| DELETE `/ai/v1/chat/sessions/{session}` | owner | 204 | content erased at once; late results are refused |
-| GET `/ai/v1/chat/sessions/{session}/turns` | owner | 200 | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
-| POST `/ai/v1/chat/sessions/{session}/turns` | owner, throttle `ai-chat` | 200 | one turn; see idempotency below |
-| POST `/ai/v1/food-submissions` | `submit-food`, throttle `ai-submit` | 201 (200 on identical resend) | body is closed: unknown keys are 422 |
-| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `verify-food` and role `admin` | 200 | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
-| POST `/ai/v1/admin/foods/{food}/revoke` | `verify-food` and role `admin` | 200 | `{expected_revision, reason}` |
+| Method and path                                           | Needs                                | Success                       | Notes                                                           |
+| --------------------------------------------------------- | ------------------------------------ | ----------------------------- | --------------------------------------------------------------- |
+| POST `/ai/v1/scan`                                        | `scan-nutrition`, throttle `ai-scan` | 200                           | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
+| GET `/ai/v1/foods`                                        | `nutrition-chat`                     | 200                           | `q` (<=200 chars, optional), `limit` 1 to 5                     |
+| POST `/ai/v1/chat/sessions`                               | `nutrition-chat`                     | 201                           | empty JSON object body                                          |
+| GET `/ai/v1/chat/sessions`                                | `nutrition-chat`                     | 200                           | `cursor`, `limit` 1 to 20; own sessions only                    |
+| DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                | 204                           | content erased at once; late results are refused                |
+| GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                | 200                           | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
+| POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`            | 200                           | one turn; see idempotency below                                 |
+| POST `/ai/v1/food-submissions`                            | `submit-food`, throttle `ai-submit`  | 201 (200 on identical resend) | body is closed: unknown keys are 422                            |
+| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `verify-food` and role `admin`       | 200                           | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
+| POST `/ai/v1/admin/foods/{food}/revoke`                   | `verify-food` and role `admin`       | 200                           | `{expected_revision, reason}`                                   |
 
 Roles from `AiPermissionSeeder`: `family_head` has scan, chat, submit. `nutritionist` has scan and chat only. `admin` has everything. Registration assigns `family_head`. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
 
@@ -50,15 +50,52 @@ No bearer tokens. CSRF is not disabled for `/ai/v1/*`. `tools/api-smoke.php` is 
 Scan (`curl -b jar -H "X-XSRF-TOKEN: $T" -H "Accept: application/json" -F image=@label.jpg $ORIGIN/ai/v1/scan`). Abridged 200 body:
 
 ```json
-{"schema_version":"1.0","request_id":"req_x","extraction_status":"complete",
- "extraction":{"label_basis":"per_serving","serving_size":{"value":30,"unit":"g","household_text":"3 keping"},
-   "servings_per_package":2,"nutrients":{"energy_kcal":{"value":150,"qualifier":"exact","unit":"kcal","evidence":"label 150 kcal","label_percent_akg":null}},
-   "needs_review":false},
- "normalized_per_serving":{"energy_kcal":150,"sodium_mg":450,"sugars_total_g":12},
- "assessment":{"policy":{"id":"careplate-ggl-screening-draft-v1","status":"provisional"},
-   "daily_reference_contribution_percent":{"sugars_total":24,"sodium":22.5,"fat_total":11.94},
-   "flags":[],"verdict":"policy_pending_validation","summary":"..."},
- "warnings":["Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal."]}
+{
+    "schema_version": "1.0",
+    "request_id": "req_x",
+    "extraction_status": "complete",
+    "extraction": {
+        "label_basis": "per_serving",
+        "serving_size": {
+            "value": 30,
+            "unit": "g",
+            "household_text": "3 keping"
+        },
+        "servings_per_package": 2,
+        "nutrients": {
+            "energy_kcal": {
+                "value": 150,
+                "qualifier": "exact",
+                "unit": "kcal",
+                "evidence": "label 150 kcal",
+                "label_percent_akg": null
+            }
+        },
+        "needs_review": false
+    },
+    "normalized_per_serving": {
+        "energy_kcal": 150,
+        "sodium_mg": 450,
+        "sugars_total_g": 12
+    },
+    "assessment": {
+        "policy": {
+            "id": "careplate-ggl-screening-draft-v1",
+            "status": "provisional"
+        },
+        "daily_reference_contribution_percent": {
+            "sugars_total": 24,
+            "sodium": 22.5,
+            "fat_total": 11.94
+        },
+        "flags": [],
+        "verdict": "policy_pending_validation",
+        "summary": "..."
+    },
+    "warnings": [
+        "Pembanding edukasi dewasa umum; bukan %AKG label atau kebutuhan personal."
+    ]
+}
 ```
 
 `extraction_status` is `complete` or `partial`. Unknown values are `null`, never 0. An unreadable label is 422 `OCR_UNREADABLE`. The verdict is always `policy_pending_validation` and `flags` is empty: the screening policy is provisional.
@@ -66,19 +103,55 @@ Scan (`curl -b jar -H "X-XSRF-TOKEN: $T" -H "Accept: application/json" -F image=
 Chat turn: `POST /ai/v1/chat/sessions/{id}/turns`
 
 ```json
-{"client_turn_id":"40000000-0000-4000-8000-000000000001","message":"Berapa protein 50 gram tahu contoh?",
- "food_id":"10000000-0000-4000-8000-000000000001","amount_g":50}
+{
+    "client_turn_id": "40000000-0000-4000-8000-000000000001",
+    "message": "Berapa protein 50 gram tahu contoh?",
+    "food_id": "10000000-0000-4000-8000-000000000001",
+    "amount_g": 50
+}
 ```
 
 `message` is 1 to 2000 characters after trim. `food_id` and `amount_g` are optional (`amount_g` > 0, <= 2000, 2 decimals max; with no amount in the body or text the server uses 100 g and says so). A conflict between the body amount and the text amount is 422 `AMOUNT_CONFLICT`. Response (200), abridged:
 
 ```json
-{"schema_version":"1.0","request_id":"req_x","session_id":"...","turn_id":"...","client_turn_id":"...","sequence":1,
- "mode":"database","retrieval_status":"found","answer":"...",
- "claims":[{"food_id":"...","revision":3,"nutrient":"protein_g","canonical_value":10,"unit":"g","canonical_basis":"100g",
-            "requested_amount":50,"derived_value":5,"source_type":"database","citation_id":"food-1"}],
- "citations":[{"id":"food-1","food_id":"...","revision":3,"food_name":"...","basis":"100g","source_reference":"...","verified_at":"2026-11-06T02:00:00Z"}],
- "general_knowledge_notice":null,"warnings":[]}
+{
+    "schema_version": "1.0",
+    "request_id": "req_x",
+    "session_id": "...",
+    "turn_id": "...",
+    "client_turn_id": "...",
+    "sequence": 1,
+    "mode": "database",
+    "retrieval_status": "found",
+    "answer": "...",
+    "claims": [
+        {
+            "food_id": "...",
+            "revision": 3,
+            "nutrient": "protein_g",
+            "canonical_value": 10,
+            "unit": "g",
+            "canonical_basis": "100g",
+            "requested_amount": 50,
+            "derived_value": 5,
+            "source_type": "database",
+            "citation_id": "food-1"
+        }
+    ],
+    "citations": [
+        {
+            "id": "food-1",
+            "food_id": "...",
+            "revision": 3,
+            "food_name": "...",
+            "basis": "100g",
+            "source_reference": "...",
+            "verified_at": "2026-11-06T02:00:00Z"
+        }
+    ],
+    "general_knowledge_notice": null,
+    "warnings": []
+}
 ```
 
 `mode` is `database`, `general`, `clarification` or `referral`; `retrieval_status` is `found`, `no_match`, `ambiguous` or `not_needed`. A `general` answer carries `general_knowledge_notice` and no citations. Show the notice and the citation source on every answer. Nutrient values appear only in `claims`, computed by the server; model text is checked and replaced by a server template if it contains numbers.
@@ -92,9 +165,26 @@ Foods: `GET /ai/v1/foods?q=ayam&limit=3` gives `{"data":[{"food_id","revision","
 Submission body (synthetic):
 
 ```json
-{"name":"Tahu Contoh (data sintetis)","aliases":["tahu contoh"],"basis":"100g",
- "nutrients":{"energy_kcal":100,"fat_g":5,"sugars_total_g":null,"protein_g":10,"carbohydrate_g":4,"sodium_mg":20},
- "source":{"provider":"MANUAL","source_id":"synthetic-fixture-only","source_url":"https://example.invalid/x","snapshot_version":"synthetic-v1","source_sha256":null}}
+{
+    "name": "Tahu Contoh (data sintetis)",
+    "aliases": ["tahu contoh"],
+    "basis": "100g",
+    "nutrients": {
+        "energy_kcal": 100,
+        "fat_g": 5,
+        "sugars_total_g": null,
+        "protein_g": 10,
+        "carbohydrate_g": 4,
+        "sodium_mg": 20
+    },
+    "source": {
+        "provider": "MANUAL",
+        "source_id": "synthetic-fixture-only",
+        "source_url": "https://example.invalid/x",
+        "snapshot_version": "synthetic-v1",
+        "source_sha256": null
+    }
+}
 ```
 
 Reply: `{"submission_id","status":"pending","revision_counter":1}`. Admin approve/revoke reply: `{"food_id","revision","status":"verified|revoked","sync_status":"ready"}`. An identical repeated decision returns the stored result; a stale `expected_revision` is 409 `STALE_REVISION`. Approve uses the submission `revision_counter`, revoke uses `foods.current_revision`.
@@ -103,29 +193,29 @@ Reply: `{"submission_id","status":"pending","revision_counter":1}`. Admin approv
 
 Envelope: `{"error":{"code","message","retryable"},"request_id":"req_..."}`. Messages are Indonesian. `Retry-After` is set on 429. Raw provider output, prompts, SQL and stack traces never appear.
 
-| HTTP | Code | Retryable | Meaning and client action |
-|---:|---|:-:|---|
-| 401 | UNAUTHENTICATED | no | log in |
-| 403 | FORBIDDEN | no | missing permission or role |
-| 404 | NOT_FOUND | no | missing, foreign or deleted record |
-| 409 | IDEMPOTENCY_CONFLICT | no | same `client_turn_id`, different body |
-| 409 | TURN_IN_PROGRESS | yes | same turn still running; poll history or resend later |
-| 409 | SESSION_BUSY | yes | another turn running, SQLite busy or MySQL lock wait/deadlock; retry shortly |
-| 409 | STALE_REVISION | no | reload the record and decide again |
-| 409 | KNOWLEDGE_CHANGED | yes | a cited food was revoked or revised while the answer was prepared; the turn is closed as failed; send the question again as a new message (new `client_turn_id`) |
-| 413 | IMAGE_TOO_LARGE | no | smaller photo |
-| 415 | UNSUPPORTED_MEDIA_TYPE | no | JPEG or PNG only |
-| 419 | CSRF_MISMATCH | no | refresh the CSRF cookie, log in again if needed |
-| 422 | INVALID_INPUT | no | fix the input; admin approve uses this with a reason code in the message (`SOURCE_NOT_IN_MANIFEST`, `SOURCE_SHA_MISMATCH`, `REVIEW_ACK_REQUIRED`, `CANDIDATE_INVALID`, `SOURCE_MISSING`, `NOTE_REQUIRED`); every other 422 carries only the generic message "Data yang dikirim tidak valid." The envelope has no per-field errors, so validation detail is never returned |
-| 422 | AMOUNT_CONFLICT | no | body amount and text amount disagree |
-| 422 | OCR_UNREADABLE | no | retake the photo |
-| 429 | RATE_LIMITED | yes | wait `Retry-After`; the model was not called |
-| 500 | INTERNAL | no | unexpected server error |
-| 502 | AI_PROVIDER_ERROR, AI_OUTPUT_INVALID | yes | provider failed (also free-tier quota, HTTP 429: see Provider quota) or returned unusable output |
-| 503 | DB_BUSY | yes | SQLite busy or MySQL lock wait/deadlock on admin approve/revoke, food submission or session creation; nothing was written; repeat the same call |
-| 503 | KNOWLEDGE_UNAVAILABLE | yes | catalog not available |
-| 503 | AI_DISABLED, POLICY_CONFIG_INVALID | no | feature off or policy config invalid; the catalog list still works |
-| 504 | AI_TIMEOUT | yes | provider too slow (scan deadline 25 s, chat 20 s) |
+| HTTP | Code                                 | Retryable | Meaning and client action                                                                                                                                                                                                                                                                                                                                                 |
+| ---: | ------------------------------------ | :-------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  401 | UNAUTHENTICATED                      |    no     | log in                                                                                                                                                                                                                                                                                                                                                                    |
+|  403 | FORBIDDEN                            |    no     | missing permission or role                                                                                                                                                                                                                                                                                                                                                |
+|  404 | NOT_FOUND                            |    no     | missing, foreign or deleted record                                                                                                                                                                                                                                                                                                                                        |
+|  409 | IDEMPOTENCY_CONFLICT                 |    no     | same `client_turn_id`, different body                                                                                                                                                                                                                                                                                                                                     |
+|  409 | TURN_IN_PROGRESS                     |    yes    | same turn still running; poll history or resend later                                                                                                                                                                                                                                                                                                                     |
+|  409 | SESSION_BUSY                         |    yes    | another turn running, SQLite busy or MySQL lock wait/deadlock; retry shortly                                                                                                                                                                                                                                                                                              |
+|  409 | STALE_REVISION                       |    no     | reload the record and decide again                                                                                                                                                                                                                                                                                                                                        |
+|  409 | KNOWLEDGE_CHANGED                    |    yes    | a cited food was revoked or revised while the answer was prepared; the turn is closed as failed; send the question again as a new message (new `client_turn_id`)                                                                                                                                                                                                          |
+|  413 | IMAGE_TOO_LARGE                      |    no     | smaller photo                                                                                                                                                                                                                                                                                                                                                             |
+|  415 | UNSUPPORTED_MEDIA_TYPE               |    no     | JPEG or PNG only                                                                                                                                                                                                                                                                                                                                                          |
+|  419 | CSRF_MISMATCH                        |    no     | refresh the CSRF cookie, log in again if needed                                                                                                                                                                                                                                                                                                                           |
+|  422 | INVALID_INPUT                        |    no     | fix the input; admin approve uses this with a reason code in the message (`SOURCE_NOT_IN_MANIFEST`, `SOURCE_SHA_MISMATCH`, `REVIEW_ACK_REQUIRED`, `CANDIDATE_INVALID`, `SOURCE_MISSING`, `NOTE_REQUIRED`); every other 422 carries only the generic message "Data yang dikirim tidak valid." The envelope has no per-field errors, so validation detail is never returned |
+|  422 | AMOUNT_CONFLICT                      |    no     | body amount and text amount disagree                                                                                                                                                                                                                                                                                                                                      |
+|  422 | OCR_UNREADABLE                       |    no     | retake the photo                                                                                                                                                                                                                                                                                                                                                          |
+|  429 | RATE_LIMITED                         |    yes    | wait `Retry-After`; the model was not called                                                                                                                                                                                                                                                                                                                              |
+|  500 | INTERNAL                             |    no     | unexpected server error                                                                                                                                                                                                                                                                                                                                                   |
+|  502 | AI_PROVIDER_ERROR, AI_OUTPUT_INVALID |    yes    | provider failed (also free-tier quota, HTTP 429: see Provider quota) or returned unusable output                                                                                                                                                                                                                                                                          |
+|  503 | DB_BUSY                              |    yes    | SQLite busy or MySQL lock wait/deadlock on admin approve/revoke, food submission or session creation; nothing was written; repeat the same call                                                                                                                                                                                                                           |
+|  503 | KNOWLEDGE_UNAVAILABLE                |    yes    | catalog not available                                                                                                                                                                                                                                                                                                                                                     |
+|  503 | AI_DISABLED, POLICY_CONFIG_INVALID   |    no     | feature off or policy config invalid; the catalog list still works                                                                                                                                                                                                                                                                                                        |
+|  504 | AI_TIMEOUT                           |    yes    | provider too slow (scan deadline 25 s, chat 20 s)                                                                                                                                                                                                                                                                                                                         |
 
 ## Quotas (per user, server side)
 
@@ -171,17 +261,20 @@ Two engines are supported by the same code. The default and the demo are SQLite.
 - The app's MySQL connection runs `SET SESSION innodb_lock_wait_timeout = 5` on connect, so a blocked write fails after about 5 s instead of the InnoDB default of 50 s. This setting is configured and verified live on MySQL 8.0.43 (`@@session.innodb_lock_wait_timeout` = 5).
 
 Row locks (`lockForUpdate()` compiles to nothing on SQLite, where the IMMEDIATE write lock already serialises). One order everywhere:
+
 - chat: session row, then turn row, then cited food rows (shared lock). A competing turn, delete or finalize waits or fails as a retryable error, and it never acts on a stale snapshot.
 - admin: approve locks the submission, then the food row; revoke locks only the food row. The importer locks the submission rows it may refresh.
 - Lock errors become retryable errors: SQLite busy/locked (driver codes 5 and 6) and MySQL 1205 (lock wait timeout), 1213 (deadlock) and SQLSTATE 40001 map to `SESSION_BUSY` (chat) or `DB_BUSY` (admin approve/revoke, food submission, session creation). Nothing was written; repeat the same call. Other database errors are not remapped.
 
 Behaviour differences you will see on MySQL:
+
 - Collation: `LIKE`, equality and unique indexes ignore case, accents and trailing spaces. `GET /foods?q=` re-checks the matches in PHP, so `q=táhu` does not match `Tahu`. Chat food resolution was already exact. A food source triple that differs only by case (`abc` vs `ABC`) is one source on MySQL: a second submission is 409, never a second row. On SQLite it is a separate source. Sort by name is case-insensitive on MySQL and byte order on SQLite.
 - JSON key order: responses stored as JSON are read back from the database (the first answer is the stored result, so it equals every replay). MySQL reorders object keys (short keys first). Clients must not rely on key order.
 - Column limits are validated, never truncated: `source_url` is 500 characters (migration `2026_11_09_000001`), nutrient values have at most 8 integer and 4 decimal digits (a 5th decimal is refused, not rounded), and over-long aliases, audit ids and notes are 422.
 - The unique index on `food_submissions` has an explicit short name (the generated name exceeded the 64-character MySQL limit).
 
 Known limits on MySQL:
+
 - Approving two NEW foods with adjacent source triples at the same moment can deadlock on a gap lock. One call gets a retryable `DB_BUSY`; the admin repeats it.
 - `ai:purge-chats` filters chat turns and sessions by columns without a dedicated index (it does select by primary key and `chat_sessions.active_turn_id`, which has an index since migration `2026_11_09_000002`). Fine at MVP volume; run it off-peak. A rare deadlock with a chat turn gives that turn a retryable `SESSION_BUSY` or fails one purge chunk (earlier chunks stay committed, the next run continues).
 - The two-connection concurrency tests run in one PHP process: a waiting connection times out after 1 s and the test asserts the retryable error. A real wait followed by success is not shown by a test.
@@ -208,33 +301,33 @@ The Gemini key used for development is a free-tier key. Observed: about 20 reque
 
 Questions in Indonesian are the primary language. The chat catalog is 10 USDA Foundation foods (snapshot 2026-10-29) with Indonesian display names. Aliases are derived from the name, for example `jeruk` and `susu sapi utuh`:
 
-| Catalog name | USDA record |
-|---|---|
-| Beras putih mentah | Rice, white, long grain, unenriched, raw |
-| Apel dengan kulit | Apples, fuji, with skin, raw |
-| Wortel mentah | Carrots, mature, raw |
-| Tomat mentah | Tomatoes, grape, raw |
-| Dada ayam tanpa kulit mentah | Chicken, breast, boneless, skinless, raw |
-| Kentang mentah | Potatoes, russet, without skin, raw |
-| Susu sapi utuh basis gram | Milk, whole, 3.25% milkfat, with added vitamin D |
-| Ubi jalar mentah | Sweet potatoes, orange flesh, without skin, raw |
-| Jeruk bagian dapat dimakan | Oranges, raw, navels |
-| Brokoli mentah | Broccoli, raw |
+| Catalog name                 | USDA record                                      |
+| ---------------------------- | ------------------------------------------------ |
+| Beras putih mentah           | Rice, white, long grain, unenriched, raw         |
+| Apel dengan kulit            | Apples, fuji, with skin, raw                     |
+| Wortel mentah                | Carrots, mature, raw                             |
+| Tomat mentah                 | Tomatoes, grape, raw                             |
+| Dada ayam tanpa kulit mentah | Chicken, breast, boneless, skinless, raw         |
+| Kentang mentah               | Potatoes, russet, without skin, raw              |
+| Susu sapi utuh basis gram    | Milk, whole, 3.25% milkfat, with added vitamin D |
+| Ubi jalar mentah             | Sweet potatoes, orange flesh, without skin, raw  |
+| Jeruk bagian dapat dimakan   | Oranges, raw, navels                             |
+| Brokoli mentah               | Broccoli, raw                                    |
 
 Local foods such as tempe, tahu, nasi matang, telur, bayam and yogurt are NOT in the catalog. A question about them returns `retrieval_status: no_match` with no numbers and a suggestion to scan the label; it does not invent values. The 10 CSV rows that the importer skipped (never invented), with the reason:
 
-| Row | Reason |
-|---|---|
-| FOOD-001 nasi putih matang | no cooked white rice record (raw rice is not offered as cooked) |
-| FOOD-003 pisang | ambiguous: overripe vs ripe records |
-| FOOD-007 telur | no raw fresh whole egg record |
-| FOOD-011 oat kering | no Foundation record has every query term in the required state (oats dry) |
-| FOOD-014 pepaya | no papaya in Foundation |
-| FOOD-015 bayam | spinach descriptions carry no raw state |
-| FOOD-017 daging sapi giling | ambiguous: 90/10 vs 80/20 |
-| FOOD-018 yogurt plain | no Foundation record has every query term in the required state (yogurt plain unsweetened) |
-| FOOD-019 tahu | not in Foundation |
-| FOOD-020 tempe | not in Foundation |
+| Row                         | Reason                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| FOOD-001 nasi putih matang  | no cooked white rice record (raw rice is not offered as cooked)                            |
+| FOOD-003 pisang             | ambiguous: overripe vs ripe records                                                        |
+| FOOD-007 telur              | no raw fresh whole egg record                                                              |
+| FOOD-011 oat kering         | no Foundation record has every query term in the required state (oats dry)                 |
+| FOOD-014 pepaya             | no papaya in Foundation                                                                    |
+| FOOD-015 bayam              | spinach descriptions carry no raw state                                                    |
+| FOOD-017 daging sapi giling | ambiguous: 90/10 vs 80/20                                                                  |
+| FOOD-018 yogurt plain       | no Foundation record has every query term in the required state (yogurt plain unsweetened) |
+| FOOD-019 tahu               | not in Foundation                                                                          |
+| FOOD-020 tempe              | not in Foundation                                                                          |
 
 Some of these could be added from another source (USDA SR Legacy was not tried), which needs its own snapshot entry and review. A general education question (for example what protein is for) is answered by the model as `mode: general` with the general-knowledge notice, no citations, and the narration guard that replaces any text containing numbers with units. Chat quality was evaluated on the 12 spec cases mapped to the catalog (see Honest limits), not on a set of Indonesian questions.
 
@@ -242,11 +335,11 @@ Some of these could be added from another source (USDA SR Legacy was not tried),
 
 Scan was first evaluated on 8 US, Canadian and EU web images (`ai/evals/ocr/`: FDA, Wikimedia Commons). The Indonesian sets are separate (`ai/evals/ocr-id/`, details in `ai/evals/README.md`): 8 real photos from Open Food Facts contributors (CC BY-SA 3.0, truth transcribed by an AI assistant, `unverified_by_human`; ID-05 is partly hidden by glare, ID-08 is an export-style English/French label) and 6 synthetic BPOM-format labels (exact truth by construction, clean renders).
 
-| Model, set, runs | Requests | Scored requests | Result |
-|---|---:|---:|---|
-| `gemini-3.6-flash` (shipped), real, 3 runs | 24 | 9 | every scored field correct on those 9; 15 provider errors (`AI_PROVIDER_ERROR`, quota rejections seen in the run log); ID-08 never read |
-| `gemini-3-flash-preview`, synthetic, 3 runs | 18 | 7 | 1 unsafe inference: serving size 100 g taken from "Per 100 g"; 11 provider errors (`AI_PROVIDER_ERROR`, HTTP 429 seen in the run log) |
-| `gemini-3.1-flash-lite`, 1 run, prompt v1.1 before/after | 8 + 6 + 8 per prompt | all | unsafe inferences on the original set 3 to 1; table in `ai/evals/README.md` |
+| Model, set, runs                                         |             Requests | Scored requests | Result                                                                                                                                  |
+| -------------------------------------------------------- | -------------------: | --------------: | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `gemini-3.6-flash` (shipped), real, 3 runs               |                   24 |               9 | every scored field correct on those 9; 15 provider errors (`AI_PROVIDER_ERROR`, quota rejections seen in the run log); ID-08 never read |
+| `gemini-3-flash-preview`, synthetic, 3 runs              |                   18 |               7 | 1 unsafe inference: serving size 100 g taken from "Per 100 g"; 11 provider errors (`AI_PROVIDER_ERROR`, HTTP 429 seen in the run log)   |
+| `gemini-3.1-flash-lite`, 1 run, prompt v1.1 before/after | 8 + 6 + 8 per prompt |             all | unsafe inferences on the original set 3 to 1; table in `ai/evals/README.md`                                                             |
 
 - The shipped model was never read on the synthetic set, and prompt v1.1 was never run on `gemini-3.6-flash`. v1.1 (`ai/prompts/ocr-system.txt`, sha `4f4184e1`) is kept PENDING that regression run; if the shipped model regresses, revert the file to the version at commit `718dc98`. The commands to finish are in `ai/evals/README.md`.
 - Salt vs sodium: a label row named garam, zout, sel, sal or salz without natrium, sodium or sodio is salt, not sodium: sodium stays unknown (`null`) and a warning is returned. `Garam (Natrium)` and the sodium words are sodium.
@@ -255,6 +348,7 @@ Scan was first evaluated on 8 US, Canadian and EU web images (`ai/evals/ocr/`: F
 ## Honest limits
 
 Catalog and wording
+
 - The catalog is 10 USDA Foundation foods. They were approved by a script (`ai:seed-catalog`): the source id and the archive sha256 were matched against `ai/data/snapshot.manifest.json`. The nutrient values were NOT re-verified, review flags were acknowledged by the script, and no human or nutritionist reviewed anything. Product copy must say "source-reviewed (script)" and never "nutritionist-verified" or "lab-verified".
 - Several candidates carry review flags: variant picks (3 foods), single-variety only (5 foods), legacy energy nutrient 1008 (4 foods, energy method labelled), exact zeros (2 foods). Sugars are `null` for 9 of 10 foods because USDA Foundation rarely reports them.
 - Foods outside the catalog get no numbers: the chat says so and suggests scanning the label.
@@ -262,15 +356,18 @@ Catalog and wording
 - The scan assessment policy is provisional: verdict `policy_pending_validation`, no flags. Do not present it as a health rating.
 
 Evaluation
+
 - Scan eval: 8 Wikimedia Commons web sample images (3 dev, 5 holdout), mostly US, Canadian and EU labels, ground truth written by an AI assistant and not checked by a human. 100% on tiny n is a smoke test, not accuracy, and says nothing about Indonesian packaging (see Indonesian labels for those sets). Latency on `gemini-3.6-flash`: p50 about 15.6 s, p95 about 21.8 s (n=8), against a 25 s deadline and the spec target of 15 s. Plan for slow scans and show progress.
 - Chat eval: 9 applicable of 12 golden cases, 4 of the 9 mapped or substituted onto the demo catalog; 9 of 9 routing, claims and citations pass. `unsafe_claims = 0` holds by construction (the guard blocks every number-plus-unit), it is not an independent safety result. Only 2 cases reach the model. One run per case.
 - NarrationGuard is lexical. Known bypass classes: number words attached to units in unusual forms, units outside its list, other-language units, and citation styles it does not recognise. It fails closed on invalid UTF-8 and regex errors, and the numbers in answers come from server claims anyway, but text quality of general answers is not human graded.
 - The eval images carry licence caveats (CC BY, CC BY-SA, third-party packaging artwork). Replace them with team-owned photos before public redistribution.
 
 Model
+
 - `gemini-3.8-flash` was the planned model but did not respond on the project key (no answer in 45 to 50 s, tested twice). `gemini-3.6-flash` answers in about 1 s on preflight and was used for every evaluation, so it is the frozen default. The model id is validated against a strict pattern before it is placed in the request URL.
 
 Operations
+
 - SQLite needs PHP 8.4 or newer for `transaction_mode=IMMEDIATE` (on older PHP Laravel silently falls back to deferred transactions). Engines, locks and the MySQL status are in Databases.
 - PHP ini for the 5 MiB scan contract: `upload_max_filesize` >= 5M and `post_max_size` >= 6M (the upload is multipart; the base64 expansion happens server side). With the stock `upload_max_filesize=2M`, a 2 to 5 MiB photo is answered 413 IMAGE_TOO_LARGE. `max_execution_time` must sit comfortably above the 25 s scan deadline (and the 20 s chat deadline). A fatal execution timeout cannot be caught: the request dies without an envelope and a chat turn stays `pending` until its lease expires.
 - `memory_limit` must be at least 256M for the scan route (the ImagePreparer guard decodes up to 16 MP).

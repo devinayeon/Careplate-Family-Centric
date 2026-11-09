@@ -8,9 +8,7 @@
     "truth_status": "unverified_by_human",
     "caveat": "Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging. Re-scored offline: only provider errors (AI_PROVIDER_ERROR, AI_TIMEOUT, AI_DISABLED; for example a free-tier quota rejection) are excluded from field scores, latency and tokens and listed as provider_errors; every other request is scored (scored_requests is the n) and harness or pipeline errors are also listed as harness_errors.",
     "model_config": "gemini-3.1-flash-lite",
-    "model_versions_reported": [
-        "gemini-3.1-flash-lite"
-    ],
+    "model_versions_reported": ["gemini-3.1-flash-lite"],
     "prompt_sha256": "4f4184e18216f8a7b2338e586cab16b17fef6b948e459261c5e6e5cd15ba96f5",
     "requests": 8,
     "summary": {
@@ -665,10 +663,7 @@
                 "serving_size": {
                     "result": "unsafe",
                     "truth": null,
-                    "got": [
-                        8,
-                        "ml"
-                    ]
+                    "got": [8, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -820,14 +815,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        55,
-                        "g"
-                    ],
-                    "got": [
-                        55,
-                        "g"
-                    ]
+                    "truth": [55, "g"],
+                    "got": [55, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -904,14 +893,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        30,
-                        "g"
-                    ],
-                    "got": [
-                        30,
-                        "g"
-                    ]
+                    "truth": [30, "g"],
+                    "got": [30, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -988,14 +971,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        50,
-                        "g"
-                    ],
-                    "got": [
-                        50,
-                        "g"
-                    ]
+                    "truth": [50, "g"],
+                    "got": [50, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -1072,14 +1049,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        94,
-                        "g"
-                    ],
-                    "got": [
-                        94,
-                        "g"
-                    ]
+                    "truth": [94, "g"],
+                    "got": [94, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -1156,14 +1127,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        200,
-                        "g"
-                    ],
-                    "got": [
-                        200,
-                        "g"
-                    ]
+                    "truth": [200, "g"],
+                    "got": [200, "g"]
                 },
                 "label_basis": {
                     "result": "match",

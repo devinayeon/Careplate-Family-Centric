@@ -8,9 +8,7 @@
     "truth_status": "exact_by_construction",
     "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples. Re-scored offline: only provider errors (AI_PROVIDER_ERROR, AI_TIMEOUT, AI_DISABLED; for example a free-tier quota rejection) are excluded from field scores, latency and tokens and listed as provider_errors; every other request is scored (scored_requests is the n) and harness or pipeline errors are also listed as harness_errors.",
     "model_config": "gemini-3.1-flash-lite",
-    "model_versions_reported": [
-        "gemini-3.1-flash-lite"
-    ],
+    "model_versions_reported": ["gemini-3.1-flash-lite"],
     "prompt_sha256": "4f4184e18216f8a7b2338e586cab16b17fef6b948e459261c5e6e5cd15ba96f5",
     "requests": 6,
     "summary": {
@@ -506,14 +504,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        25,
-                        "g"
-                    ],
-                    "got": [
-                        25,
-                        "g"
-                    ]
+                    "truth": [25, "g"],
+                    "got": [25, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -590,14 +582,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        200,
-                        "ml"
-                    ],
-                    "got": [
-                        200,
-                        "ml"
-                    ]
+                    "truth": [200, "ml"],
+                    "got": [200, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -674,14 +660,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        40,
-                        "g"
-                    ],
-                    "got": [
-                        40,
-                        "g"
-                    ]
+                    "truth": [40, "g"],
+                    "got": [40, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -758,14 +738,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        30,
-                        "g"
-                    ],
-                    "got": [
-                        30,
-                        "g"
-                    ]
+                    "truth": [30, "g"],
+                    "got": [30, "g"]
                 },
                 "label_basis": {
                     "result": "match",

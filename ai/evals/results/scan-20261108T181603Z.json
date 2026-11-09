@@ -8,9 +8,7 @@
     "truth_status": "unverified_by_human",
     "caveat": "Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples. Re-scored offline: only provider errors (AI_PROVIDER_ERROR, AI_TIMEOUT, AI_DISABLED; for example a free-tier quota rejection) are excluded from field scores, latency and tokens and listed as provider_errors; every other request is scored (scored_requests is the n) and harness or pipeline errors are also listed as harness_errors.",
     "model_config": "gemini-3.1-flash-lite",
-    "model_versions_reported": [
-        "gemini-3.1-flash-lite"
-    ],
+    "model_versions_reported": ["gemini-3.1-flash-lite"],
     "prompt_sha256": "4f4184e18216f8a7b2338e586cab16b17fef6b948e459261c5e6e5cd15ba96f5",
     "requests": 8,
     "summary": {
@@ -588,14 +586,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        34,
-                        "g"
-                    ],
-                    "got": [
-                        34,
-                        "g"
-                    ]
+                    "truth": [34, "g"],
+                    "got": [34, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -672,14 +664,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        240,
-                        "ml"
-                    ],
-                    "got": [
-                        240,
-                        "ml"
-                    ]
+                    "truth": [240, "ml"],
+                    "got": [240, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -756,14 +742,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        330,
-                        "ml"
-                    ],
-                    "got": [
-                        330,
-                        "ml"
-                    ]
+                    "truth": [330, "ml"],
+                    "got": [330, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -840,14 +820,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        250,
-                        "ml"
-                    ],
-                    "got": [
-                        250,
-                        "ml"
-                    ]
+                    "truth": [250, "ml"],
+                    "got": [250, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -924,14 +898,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        250,
-                        "ml"
-                    ],
-                    "got": [
-                        250,
-                        "ml"
-                    ]
+                    "truth": [250, "ml"],
+                    "got": [250, "ml"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -1008,14 +976,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        69,
-                        "g"
-                    ],
-                    "got": [
-                        69,
-                        "g"
-                    ]
+                    "truth": [69, "g"],
+                    "got": [69, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -1092,14 +1054,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        20,
-                        "g"
-                    ],
-                    "got": [
-                        20,
-                        "g"
-                    ]
+                    "truth": [20, "g"],
+                    "got": [20, "g"]
                 },
                 "label_basis": {
                     "result": "match",
@@ -1176,14 +1132,8 @@
                 },
                 "serving_size": {
                     "result": "match",
-                    "truth": [
-                        175,
-                        "g"
-                    ],
-                    "got": [
-                        175,
-                        "g"
-                    ]
+                    "truth": [175, "g"],
+                    "got": [175, "g"]
                 },
                 "label_basis": {
                     "result": "match",
