@@ -4,6 +4,18 @@ Backend only (Laravel 13, SQLite or MySQL 8, Pest). No UI was built or changed. 
 
 Tested with PHP 8.5.12, Laravel 13.39.0, Pest, SQLite and MySQL 8.0.43 (see Databases). Full suite on 2026-11-09 at commit `ede68c5`: SQLite 959 tests, 933 passed, 9 failed, 17 skipped (the 17 are MySQL-only tests); MySQL 959 tests, 938 passed, 9 failed, 12 skipped (the 12 are SQLite-only tests). The 9 failures are old and not AI related (8 Vite manifest tests that need `public/build/manifest.json`, and 1 `RegistrationTest` registration test). Pint reports the same 3 old files, PHPStan the same 1 old error (`VerifyEmailController`). Every other test passes. Read Provider quota before demoing: the free-tier key allowed about 20 requests per day on `gemini-3.6-flash` (observed; other models may differ).
 
+## Active provider: Qwen (OpenAI-compatible gateway)
+
+The default provider is now `AI_PROVIDER=openai`: `qwen/qwen3.8-max` through an OpenAI-compatible `POST {OPENAI_BASE_URL}/chat/completions` (env `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`; the key lives only in the git-ignored `.env`). Gemini stays available with `AI_PROVIDER=gemini` (`AI_GEMINI_KEY`, `AI_GEMINI_MODEL`). Same adapter (`GeminiClient`, class name kept), same contract: structured output via `response_format: json_schema`, images as `data:` URLs, `finish_reason` must be `stop`, reasoning text is ignored, one retry inside the shared deadline.
+
+Checked live on 2026-11-09: `ai:preflight` ok (model `qwen3.8-max`, about 6 s); a text+schema call and a label-image call (FDA label: 230 kcal, 160 mg read correctly) work. Offline tests: `tests/Feature/Ai/OpenAiClientTest.php` (13).
+
+Limits, stated plainly:
+- The gateway is a FREE Qwen tier that returns HTTP 429 "at capacity" with `Retry-After` of 6 to 26 s. Our scan deadline is 25 s, so a longer `Retry-After` is not retried and the request fails with `AI_PROVIDER_ERROR`. In a live eval of 8 samples only a minority was read; a 3-image run read 1 of 3. Latency of a successful label read was about 10 to 22 s. Plan for a paid or reserved capacity before the demo.
+- There is no `store:false` equivalent: retention and training use are the gateway operator's policy. Do not send real user photos or chats until that policy is known.
+- The earlier eval numbers in this README were produced with Gemini, not Qwen. Accuracy of `qwen/qwen3.8-max` on the label sets is NOT measured yet (capacity-blocked).
+- `php tools/ai-dev.php doctor` still reports the Gemini key flag only (the baseline helper was not changed).
+
 ## What exists
 
 | Feature      | Summary                                                                                                                                                        |

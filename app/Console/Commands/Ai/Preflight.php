@@ -4,17 +4,18 @@ namespace App\Console\Commands\Ai;
 
 use App\Exceptions\Ai\AiException;
 use App\Services\Ai\Gemini\GeminiClient;
+use App\Services\Ai\Provider;
 use Illuminate\Console\Command;
 
 class Preflight extends Command
 {
     protected $signature = 'ai:preflight';
 
-    protected $description = 'Send one tiny JSON request to the configured Gemini model and print sanitized metadata.';
+    protected $description = 'Send one tiny JSON request to the configured model and print sanitized metadata.';
 
     public function handle(GeminiClient $client): int
     {
-        $model = (string) config('ai.gemini.model');
+        $model = Provider::model();
 
         try {
             $result = $client->generate(

@@ -3,7 +3,14 @@
 return [
     'enabled' => (bool) env('AI_ENABLED', false),
 
-    'provider' => 'gemini',
+    // `openai` = OpenAI-compatible chat/completions gateway (Qwen); `gemini` = Google generateContent.
+    'provider' => env('AI_PROVIDER', 'openai'),
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'qwen/qwen3.8-max'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.twigpine.com/v1'),
+    ],
 
     'gemini' => [
         'api_key' => env('AI_GEMINI_KEY'),

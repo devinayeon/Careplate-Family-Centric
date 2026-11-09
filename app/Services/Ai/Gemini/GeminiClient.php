@@ -4,6 +4,7 @@ namespace App\Services\Ai\Gemini;
 
 use App\Exceptions\Ai\AiException;
 use App\Http\Middleware\Ai\AiResponseHeaders;
+use App\Services\Ai\Provider;
 use DomainException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
@@ -13,7 +14,8 @@ use Illuminate\Support\Sleep;
 use Throwable;
 
 /**
- * Single REST adapter for Gemini generateContent. One generation, at most one
+ * Single REST adapter for the active provider: Gemini generateContent or an OpenAI-compatible
+ * chat/completions gateway (Qwen), chosen by `ai.provider`. One generation, at most one
  * transient retry inside a shared deadline, no JSON repair, no model switching.
  * Logs allowlisted metadata only; provider error text never leaves this class.
  */
@@ -70,7 +72,7 @@ class GeminiClient
             $retryAfter = null;
             $response = null;
             try {
-                $response = Http::withHeaders(['x-goog-api-key' => (string) config('ai.gemini.api_key')])
+                $response = Http::withHeaders(Provider::isOpenAi() ? ['Authorization' => 'Bearer '.Provider::apiKey()] : ['x-goog-api-key' => Provider::apiKey()])
                     ->acceptJson()
                     ->asJson()
                     ->connectTimeout(min((float) config('ai.http.connect_timeout_seconds', 5), $remaining))
@@ -111,7 +113,7 @@ class GeminiClient
     private function result(Response $response, int $start): GeminiResult
     {
         try {
-            $parsed = GeminiResponseParser::parse($response->json());
+            $parsed = Provider::isOpenAi() ? OpenAiResponseParser::parse($response->json()) : GeminiResponseParser::parse($response->json());
         } catch (DomainException $e) {
             throw $this->fail('AI_OUTPUT_INVALID', $e->getMessage());
         }
@@ -128,16 +130,16 @@ class GeminiClient
 
     private function endpoint(): string
     {
-        $key = config('ai.gemini.api_key');
-        if (! config('ai.enabled') || ! is_string($key) || trim($key) === '') {
+        $key = Provider::apiKey();
+        if (! config('ai.enabled') || trim($key) === '') {
             throw $this->fail('AI_DISABLED', 'disabled');
         }
-        $model = (string) config('ai.gemini.model');
-        if (preg_match('/^[A-Za-z0-9._-]{1,100}$/', $model) !== 1) {
+        $model = Provider::model();
+        if (preg_match(Provider::isOpenAi() ? '/^[A-Za-z0-9._\/-]{1,100}$/' : '/^[A-Za-z0-9._-]{1,100}$/', $model) !== 1) {
             throw $this->fail('POLICY_CONFIG_INVALID', 'bad_model_id');
         }
 
-        return rtrim((string) config('ai.gemini.base_url'), '/').'/models/'.$model.':generateContent';
+        return Provider::isOpenAi() ? Provider::baseUrl().'/chat/completions' : Provider::baseUrl().'/models/'.$model.':generateContent';
     }
 
     /**
@@ -147,6 +149,10 @@ class GeminiClient
      */
     private function body(string $systemPrompt, array $parts, array $schema, int $maxOutputTokens): array
     {
+        if (Provider::isOpenAi()) {
+            return $this->openAiBody($systemPrompt, $parts, $schema, $maxOutputTokens);
+        }
+
         return [
             'store' => false,
             'systemInstruction' => ['parts' => [['text' => $systemPrompt]]],
@@ -156,6 +162,36 @@ class GeminiClient
                 'maxOutputTokens' => $maxOutputTokens,
                 'responseFormat' => ['text' => ['mimeType' => 'APPLICATION_JSON', 'schema' => $schema]],
             ],
+        ];
+    }
+
+    /**
+     * OpenAI-compatible body: Gemini-style parts become chat content (text / image data URL).
+     * No provider storage flag exists here; retention is the gateway's policy.
+     *
+     * @param  array<int, array<string, mixed>>  $parts
+     * @param  array<string, mixed>  $schema
+     * @return array<string, mixed>
+     */
+    private function openAiBody(string $systemPrompt, array $parts, array $schema, int $maxOutputTokens): array
+    {
+        $content = [];
+        foreach ($parts as $part) {
+            if (isset($part['text'])) {
+                $content[] = ['type' => 'text', 'text' => (string) $part['text']];
+            } elseif (isset($part['inlineData'])) {
+                $content[] = ['type' => 'image_url', 'image_url' => ['url' => 'data:'.$part['inlineData']['mimeType'].';base64,'.$part['inlineData']['data']]];
+            }
+        }
+
+        return [
+            'model' => Provider::model(),
+            'max_tokens' => $maxOutputTokens,
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => $content],
+            ],
+            'response_format' => ['type' => 'json_schema', 'json_schema' => ['name' => 'result', 'schema' => $schema]],
         ];
     }
 
@@ -195,7 +231,7 @@ class GeminiClient
             'reason' => $this->lastReason,
             'attempts' => $attempts,
             'latency_ms' => $this->latencyMs($start),
-            'model' => (string) config('ai.gemini.model'),
+            'model' => Provider::model(),
             'model_version' => $result?->modelVersion,
             'usage' => $result?->usage,
         ], fn ($v) => $v !== null));
