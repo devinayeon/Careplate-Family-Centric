@@ -3,11 +3,18 @@
 return [
     'enabled' => (bool) env('AI_ENABLED', false),
 
-    'provider' => 'gemini',
+    // `gemini` = Google generateContent (default); `openai` = OpenAI-compatible chat/completions gateway (Qwen).
+    'provider' => env('AI_PROVIDER', 'gemini'),
+
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'qwen/qwen3.8-max'),
+        'base_url' => env('OPENAI_BASE_URL', 'https://api.twigpine.com/v1'),
+    ],
 
     'gemini' => [
         'api_key' => env('AI_GEMINI_KEY'),
-        'model' => env('AI_GEMINI_MODEL', 'gemini-3.6-flash'),
+        'model' => env('AI_GEMINI_MODEL', 'gemini-3.5-flash-lite'),
         'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
         'thinking_level' => 'low',
 

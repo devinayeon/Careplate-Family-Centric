@@ -9,6 +9,7 @@ use App\Services\Ai\Eval\ScanComparer;
 use App\Services\Ai\Eval\ScanEvalRunner;
 use App\Services\Ai\Eval\ScanManifest;
 use App\Services\Ai\Eval\ScanRunStats;
+use App\Services\Ai\Provider;
 use App\Services\Ai\Scan\ImagePreparer;
 use Illuminate\Console\Command;
 use Throwable;
@@ -62,7 +63,7 @@ class EvalRun extends Command
 
             return self::INVALID;
         }
-        if (config('ai.enabled') !== true || (string) config('ai.gemini.api_key', '') === '') {
+        if (config('ai.enabled') !== true || Provider::apiKey() === '') {
             $this->error('AI is disabled or no provider key is configured; nothing was sent.');
 
             return self::FAILURE;
@@ -180,7 +181,7 @@ class EvalRun extends Command
             'caveat' => in_array('web_sample', $kinds, true)
                 ? 'Mostly US/Canadian/European web samples with AI-transcribed, human-unverified truth. Not accuracy on Indonesian packaging.'
                 : 'Indonesian label set: real photos have AI-transcribed, human-unverified truth (n is tiny); synthetic labels are exact by construction but clean renders, far easier than photos. Repeated runs measure stability, not independent samples.',
-            'model_config' => (string) config('ai.gemini.model'),
+            'model_config' => Provider::model(),
             'model_versions_reported' => $versions,
             'prompt_sha256' => hash_file('sha256', base_path('ai/prompts/ocr-system.txt')),
             'requests' => count($items),
@@ -199,7 +200,7 @@ class EvalRun extends Command
      */
     private function chat(): int
     {
-        $enabled = config('ai.enabled') === true && (string) config('ai.gemini.api_key', '') !== '';
+        $enabled = config('ai.enabled') === true && Provider::apiKey() !== '';
         if (! $enabled) {
             $this->warn('AI is disabled or no provider key is configured: cases that need the model are skipped.');
         }
@@ -252,7 +253,7 @@ class EvalRun extends Command
                 'checks' => 'Deterministic checks only. Relevance and honesty of model text still need human review (scores 0-2, spec 08).',
                 'latency' => 'For two-turn CHAT-07, latency_ms is the last turn only and model_calls spans both turns.',
             ],
-            'model_config' => (string) config('ai.gemini.model'),
+            'model_config' => Provider::model(),
             'model_versions_reported' => $versions,
             'prompt_sha256' => self::lfSha(base_path('ai/prompts/chat-system.txt')),
             'golden_sha256' => self::lfSha(base_path('ai/evals/chat-golden.jsonl')),
