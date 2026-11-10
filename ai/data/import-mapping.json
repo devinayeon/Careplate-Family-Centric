@@ -1,0 +1,139 @@
+{
+    "artifact_status": "planning_template",
+    "schema_version": "careplate-fdc-import-plan-v1",
+    "reviewed_as_of": "2026-11-06",
+    "actual_snapshot_acquired": true,
+    "snapshot_nutrient_identity_validation": "required_on_day_2_before_approval",
+    "source_system": "USDA_FDC",
+    "source_url": "https://fdc.nal.usda.gov/download-datasets/",
+    "candidate_snapshot_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2026-10-29.zip",
+    "source_snapshot_sha256": "dd414cc9f1a132626bad354ef6655972c78b44aff14f16114dc899708663c579",
+    "source_snapshot_version": "2026-10-29",
+    "source_snapshot_manifest": "ai/data/snapshot.manifest.json",
+    "allowed_data_types": ["Foundation", "SR Legacy"],
+    "canonical_food_basis": "100g",
+    "basis_scope": "edible_portion_only",
+    "volume_conversion": "not_supported_without_verified_density",
+    "source_identifier_path": "fdcId",
+    "nutrient_identifier_path": "foodNutrients[].nutrient.id",
+    "legacy_nutrient_number_must_not_be_used_as_id": true,
+    "nutrient_amount_path": "foodNutrients[].amount",
+    "nutrient_unit_path": "foodNutrients[].nutrient.unitName",
+    "fields": {
+        "protein_g": {
+            "nutrient_id": 1003,
+            "expected_name": "Protein",
+            "unit": "g",
+            "missing_value": null
+        },
+        "fat_g": {
+            "nutrient_id": 1004,
+            "expected_name": "Total lipid (fat)",
+            "unit": "g",
+            "missing_value": null
+        },
+        "carbohydrate_g": {
+            "nutrient_id": 1005,
+            "expected_name": "Carbohydrate, by difference",
+            "unit": "g",
+            "missing_value": null
+        },
+        "sodium_mg": {
+            "nutrient_id": 1093,
+            "expected_name": "Sodium, Na",
+            "unit": "mg",
+            "missing_value": null
+        },
+        "sugars_total_g": {
+            "nutrient_id": 2000,
+            "expected_name": "Sugars, total including NLEA",
+            "unit": "g",
+            "missing_value": null,
+            "do_not_substitute": [
+                "added sugars",
+                "individual sugars",
+                "unreviewed nutrient 1063"
+            ]
+        },
+        "energy_kcal": {
+            "selection": "first_available_valid_exact_value_in_preference_order",
+            "preference": [
+                {
+                    "nutrient_id": 2048,
+                    "method": "Atwater specific factors",
+                    "allowed_data_types": ["Foundation", "SR Legacy"]
+                },
+                {
+                    "nutrient_id": 2047,
+                    "method": "Atwater general factors",
+                    "allowed_data_types": ["Foundation", "SR Legacy"]
+                },
+                {
+                    "nutrient_id": 1008,
+                    "method": "Legacy energy",
+                    "allowed_data_types": ["SR Legacy", "Foundation"],
+                    "note": "On Foundation records 1008 is accepted only as a flagged fallback when 2048 and 2047 are absent; the candidate then carries requires_review with review_reason energy_legacy_1008."
+                }
+            ],
+            "unit": "kcal",
+            "missing_value": null,
+            "sum_multiple_energy_entries": false,
+            "preserve_selected_nutrient_id_and_method": true
+        }
+    },
+    "uncertainty_policy": {
+        "missing_nutrient": {
+            "public_value": null,
+            "provenance_qualifier": "unknown"
+        },
+        "limit_of_quantification_present": {
+            "public_value": null,
+            "provenance_qualifier": "less_than",
+            "preserve_source_loq": true,
+            "component_zero_is_not_exact_zero": true
+        },
+        "exact_zero_without_loq_or_other_uncertainty": {
+            "public_value": 0,
+            "provenance_qualifier": "exact"
+        },
+        "negative_nonfinite_or_unit_mismatch": {
+            "public_value": null,
+            "requires_review": true
+        },
+        "duplicate_unresolvable_nutrient": {
+            "public_value": null,
+            "requires_review": true
+        },
+        "never_impute_with_llm": true,
+        "never_default_missing_to_zero": true
+    },
+    "import_gate": {
+        "initial_status": "pending",
+        "minimum_source_reviewed_foods": 10,
+        "target_source_reviewed_foods": 20,
+        "required_before_verified": [
+            "actual_source_id",
+            "snapshot_version_and_sha256",
+            "exact_description_and_preparation_state",
+            "nutrient_id_name_unit_validation",
+            "nullable_value_and_loq_review",
+            "reviewer_actor_and_time",
+            "source_reference"
+        ],
+        "verification_meaning": "admin_source_review_not_new_laboratory_or_clinical_validation"
+    },
+    "references": [
+        {
+            "url": "https://fdc.nal.usda.gov/api-guide/",
+            "supports": "public_domain_CC0_API_auth_and_access"
+        },
+        {
+            "url": "https://fdc.nal.usda.gov/Foundation_Foods_Documentation/",
+            "supports": "per100g_edible_basis_energy_ids_2047_2048_1008_legacy_and_LOQ"
+        },
+        {
+            "url": "https://build.fhir.org/nutritionproduct-example-apples.json.html",
+            "supports": "informative_primary_HL7_example_referencing_FDC_nutrient_code_names_including_2000_not_actual_USDA_snapshot_validation"
+        }
+    ]
+}

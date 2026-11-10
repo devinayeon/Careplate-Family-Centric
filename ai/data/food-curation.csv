@@ -1,0 +1,21 @@
+candidate_id,priority,display_name_id,search_query_en,required_state,canonical_basis,source_system,preferred_data_type,source_id,source_url,reviewer_id,status,artifact_status
+FOOD-001,1,Nasi putih matang tanpa tambahan,rice white cooked without added fat,cooked plain,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-002,2,Beras putih mentah,rice white raw,raw dry,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-003,3,Pisang tanpa kulit,bananas raw,raw edible portion without peel,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-004,4,Apel dengan kulit,apples raw with skin,raw edible portion without core,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-005,5,Wortel mentah,carrots raw,raw edible portion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-006,6,Tomat mentah,tomatoes raw,raw edible portion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-007,7,Telur ayam utuh mentah,egg whole raw fresh,raw whole edible portion without shell,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-008,8,Dada ayam tanpa kulit mentah,chicken breast skinless raw,raw boneless skinless,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-009,9,Kentang mentah,potatoes raw,raw edible portion as exact source description,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-010,10,Susu sapi utuh basis gram,milk whole,plain whole milk per100g no volume conversion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-011,11,Oat kering,oats dry,dry uncooked,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-012,12,Ubi jalar mentah,sweet potato raw,raw edible portion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-013,13,Jeruk bagian dapat dimakan,oranges raw,raw without peel and refuse,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-014,14,Pepaya mentah,papayas raw,raw without peel and seeds,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-015,15,Bayam mentah,spinach raw,raw edible portion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-016,16,Brokoli mentah,broccoli raw,raw edible portion,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-017,17,Daging sapi giling varian spesifik,beef ground raw,raw fat percentage must match source description,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-018,18,Yogurt plain tanpa tambahan gula,yogurt plain unsweetened,plain unsweetened fat level must match source,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-019,19,Tahu firm varian sumber,tofu firm,exact coagulant and preparation from source required,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template
+FOOD-020,20,Tempe tanpa tambahan,tempeh plain,exact raw or cooked state must be retained from source,100g,USDA_FDC,Foundation_or_SR_Legacy,,https://fdc.nal.usda.gov/,,planned_not_acquired,planning_template

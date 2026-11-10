@@ -1,0 +1,240 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Careplate raw Vision extraction, not public API response",
+    "type": "object",
+    "properties": {
+        "readable": {
+            "type": "boolean"
+        },
+        "label_basis": {
+            "enum": ["per_serving", "per_100g", "per_100ml", "unknown"]
+        },
+        "needs_review": {
+            "type": "boolean"
+        },
+        "serving_size": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": ["number", "null"],
+                    "minimum": 0
+                },
+                "unit": {
+                    "enum": ["g", "ml", null]
+                },
+                "household_text": {
+                    "type": ["string", "null"]
+                }
+            },
+            "required": ["value", "unit", "household_text"],
+            "additionalProperties": false
+        },
+        "servings_per_package": {
+            "type": ["number", "null"],
+            "minimum": 0
+        },
+        "nutrients": {
+            "type": "object",
+            "properties": {
+                "energy": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                },
+                "fat": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                },
+                "sugars_total": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                },
+                "protein": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                },
+                "carbohydrate": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                },
+                "sodium": {
+                    "type": "object",
+                    "properties": {
+                        "raw_value": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        "raw_unit": {
+                            "enum": ["g", "mg", "kcal", "kJ", null]
+                        },
+                        "qualifier": {
+                            "enum": ["exact", "less_than", "unknown"]
+                        },
+                        "evidence": {
+                            "type": ["string", "null"]
+                        },
+                        "label_percent_akg": {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        }
+                    },
+                    "required": [
+                        "raw_value",
+                        "raw_unit",
+                        "qualifier",
+                        "evidence",
+                        "label_percent_akg"
+                    ],
+                    "additionalProperties": false
+                }
+            },
+            "required": [
+                "energy",
+                "fat",
+                "sugars_total",
+                "protein",
+                "carbohydrate",
+                "sodium"
+            ],
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "readable",
+        "label_basis",
+        "needs_review",
+        "serving_size",
+        "servings_per_package",
+        "nutrients"
+    ],
+    "additionalProperties": false
+}

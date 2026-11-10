@@ -18,6 +18,9 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
+// Existing AI tests exercise the Gemini adapter; OpenAI-compatible (Qwen) tests opt in explicitly.
+pest()->beforeEach(fn () => config(['ai.provider' => 'gemini']))->in('Feature');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations
