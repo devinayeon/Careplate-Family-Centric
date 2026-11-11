@@ -14,8 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $makanan_id
  * @property \Illuminate\Support\Carbon $tanggal_konsumsi
  * @property string $waktu_konsumsi
- * @property float $jumlah_porsi
- * @property float $total_kalori
+ * @property string|null $waktu_makan
+ * @property string $jumlah_porsi
+ * @property string|null $total_kalori
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read Pengguna $pengguna
@@ -32,9 +33,41 @@ class PelacakanMakanan extends Model
         'makanan_id',
         'tanggal_konsumsi',
         'waktu_konsumsi',
+        'waktu_makan',
         'jumlah_porsi',
         'total_kalori',
     ];
+
+    /** Meal times in display order (Figma 03), key => label. */
+    public const WAKTU_MAKAN = [
+        'sarapan' => 'Sarapan',
+        'makan_siang' => 'Makan Siang',
+        'makan_malam' => 'Makan Malam',
+        'camilan' => 'Camilan',
+    ];
+
+    /**
+     * The stored meal time, or for rows written before `waktu_makan` existed, the one implied by the clock time
+     * (before 11.00 breakfast, before 16.00 lunch, otherwise dinner; a snack cannot be inferred).
+     */
+    public function waktuMakanEfektif(): string
+    {
+        if ($this->waktu_makan !== null && isset(self::WAKTU_MAKAN[$this->waktu_makan])) {
+            return $this->waktu_makan;
+        }
+        $hour = (int) substr((string) $this->waktu_konsumsi, 0, 2);
+
+        return $hour < 11 ? 'sarapan' : ($hour < 16 ? 'makan_siang' : 'makan_malam');
+    }
+
+    /** Calories of `porsi` portions of a food (energi is per one portion = kuantitas satuan), 2 decimals. */
+    public static function hitungKalori(Makanan $makanan, string $porsi): string
+    {
+        $energi = (string) $makanan->energi; // decimal(8,2) NOT NULL column: always a numeric string
+        $porsi = is_numeric($porsi) ? $porsi : '0';
+
+        return bcadd(bcmul($energi, $porsi, 4), '0.005', 2);
+    }
 
     /**
      * @return array<string, string>
@@ -56,10 +89,11 @@ class PelacakanMakanan extends Model
     protected static function booted(): void
     {
         static::creating(function (PelacakanMakanan $pelacakan) {
-            if (empty($pelacakan->total_kalori) && $pelacakan->makanan_id) {
-                $makanan = Makanan::find($pelacakan->makanan_id);
+            // Only when no value was given: an explicit 0 (a zero-calorie food) must stay 0.
+            if ($pelacakan->total_kalori === null && $pelacakan->makanan_id) {
+                $makanan = Makanan::withTrashed()->find($pelacakan->makanan_id);
                 if ($makanan) {
-                    $pelacakan->total_kalori = round((float) $makanan->energi * (float) ($pelacakan->jumlah_porsi ?: 1), 2);
+                    $pelacakan->total_kalori = self::hitungKalori($makanan, (string) ($pelacakan->jumlah_porsi ?: '1'));
                 }
             }
         });

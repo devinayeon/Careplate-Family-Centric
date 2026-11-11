@@ -13,6 +13,7 @@ use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\AiPageController;
+use App\Http\Controllers\User\MealLogController;
 use App\Http\Controllers\User\UserDashboardController;
 use App\Http\Controllers\User\UserFoodController;
 use Illuminate\Foundation\Application;
@@ -95,7 +96,12 @@ Route::middleware(['auth'])->name('user.')->group(function () {
     Route::get('/beranda', [UserDashboardController::class, 'index'])->name('dashboard');
 
     // Menu-menu Pengguna
-    Route::get('/catatan-makanan', fn () => redirect()->route('user.dashboard'))->name('meals');
+    // Catatan Makanan (Figma 03): the signed-in user's own meal log; /makanan is declared before /{pelacakan}.
+    Route::get('/catatan-makanan', [MealLogController::class, 'index'])->middleware('permission:meal_log:read')->name('meals');
+    Route::get('/catatan-makanan/makanan', [MealLogController::class, 'foods'])->middleware('permission:meal_log:create')->name('meals.foods');
+    Route::post('/catatan-makanan', [MealLogController::class, 'store'])->middleware(['permission:meal_log:create', 'throttle:60,1'])->name('meals.store');
+    Route::put('/catatan-makanan/{pelacakan}', [MealLogController::class, 'update'])->whereNumber('pelacakan')->middleware('permission:meal_log:update')->name('meals.update');
+    Route::delete('/catatan-makanan/{pelacakan}', [MealLogController::class, 'destroy'])->whereNumber('pelacakan')->middleware('permission:meal_log:delete')->name('meals.destroy');
     // AI screens: same permissions as the /ai/v1 API behind them.
     Route::get('/pindai-kemasan', [AiPageController::class, 'scan'])->middleware('permission:health_tool:use_scanner')->name('scan');
     Route::get('/chat-gizi', [AiPageController::class, 'chat'])->middleware('permission:health_tool:use_ai_chat')->name('chat_gizi');

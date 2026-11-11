@@ -40,21 +40,24 @@ class UserDashboardController extends Controller
 
         $targetKalori = (float) ($pengguna?->kalori ?? 0.00);
 
-        // Misi harian
+        // Misi harian: judged by meal time (sarapan, makan_siang, makan_malam), not by the number of rows.
+        $waktuMakanHariIni = $catatanMakananHariIni->map(fn (PelacakanMakanan $c) => $c->waktuMakanEfektif())->unique();
+        $waktuUtama = $waktuMakanHariIni->intersect(['sarapan', 'makan_siang', 'makan_malam']);
+
         $misiList = [
             [
                 'id' => 1,
                 'title' => 'Catat sarapan',
                 'action_label' => 'Catat',
                 'route' => 'user.meals',
-                'completed' => count($catatanMakananHariIni) > 0,
+                'completed' => $waktuMakanHariIni->contains('sarapan'),
             ],
             [
                 'id' => 2,
                 'title' => 'Catat tiga waktu makan',
                 'action_label' => 'Lihat catatan',
                 'route' => 'user.meals',
-                'completed' => count($catatanMakananHariIni) >= 3,
+                'completed' => $waktuUtama->count() >= 3,
             ],
             [
                 'id' => 3,

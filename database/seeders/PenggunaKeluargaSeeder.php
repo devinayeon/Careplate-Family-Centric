@@ -134,6 +134,7 @@ class PenggunaKeluargaSeeder extends Seeder
                 'waktu_konsumsi' => '07:30:00',
             ], [
                 'jumlah_porsi' => 1.00,
+                'waktu_makan' => 'sarapan',
                 'total_kalori' => $makanan1->energi,
             ]);
         }
@@ -146,6 +147,7 @@ class PenggunaKeluargaSeeder extends Seeder
                 'waktu_konsumsi' => '12:30:00',
             ], [
                 'jumlah_porsi' => 1.00,
+                'waktu_makan' => 'makan_siang',
                 'total_kalori' => $makanan2->energi,
             ]);
 
@@ -156,6 +158,7 @@ class PenggunaKeluargaSeeder extends Seeder
                 'waktu_konsumsi' => '12:30:00',
             ], [
                 'jumlah_porsi' => 1.00,
+                'waktu_makan' => 'makan_siang',
                 'total_kalori' => $makanan3->energi,
             ]);
         }
