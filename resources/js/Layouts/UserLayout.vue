@@ -68,7 +68,7 @@ const logout = () => {
     >
         <!-- Desktop Sidebar -->
         <aside
-            class="hidden min-h-screen shrink-0 flex-col justify-between border-r border-gray-100 bg-white p-5 transition-colors md:flex md:w-64 dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            class="hidden md:flex md:w-64 flex-col bg-white dark:bg-[#1c1c1c] border-r border-gray-100 dark:border-[#2e2e2e] h-screen sticky top-0 p-5 shrink-0 justify-between overflow-y-auto custom-scrollbar transition-colors z-30"
         >
             <div>
                 <!-- Logo -->
@@ -99,7 +99,9 @@ const logout = () => {
                         "
                         class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all"
                         :class="
-                            route().current(item.routeName)
+                            route().current(item.routeName) ||
+                            (item.routeName === 'user.articles' && route().current('user.articles.*')) ||
+                            (item.routeName === 'user.family' && route().current('user.family.*'))
                                 ? 'bg-[#e7f5ec] font-semibold text-[#0f6b36] dark:bg-[#17321f] dark:text-[#3fcb7a]'
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-[#a3a3a3] dark:hover:bg-[#262626] dark:hover:text-[#f0efea]'
                         "
@@ -108,7 +110,9 @@ const logout = () => {
                             :is="item.icon"
                             class="h-4 w-4 shrink-0"
                             :class="
-                                route().current(item.routeName)
+                                route().current(item.routeName) ||
+                                (item.routeName === 'user.articles' && route().current('user.articles.*')) ||
+                                (item.routeName === 'user.family' && route().current('user.family.*'))
                                     ? 'text-[#0f6b36] dark:text-[#3fcb7a]'
                                     : 'text-gray-400 dark:text-gray-500'
                             "
@@ -172,7 +176,9 @@ const logout = () => {
                 @click="isMobileMenuOpen = false"
                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium"
                 :class="
-                    route().current(item.routeName)
+                    route().current(item.routeName) ||
+                    (item.routeName === 'user.articles' && route().current('user.articles.*')) ||
+                    (item.routeName === 'user.family' && route().current('user.family.*'))
                         ? 'bg-[#e7f5ec] text-[#0f6b36] dark:bg-[#17321f] dark:text-[#3fcb7a]'
                         : 'text-gray-600 dark:text-gray-300'
                 "
