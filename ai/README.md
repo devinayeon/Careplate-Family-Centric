@@ -35,6 +35,7 @@ The chat reads only `foods` (verified, per 100 g, with citations). Foods the adm
 | Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
 | Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                        |
 | Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                     |
+| Screens      | `/pindai-kemasan` and `/chat-gizi` (Inertia pages `User/Pindai`, `User/ChatGizi`, same permissions as the API) call `/ai/v1/*` from the browser with the session cookie and the `XSRF-TOKEN` header (`resources/js/lib/aiApi.ts`). A chat is titled by its first question (60 characters). |
 | Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                   |
 
 ## Routes

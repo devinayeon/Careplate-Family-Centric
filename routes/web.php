@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\AiPageController;
 use App\Http\Controllers\User\UserDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -84,8 +85,9 @@ Route::middleware(['auth'])->name('user.')->group(function () {
 
     // Menu-menu Pengguna
     Route::get('/catatan-makanan', fn () => redirect()->route('user.dashboard'))->name('meals');
-    Route::get('/pindai-kemasan', fn () => redirect()->route('user.dashboard'))->name('scan');
-    Route::get('/chat-gizi', fn () => redirect()->route('user.dashboard'))->name('chat_gizi');
+    // AI screens: same permissions as the /ai/v1 API behind them.
+    Route::get('/pindai-kemasan', [AiPageController::class, 'scan'])->middleware('permission:health_tool:use_scanner')->name('scan');
+    Route::get('/chat-gizi', [AiPageController::class, 'chat'])->middleware('permission:health_tool:use_ai_chat')->name('chat_gizi');
     Route::get('/kalkulator', fn () => redirect()->route('user.dashboard'))->name('calculator');
     Route::get('/data-makanan', fn () => redirect()->route('user.dashboard'))->name('foods');
     Route::get('/artikel', fn () => redirect()->route('user.dashboard'))->name('articles');
