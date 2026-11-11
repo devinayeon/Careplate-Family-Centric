@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Makanan;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -44,7 +45,8 @@ class HandleInertiaRequests extends Middleware
                     'keluarga' => $user->pengguna?->keluarga,
                 ]) : null,
             ],
-            'pendingVerificationCount' => fn () => $user ? \App\Models\Makanan::where('status', 'menunggu')->count() : 0,
+            'flash' => ['success' => fn () => $request->session()->get('success'), 'error' => fn () => $request->session()->get('error')],
+            'pendingVerificationCount' => fn () => $user ? Makanan::where('status', 'menunggu')->count() : 0,
         ];
     }
 }

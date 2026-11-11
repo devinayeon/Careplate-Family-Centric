@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Head, Link, useForm } from "@inertiajs/vue3";
-import AuthBrandPanel from "@/Components/Auth/AuthBrandPanel.vue";
-import InputError from "@/Components/InputError.vue";
+import { ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import AuthBrandPanel from '@/Components/Auth/AuthBrandPanel.vue';
+import InputError from '@/Components/InputError.vue';
 
 const form = useForm({
-    email: "",
-    name: "",
-    password: "",
-    password_confirmation: "",
+    email: '',
+    name: '',
+    password: '',
+    password_confirmation: '',
 });
 
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
 const submit = () => {
-    form.post(route("register"), {
+    form.post(route('register'), {
         onFinish: () => {
-            form.reset("password", "password_confirmation");
+            form.reset('password', 'password_confirmation');
         },
     });
 };
@@ -157,7 +157,7 @@ const submit = () => {
                                 @click="showPassword = !showPassword"
                                 class="absolute right-4 cursor-pointer text-sm font-bold text-[#191919] transition-colors select-none hover:text-[#0b8043]"
                             >
-                                {{ showPassword ? "Sembunyikan" : "Tampilkan" }}
+                                {{ showPassword ? 'Sembunyikan' : 'Tampilkan' }}
                             </button>
                         </div>
                         <InputError
@@ -199,8 +199,8 @@ const submit = () => {
                             >
                                 {{
                                     showConfirmPassword
-                                        ? "Sembunyikan"
-                                        : "Tampilkan"
+                                        ? 'Sembunyikan'
+                                        : 'Tampilkan'
                                 }}
                             </button>
                         </div>

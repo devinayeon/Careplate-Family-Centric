@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAiSyncController;
 use App\Http\Controllers\Admin\AdminArticleCategoryController;
 use App\Http\Controllers\Admin\AdminArticleController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -11,7 +12,9 @@ use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\AiPageController;
 use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\User\UserFoodController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -62,6 +65,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/data-makanan/{makanan}', [AdminFoodController::class, 'update'])->name('foods.update');
     Route::delete('/data-makanan/{makanan}', [AdminFoodController::class, 'destroy'])->name('foods.destroy');
 
+    // Sinkronisasi Chat Gizi: publish verified foods the AI chat is missing
+    Route::post('/sinkronisasi-ai', [AdminAiSyncController::class, 'run'])->name('ai-sync.run');
+
     // Verifikasi Pengajuan Makanan
     Route::get('/verifikasi', [AdminVerificationController::class, 'index'])->name('verifications');
     Route::post('/verifikasi/{makanan}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
@@ -90,10 +96,16 @@ Route::middleware(['auth'])->name('user.')->group(function () {
 
     // Menu-menu Pengguna
     Route::get('/catatan-makanan', fn () => redirect()->route('user.dashboard'))->name('meals');
-    Route::get('/pindai-kemasan', fn () => redirect()->route('user.dashboard'))->name('scan');
-    Route::get('/chat-gizi', fn () => redirect()->route('user.dashboard'))->name('chat_gizi');
+    // AI screens: same permissions as the /ai/v1 API behind them.
+    Route::get('/pindai-kemasan', [AiPageController::class, 'scan'])->middleware('permission:health_tool:use_scanner')->name('scan');
+    Route::get('/chat-gizi', [AiPageController::class, 'chat'])->middleware('permission:health_tool:use_ai_chat')->name('chat_gizi');
     Route::get('/kalkulator', fn () => redirect()->route('user.dashboard'))->name('calculator');
-    Route::get('/data-makanan', fn () => redirect()->route('user.dashboard'))->name('foods');
+    // Data Makanan (Figma 07). /ajukan is declared before /{makanan} so it is not read as an id.
+    Route::get('/data-makanan', [UserFoodController::class, 'index'])->middleware('permission:food:read')->name('foods');
+    Route::get('/data-makanan/ajukan', [UserFoodController::class, 'create'])->middleware('permission:food:create')->name('foods.create');
+    Route::post('/data-makanan/ajukan', [UserFoodController::class, 'store'])->middleware(['permission:food:create', 'throttle:20,60'])->name('foods.store');
+    Route::get('/data-makanan/{makanan}', [UserFoodController::class, 'show'])->whereNumber('makanan')->middleware('permission:food:read')->name('foods.show');
+    Route::get('/pengajuan-saya', [UserFoodController::class, 'mine'])->middleware('permission:food:create')->name('foods.mine');
     Route::get('/artikel', fn () => redirect()->route('user.dashboard'))->name('articles');
     Route::get('/konsultasi', fn () => redirect()->route('user.dashboard'))->name('consultation');
     Route::get('/keluarga', fn () => redirect()->route('user.dashboard'))->name('family');

@@ -7,14 +7,17 @@ import SearchBar from '@/Components/UI/SearchBar.vue';
 import PillButton from '@/Components/UI/PillButton.vue';
 import DataTable, { type TableColumn } from '@/Components/UI/DataTable.vue';
 import FoodStatusBadge from '@/Components/UI/FoodStatusBadge.vue';
-import FoodFormDrawer, { type FoodFormData } from '@/Components/Admin/FoodFormDrawer.vue';
+import AiFoodChip from '@/Components/Ai/AiFoodChip.vue';
+import FoodFormDrawer, {
+    type FoodFormData,
+} from '@/Components/Admin/FoodFormDrawer.vue';
 import {
     Plus,
     Pencil,
     Trash2,
     Utensils,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
 } from 'lucide-vue-next';
 
 export interface FoodItem {
@@ -22,6 +25,8 @@ export interface FoodItem {
     nama: string;
     kuantitas: number;
     satuan: string;
+    berat_per_satuan_gram?: number | null;
+    ai_status?: { state: string; label: string } | null;
     takaran_saji: string;
     kategori: string;
     kategori_makanan_id: number;
@@ -93,7 +98,7 @@ const applyStatusFilter = (statusKey: string) => {
             preserveState: true,
             preserveScroll: true,
             replace: true,
-        }
+        },
     );
 };
 
@@ -101,14 +106,17 @@ const handleSearch = () => {
     router.get(
         route('admin.foods'),
         {
-            status: activeStatusFilter.value !== 'semua' ? activeStatusFilter.value : undefined,
+            status:
+                activeStatusFilter.value !== 'semua'
+                    ? activeStatusFilter.value
+                    : undefined,
             search: searchQuery.value || undefined,
         },
         {
             preserveState: true,
             preserveScroll: true,
             replace: true,
-        }
+        },
     );
 };
 
@@ -132,6 +140,7 @@ const openEditDrawer = (item: FoodItem) => {
         kategori_makanan_id: item.kategori_makanan_id,
         kuantitas: item.kuantitas,
         satuan: item.satuan,
+        berat_per_satuan_gram: item.berat_per_satuan_gram,
         energi: item.energi,
         protein: item.protein,
         karbohidrat: item.karbohidrat,
@@ -170,32 +179,41 @@ const executeSoftDelete = () => {
     <AdminLayout title="Data Makanan">
         <Head title="Data Makanan - CarePlate Admin" />
 
-        <div class="space-y-6 max-w-6xl">
+        <div class="max-w-6xl space-y-6">
             <!-- 1. Header Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div
+                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
+                    <h1
+                        class="text-3xl font-extrabold tracking-tight text-[#191919] sm:text-4xl dark:text-[#f0efea]"
+                    >
                         Data Makanan
                     </h1>
-                    <p class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3] mt-1">
-                        {{ counts.terverifikasi }} makanan terverifikasi. Perubahan otomatis tersinkron ke Chat Gizi.
+                    <p class="mt-1 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">
+                        {{ counts.terverifikasi }} makanan terverifikasi.
+                        Perubahan otomatis tersinkron ke Chat Gizi.
                     </p>
                 </div>
 
                 <PillButton
                     variant="primary"
                     @click="openCreateDrawer"
-                    class="self-start sm:self-center shadow-xs cursor-pointer"
+                    class="cursor-pointer self-start shadow-xs sm:self-center"
                 >
-                    <Plus class="w-4 h-4 mr-1.5" />
+                    <Plus class="mr-1.5 h-4 w-4" />
                     <span>Tambah Makanan</span>
                 </PillButton>
             </div>
 
             <!-- 2. Filter Bar: Status Tabs & Search Bar -->
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div
+                class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+            >
                 <!-- Status Filter Chips -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <div
+                    class="flex scrollbar-none items-center gap-2 overflow-x-auto pb-1"
+                >
                     <ChipFilter
                         label="Semua"
                         :count="counts.semua"
@@ -234,7 +252,9 @@ const executeSoftDelete = () => {
             </div>
 
             <!-- 3. Table Card -->
-            <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl border border-[#eceae5] dark:border-[#2e2e2e] shadow-xs overflow-hidden">
+            <div
+                class="overflow-hidden rounded-2xl border border-[#eceae5] bg-white shadow-xs dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
                 <DataTable
                     :columns="tableColumns"
                     :items="foods.data"
@@ -252,26 +272,33 @@ const executeSoftDelete = () => {
                         <td class="px-6 py-3.5">
                             <div class="flex items-center gap-3">
                                 <!-- Thumbnail Foto Makanan 48x48 -->
-                                <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-[#f4f3f0] dark:bg-[#262626] border border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-center">
+                                <div
+                                    class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[#eceae5] bg-[#f4f3f0] dark:border-[#2e2e2e] dark:bg-[#262626]"
+                                >
                                     <img
                                         v-if="item.foto_makanan_url"
                                         :src="item.foto_makanan_url"
                                         :alt="item.nama"
-                                        class="w-full h-full object-cover"
+                                        class="h-full w-full object-cover"
                                     />
-                                    <Utensils v-else class="w-5 h-5 text-gray-400 dark:text-[#a3a3a3]" />
+                                    <Utensils
+                                        v-else
+                                        class="h-5 w-5 text-gray-400 dark:text-[#a3a3a3]"
+                                    />
                                 </div>
 
                                 <div class="min-w-0 pr-2">
                                     <button
                                         type="button"
                                         @click="openEditDrawer(item)"
-                                        class="font-bold text-[#191919] dark:text-[#f0efea] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] transition line-clamp-1 block text-sm text-left cursor-pointer"
+                                        class="line-clamp-1 block cursor-pointer text-left text-sm font-bold text-[#191919] transition hover:text-[#0b8043] dark:text-[#f0efea] dark:hover:text-[#3fcb7a]"
                                         :title="item.nama"
                                     >
                                         {{ item.nama }}
                                     </button>
-                                    <span class="text-xs font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] block mt-0.5">
+                                    <span
+                                        class="mt-0.5 block text-xs font-semibold text-[#5e5e5e] dark:text-[#a3a3a3]"
+                                    >
                                         {{ item.takaran_saji }}
                                     </span>
                                 </div>
@@ -279,27 +306,40 @@ const executeSoftDelete = () => {
                         </td>
 
                         <!-- Col 2: Kategori -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] dark:text-[#f0efea] font-medium">
+                        <td
+                            class="px-6 py-3.5 text-sm font-medium whitespace-nowrap text-[#191919] dark:text-[#f0efea]"
+                        >
                             {{ item.kategori }}
                         </td>
 
                         <!-- Col 3: Energi -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919] dark:text-[#f0efea]">
+                        <td
+                            class="px-6 py-3.5 text-right text-sm font-bold whitespace-nowrap text-[#191919] dark:text-[#f0efea]"
+                        >
                             {{ Math.round(item.energi) }} kkal
                         </td>
 
                         <!-- Col 4: Protein -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919] dark:text-[#f0efea]">
+                        <td
+                            class="px-6 py-3.5 text-right text-sm font-bold whitespace-nowrap text-[#191919] dark:text-[#f0efea]"
+                        >
                             {{ Math.round(item.protein) }} g
                         </td>
 
                         <!-- Col 5: Status Badge -->
-                        <td class="px-6 py-3.5 whitespace-nowrap">
+                        <td class="px-6 py-3.5">
                             <FoodStatusBadge :status="item.status" />
+                            <AiFoodChip
+                                v-if="item.ai_status"
+                                :status="item.ai_status"
+                                class="mt-1.5"
+                            />
                         </td>
 
                         <!-- Col 6: Pengaju -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] dark:text-[#f0efea] font-medium">
+                        <td
+                            class="px-6 py-3.5 text-sm font-medium whitespace-nowrap text-[#191919] dark:text-[#f0efea]"
+                        >
                             {{ item.pengaju }}
                         </td>
 
@@ -309,18 +349,18 @@ const executeSoftDelete = () => {
                                 <button
                                     type="button"
                                     @click="openEditDrawer(item)"
-                                    class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] hover:bg-emerald-50 dark:hover:bg-[#17321f] transition cursor-pointer"
+                                    class="cursor-pointer rounded-xl p-2 text-gray-400 transition hover:bg-emerald-50 hover:text-[#0b8043] dark:text-[#a3a3a3] dark:hover:bg-[#17321f] dark:hover:text-[#3fcb7a]"
                                     title="Ubah Makanan"
                                 >
-                                    <Pencil class="w-4 h-4" />
+                                    <Pencil class="h-4 w-4" />
                                 </button>
                                 <button
                                     type="button"
                                     @click="confirmDelete(item)"
-                                    class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition cursor-pointer"
+                                    class="cursor-pointer rounded-xl p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 dark:text-[#a3a3a3] dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                     title="Hapus Makanan (Soft Delete)"
                                 >
-                                    <Trash2 class="w-4 h-4" />
+                                    <Trash2 class="h-4 w-4" />
                                 </button>
                             </div>
                         </td>
@@ -341,23 +381,40 @@ const executeSoftDelete = () => {
         <!-- Modal Konfirmasi Soft Delete -->
         <div
             v-if="isDeleteModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+            class="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs duration-150"
         >
-            <div class="bg-white dark:bg-[#1c1c1c] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-[#2e2e2e]">
-                <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mb-4">
-                    <AlertCircle class="w-6 h-6" />
+            <div
+                class="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
+                <div
+                    class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
+                >
+                    <AlertCircle class="h-6 w-6" />
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-[#f0efea] mb-1">
+                <h3
+                    class="mb-1 text-lg font-bold text-gray-900 dark:text-[#f0efea]"
+                >
                     Hapus Data Makanan?
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-[#a3a3a3] mb-4 leading-relaxed">
+                <p
+                    class="mb-4 text-sm leading-relaxed text-gray-600 dark:text-[#a3a3a3]"
+                >
                     Apakah Anda yakin ingin menghapus
-                    <strong class="text-gray-900 dark:text-[#f0efea]">"{{ foodToDelete?.nama }}"</strong>?
+                    <strong class="text-gray-900 dark:text-[#f0efea]"
+                        >"{{ foodToDelete?.nama }}"</strong
+                    >?
                 </p>
-                <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200/60 dark:border-amber-900/40 mb-6 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
-                    <CheckCircle2 class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div
+                    class="mb-6 flex items-start gap-2 rounded-xl border border-amber-200/60 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
+                >
+                    <CheckCircle2
+                        class="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400"
+                    />
                     <span>
-                        <strong>Soft Delete Aktif:</strong> Data ini akan disembunyikan dari katalog, namun data historis pencatatan makanan pengguna yang pernah mencatat makanan ini akan tetap aman terjaga.
+                        <strong>Soft Delete Aktif:</strong> Data ini akan
+                        disembunyikan dari katalog, namun data historis
+                        pencatatan makanan pengguna yang pernah mencatat makanan
+                        ini akan tetap aman terjaga.
                     </span>
                 </div>
                 <div class="flex items-center justify-end gap-3">
@@ -365,7 +422,7 @@ const executeSoftDelete = () => {
                         type="button"
                         @click="isDeleteModalOpen = false"
                         :disabled="isDeleting"
-                        class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer"
+                        class="cursor-pointer rounded-full px-5 py-2.5 text-xs font-bold text-gray-600 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#262626]"
                     >
                         Batal
                     </button>
@@ -373,7 +430,7 @@ const executeSoftDelete = () => {
                         type="button"
                         @click="executeSoftDelete"
                         :disabled="isDeleting"
-                        class="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow-sm transition disabled:opacity-50 cursor-pointer"
+                        class="cursor-pointer rounded-full bg-red-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
                     >
                         {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus Data' }}
                     </button>

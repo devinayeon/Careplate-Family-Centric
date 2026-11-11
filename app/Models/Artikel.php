@@ -64,7 +64,7 @@ class Artikel extends Model
             return $this->foto_sampul;
         }
 
-        return asset('storage/' . $this->foto_sampul);
+        return asset('storage/'.$this->foto_sampul);
     }
 
     /**

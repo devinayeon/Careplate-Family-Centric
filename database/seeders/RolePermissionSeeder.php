@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\AhliGizi;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -124,6 +125,11 @@ class RolePermissionSeeder extends Seeder
         ];
         $userRole->syncPermissions($userPerms);
 
+        // Demo accounts use a well-known password: never create them in production.
+        if (app()->environment('production')) {
+            return;
+        }
+
         // 3. Default demo users
         $admin = User::firstOrCreate(
             ['email' => 'admin@careplate.test'],
@@ -145,7 +151,7 @@ class RolePermissionSeeder extends Seeder
         );
         $nutritionist->syncRoles([$ahliGiziRole, $nutritionistRole]);
 
-        \App\Models\AhliGizi::updateOrCreate(
+        AhliGizi::updateOrCreate(
             ['user_id' => $nutritionist->id],
             [
                 'spesialisasi' => 'Gizi Keluarga',

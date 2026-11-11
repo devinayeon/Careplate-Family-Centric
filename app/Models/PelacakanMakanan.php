@@ -18,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float $total_kalori
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Pengguna $pengguna
- * @property-read \App\Models\Makanan $makanan
+ * @property-read Pengguna $pengguna
+ * @property-read Makanan $makanan
  */
 class PelacakanMakanan extends Model
 {

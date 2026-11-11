@@ -42,9 +42,9 @@ test('permission matrix for approve and revoke: only admin; family head, nutriti
     expect($submission->fresh()->status)->toBe('pending')->and($food->fresh()->status)->toBe('verified');
 });
 
-test('a user holding verify-food without the admin role is still 403', function () {
+test('a user holding food:verify without the admin role is still 403', function () {
     $user = fsUser('nutritionist');
-    $user->givePermissionTo('verify-food');
+    $user->givePermissionTo('food:verify');
     $submission = fsPending();
 
     chatError(fsApprove($user, $submission->id, fsApproveBody()), 403, 'FORBIDDEN');

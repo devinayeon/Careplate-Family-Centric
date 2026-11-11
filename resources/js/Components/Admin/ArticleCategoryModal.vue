@@ -9,7 +9,7 @@ import {
     X,
     Loader2,
     AlertCircle,
-    CheckCircle2
+    CheckCircle2,
 } from 'lucide-vue-next';
 
 export interface CategoryItem {
@@ -57,7 +57,10 @@ const fetchCategories = async () => {
         const data = await res.json();
         if (data?.categories) {
             categories.value = data.categories;
-            emit('updated', categories.value.map((c) => c.nama));
+            emit(
+                'updated',
+                categories.value.map((c) => c.nama),
+            );
         }
     } catch (err) {
         console.error('Failed to fetch categories:', err);
@@ -78,7 +81,7 @@ watch(
             editingId.value = null;
             fetchCategories();
         }
-    }
+    },
 );
 
 const addCategory = async () => {
@@ -93,7 +96,12 @@ const addCategory = async () => {
         newCategoryError.value = null;
         generalError.value = null;
 
-        const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+        const csrfToken =
+            (
+                document.querySelector(
+                    'meta[name="csrf-token"]',
+                ) as HTMLMetaElement
+            )?.content || '';
 
         const res = await fetch(route('admin.article-categories.store'), {
             method: 'POST',
@@ -112,7 +120,8 @@ const addCategory = async () => {
             if (data.errors?.nama) {
                 newCategoryError.value = data.errors.nama[0];
             } else {
-                newCategoryError.value = data.message || 'Gagal menambahkan kategori.';
+                newCategoryError.value =
+                    data.message || 'Gagal menambahkan kategori.';
             }
             return;
         }
@@ -157,18 +166,26 @@ const saveEditing = async (cat: CategoryItem) => {
         isSubmitting.value = true;
         editingError.value = null;
 
-        const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+        const csrfToken =
+            (
+                document.querySelector(
+                    'meta[name="csrf-token"]',
+                ) as HTMLMetaElement
+            )?.content || '';
 
-        const res = await fetch(route('admin.article-categories.update', cat.id), {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken,
+        const res = await fetch(
+            route('admin.article-categories.update', cat.id),
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({ nama: trimmed }),
             },
-            body: JSON.stringify({ nama: trimmed }),
-        });
+        );
 
         const data = await res.json();
 
@@ -196,7 +213,7 @@ const saveEditing = async (cat: CategoryItem) => {
 const deleteCategory = async (cat: CategoryItem) => {
     if (cat.artikels_count > 0) {
         alert(
-            `Kategori "${cat.nama}" tidak dapat dihapus karena masih digunakan oleh ${cat.artikels_count} artikel. Silakan ubah kategori artikel tersebut terlebih dahulu.`
+            `Kategori "${cat.nama}" tidak dapat dihapus karena masih digunakan oleh ${cat.artikels_count} artikel. Silakan ubah kategori artikel tersebut terlebih dahulu.`,
         );
         return;
     }
@@ -209,16 +226,24 @@ const deleteCategory = async (cat: CategoryItem) => {
         isSubmitting.value = true;
         generalError.value = null;
 
-        const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '';
+        const csrfToken =
+            (
+                document.querySelector(
+                    'meta[name="csrf-token"]',
+                ) as HTMLMetaElement
+            )?.content || '';
 
-        const res = await fetch(route('admin.article-categories.destroy', cat.id), {
-            method: 'DELETE',
-            headers: {
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken,
+        const res = await fetch(
+            route('admin.article-categories.destroy', cat.id),
+            {
+                method: 'DELETE',
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
             },
-        });
+        );
 
         const data = await res.json();
 
@@ -242,55 +267,68 @@ const deleteCategory = async (cat: CategoryItem) => {
 <template>
     <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+        class="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs duration-150"
     >
-        <div class="bg-white dark:bg-[#1c1c1c] rounded-3xl max-w-lg w-full shadow-2xl border border-gray-100 dark:border-[#2e2e2e] overflow-hidden flex flex-col max-h-[90vh]">
+        <div
+            class="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+        >
             <!-- Header -->
-            <div class="p-6 border-b border-gray-100 dark:border-[#2e2e2e] flex items-center justify-between bg-white dark:bg-[#1c1c1c] shrink-0">
+            <div
+                class="flex shrink-0 items-center justify-between border-b border-gray-100 bg-white p-6 dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-[#17321f] text-[#0b8043] dark:text-[#3fcb7a] flex items-center justify-center">
-                        <Folder class="w-5 h-5" />
+                    <div
+                        class="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-[#0b8043] dark:bg-[#17321f] dark:text-[#3fcb7a]"
+                    >
+                        <Folder class="h-5 w-5" />
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-[#f0efea] tracking-tight">
+                        <h3
+                            class="text-lg font-bold tracking-tight text-gray-900 dark:text-[#f0efea]"
+                        >
                             Kelola Kategori Artikel
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-[#a3a3a3]">
-                            Tambah, ubah nama, atau hapus kategori artikel CarePlate
+                            Tambah, ubah nama, atau hapus kategori artikel
+                            CarePlate
                         </p>
                     </div>
                 </div>
                 <button
                     type="button"
                     @click="emit('close')"
-                    class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-gray-600 dark:hover:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer"
+                    class="cursor-pointer rounded-xl p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:text-[#a3a3a3] dark:hover:bg-[#262626] dark:hover:text-[#f0efea]"
                 >
-                    <X class="w-5 h-5" />
+                    <X class="h-5 w-5" />
                 </button>
             </div>
 
             <!-- Body -->
-            <div class="p-6 space-y-6 overflow-y-auto">
+            <div class="space-y-6 overflow-y-auto p-6">
                 <!-- Notifications -->
                 <div
                     v-if="successMessage"
-                    class="p-3.5 rounded-2xl bg-[#e6f6ec] dark:bg-[#17321f] text-[#0b7a46] dark:text-[#3fcb7a] text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+                    class="animate-in fade-in flex items-center gap-2 rounded-2xl bg-[#e6f6ec] p-3.5 text-xs font-semibold text-[#0b7a46] dark:bg-[#17321f] dark:text-[#3fcb7a]"
                 >
-                    <CheckCircle2 class="w-4 h-4 shrink-0" />
+                    <CheckCircle2 class="h-4 w-4 shrink-0" />
                     <span>{{ successMessage }}</span>
                 </div>
 
                 <div
                     v-if="generalError"
-                    class="p-3.5 rounded-2xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-semibold flex items-center gap-2 animate-in fade-in"
+                    class="animate-in fade-in flex items-center gap-2 rounded-2xl bg-red-50 p-3.5 text-xs font-semibold text-red-600 dark:bg-red-950/40 dark:text-red-400"
                 >
-                    <AlertCircle class="w-4 h-4 shrink-0" />
+                    <AlertCircle class="h-4 w-4 shrink-0" />
                     <span>{{ generalError }}</span>
                 </div>
 
                 <!-- Section 1: Tambah Kategori Form -->
-                <div class="p-4 rounded-2xl bg-[#f8f9fa] dark:bg-[#262626] border border-gray-200/80 dark:border-[#2e2e2e] space-y-2">
-                    <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider">
+                <div
+                    class="space-y-2 rounded-2xl border border-gray-200/80 bg-[#f8f9fa] p-4 dark:border-[#2e2e2e] dark:bg-[#262626]"
+                >
+                    <label
+                        class="block text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                    >
                         Tambah Kategori Baru
                     </label>
                     <div class="flex items-center gap-2">
@@ -298,21 +336,27 @@ const deleteCategory = async (cat: CategoryItem) => {
                             v-model="newCategoryName"
                             type="text"
                             placeholder="Contoh: Menu Diet Rendah Garam"
-                            class="grow px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#3d3d3d] bg-white dark:bg-[#1c1c1c] text-gray-900 dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] text-xs font-medium focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                            class="grow rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-medium text-gray-900 placeholder-gray-400 transition focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#3d3d3d] dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:placeholder-[#737373] dark:focus:border-[#3fcb7a]"
                             @keyup.enter="addCategory"
                         />
                         <button
                             type="button"
                             @click="addCategory"
                             :disabled="isSubmitting || !newCategoryName.trim()"
-                            class="px-4 py-2.5 rounded-xl bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] text-xs font-semibold hover:bg-[#096836] dark:hover:bg-[#34aa66] shadow-xs transition flex items-center gap-1.5 shrink-0 disabled:opacity-40 cursor-pointer"
+                            class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-[#0b8043] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#096836] disabled:opacity-40 dark:bg-[#3fcb7a] dark:text-[#121212] dark:hover:bg-[#34aa66]"
                         >
-                            <Loader2 v-if="isSubmitting" class="w-3.5 h-3.5 animate-spin" />
-                            <Plus v-else class="w-3.5 h-3.5" />
+                            <Loader2
+                                v-if="isSubmitting"
+                                class="h-3.5 w-3.5 animate-spin"
+                            />
+                            <Plus v-else class="h-3.5 w-3.5" />
                             <span>Tambah</span>
                         </button>
                     </div>
-                    <p v-if="newCategoryError" class="text-xs text-red-500 font-medium">
+                    <p
+                        v-if="newCategoryError"
+                        class="text-xs font-medium text-red-500"
+                    >
                         {{ newCategoryError }}
                     </p>
                 </div>
@@ -320,89 +364,110 @@ const deleteCategory = async (cat: CategoryItem) => {
                 <!-- Section 2: Daftar Kategori -->
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-gray-700 dark:text-[#a3a3a3] uppercase tracking-wider">
+                        <span
+                            class="text-xs font-semibold tracking-wider text-gray-700 uppercase dark:text-[#a3a3a3]"
+                        >
                             Daftar Kategori Tersedia ({{ categories.length }})
                         </span>
-                        <Loader2 v-if="isLoading" class="w-3.5 h-3.5 animate-spin text-gray-400" />
+                        <Loader2
+                            v-if="isLoading"
+                            class="h-3.5 w-3.5 animate-spin text-gray-400"
+                        />
                     </div>
 
-                    <div v-if="categories.length === 0 && !isLoading" class="p-8 text-center text-xs text-gray-400 dark:text-[#737373]">
+                    <div
+                        v-if="categories.length === 0 && !isLoading"
+                        class="p-8 text-center text-xs text-gray-400 dark:text-[#737373]"
+                    >
                         Belum ada kategori yang dibuat.
                     </div>
 
-                    <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <div class="max-h-60 space-y-2 overflow-y-auto pr-1">
                         <div
                             v-for="cat in categories"
                             :key="cat.id"
-                            class="flex items-center justify-between p-3 rounded-2xl border border-gray-100 dark:border-[#2e2e2e] bg-white dark:bg-[#1c1c1c] hover:bg-gray-50/70 dark:hover:bg-[#262626] transition"
+                            class="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-3 transition hover:bg-gray-50/70 dark:border-[#2e2e2e] dark:bg-[#1c1c1c] dark:hover:bg-[#262626]"
                         >
                             <!-- View Mode -->
                             <template v-if="editingId !== cat.id">
-                                <div class="flex items-center gap-2.5 min-w-0 pr-2">
-                                    <span class="font-semibold text-xs text-gray-800 dark:text-[#f0efea] truncate">
+                                <div
+                                    class="flex min-w-0 items-center gap-2.5 pr-2"
+                                >
+                                    <span
+                                        class="truncate text-xs font-semibold text-gray-800 dark:text-[#f0efea]"
+                                    >
                                         {{ cat.nama }}
                                     </span>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#f0f4f1] dark:bg-[#262626] text-[#2d4b38] dark:text-[#3fcb7a] shrink-0">
+                                    <span
+                                        class="shrink-0 rounded-full bg-[#f0f4f1] px-2 py-0.5 text-[10px] font-medium text-[#2d4b38] dark:bg-[#262626] dark:text-[#3fcb7a]"
+                                    >
                                         {{ cat.artikels_count }} artikel
                                     </span>
                                 </div>
-                                <div class="flex items-center gap-1 shrink-0">
+                                <div class="flex shrink-0 items-center gap-1">
                                     <button
                                         type="button"
                                         @click="startEditing(cat)"
-                                        class="p-1.5 rounded-lg text-gray-400 dark:text-[#a3a3a3] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] hover:bg-emerald-50 dark:hover:bg-[#17321f] transition cursor-pointer"
+                                        class="cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-emerald-50 hover:text-[#0b8043] dark:text-[#a3a3a3] dark:hover:bg-[#17321f] dark:hover:text-[#3fcb7a]"
                                         title="Ubah Nama"
                                     >
-                                        <Pencil class="w-3.5 h-3.5" />
+                                        <Pencil class="h-3.5 w-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         @click="deleteCategory(cat)"
                                         :class="[
-                                            'p-1.5 rounded-lg transition cursor-pointer',
+                                            'cursor-pointer rounded-lg p-1.5 transition',
                                             cat.artikels_count > 0
-                                                ? 'text-gray-300 dark:text-gray-600 hover:text-gray-400'
-                                                : 'text-gray-400 dark:text-[#a3a3a3] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40'
+                                                ? 'text-gray-300 hover:text-gray-400 dark:text-gray-600'
+                                                : 'text-gray-400 hover:bg-red-50 hover:text-red-600 dark:text-[#a3a3a3] dark:hover:bg-red-950/40 dark:hover:text-red-400',
                                         ]"
-                                        :title="cat.artikels_count > 0 ? 'Tidak dapat dihapus karena digunakan artikel' : 'Hapus Kategori'"
+                                        :title="
+                                            cat.artikels_count > 0
+                                                ? 'Tidak dapat dihapus karena digunakan artikel'
+                                                : 'Hapus Kategori'
+                                        "
                                     >
-                                        <Trash2 class="w-3.5 h-3.5" />
+                                        <Trash2 class="h-3.5 w-3.5" />
                                     </button>
                                 </div>
                             </template>
 
                             <!-- Inline Edit Mode -->
                             <template v-else>
-                                <div class="flex items-center gap-2 w-full">
+                                <div class="flex w-full items-center gap-2">
                                     <div class="grow">
                                         <input
                                             v-model="editingName"
                                             type="text"
-                                            class="w-full px-3 py-1.5 rounded-xl border border-emerald-500 dark:border-[#3fcb7a] bg-white dark:bg-[#262626] text-gray-900 dark:text-[#f0efea] text-xs font-medium focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                            class="w-full rounded-xl border border-emerald-500 bg-white px-3 py-1.5 text-xs font-medium text-gray-900 focus:ring-1 focus:ring-emerald-500 focus:outline-none dark:border-[#3fcb7a] dark:bg-[#262626] dark:text-[#f0efea]"
                                             @keyup.enter="saveEditing(cat)"
                                             @keyup.esc="cancelEditing"
                                             autoFocus
                                         />
-                                        <p v-if="editingError" class="text-[10px] text-red-500 mt-0.5">
-                                             {{ editingError }}
+                                        <p
+                                            v-if="editingError"
+                                            class="mt-0.5 text-[10px] text-red-500"
+                                        >
+                                            {{ editingError }}
                                         </p>
                                     </div>
                                     <button
                                         type="button"
                                         @click="saveEditing(cat)"
                                         :disabled="isSubmitting"
-                                        class="p-1.5 rounded-lg bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] hover:bg-[#096836] dark:hover:bg-[#34aa66] shadow-2xs transition cursor-pointer"
+                                        class="cursor-pointer rounded-lg bg-[#0b8043] p-1.5 text-white shadow-2xs transition hover:bg-[#096836] dark:bg-[#3fcb7a] dark:text-[#121212] dark:hover:bg-[#34aa66]"
                                         title="Simpan"
                                     >
-                                        <Check class="w-3.5 h-3.5" />
+                                        <Check class="h-3.5 w-3.5" />
                                     </button>
                                     <button
                                         type="button"
                                         @click="cancelEditing"
-                                        class="p-1.5 rounded-lg text-gray-400 dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer"
+                                        class="cursor-pointer rounded-lg p-1.5 text-gray-400 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#262626]"
                                         title="Batal"
                                     >
-                                        <X class="w-3.5 h-3.5" />
+                                        <X class="h-3.5 w-3.5" />
                                     </button>
                                 </div>
                             </template>
@@ -412,11 +477,13 @@ const deleteCategory = async (cat: CategoryItem) => {
             </div>
 
             <!-- Footer -->
-            <div class="p-4 bg-gray-50 dark:bg-[#1c1c1c] border-t border-gray-100 dark:border-[#2e2e2e] flex items-center justify-end shrink-0">
+            <div
+                class="flex shrink-0 items-center justify-end border-t border-gray-100 bg-gray-50 p-4 dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
                 <button
                     type="button"
                     @click="emit('close')"
-                    class="px-5 py-2.5 rounded-full text-xs font-semibold text-gray-700 dark:text-[#f0efea] hover:bg-gray-200 dark:hover:bg-[#262626] transition cursor-pointer"
+                    class="cursor-pointer rounded-full px-5 py-2.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 dark:text-[#f0efea] dark:hover:bg-[#262626]"
                 >
                     Selesai
                 </button>

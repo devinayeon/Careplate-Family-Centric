@@ -10,7 +10,7 @@ import {
     RefreshCw,
     Trash2,
     Utensils,
-    ShieldCheck
+    ShieldCheck,
 } from 'lucide-vue-next';
 
 export interface FoodFormData {
@@ -19,6 +19,7 @@ export interface FoodFormData {
     kategori_makanan_id: number | string;
     kuantitas: number | string;
     satuan: string;
+    berat_per_satuan_gram?: number | string | null;
     energi: number | string;
     protein: number | string;
     karbohidrat: number | string;
@@ -50,6 +51,7 @@ const form = useForm({
     kategori_makanan_id: '' as number | string,
     kuantitas: '100',
     satuan: 'g',
+    berat_per_satuan_gram: '' as number | string | null,
     energi: '',
     protein: '',
     karbohidrat: '',
@@ -61,13 +63,23 @@ const form = useForm({
     foto_makanan: null as File | null,
 });
 
-const defaultSatuanOptions = ['g', 'ml', 'porsi', 'mangkuk', 'potong', 'butir', 'buah', 'sendok'];
+const defaultSatuanOptions = [
+    'g',
+    'ml',
+    'porsi',
+    'mangkuk',
+    'potong',
+    'butir',
+    'buah',
+    'sendok',
+];
 
 const resetToCleanState = () => {
     form.nama = '';
     form.kategori_makanan_id = props.categories[0]?.id || '';
     form.kuantitas = '100';
     form.satuan = 'g';
+    form.berat_per_satuan_gram = '';
     form.energi = '';
     form.protein = '';
     form.karbohidrat = '';
@@ -93,6 +105,8 @@ watch(
             form.kategori_makanan_id = props.foodToEdit.kategori_makanan_id;
             form.kuantitas = props.foodToEdit.kuantitas.toString();
             form.satuan = props.foodToEdit.satuan;
+            form.berat_per_satuan_gram =
+                props.foodToEdit.berat_per_satuan_gram?.toString() ?? '';
             form.energi = props.foodToEdit.energi.toString();
             form.protein = props.foodToEdit.protein.toString();
             form.karbohidrat = props.foodToEdit.karbohidrat.toString();
@@ -106,7 +120,7 @@ watch(
         } else {
             resetToCleanState();
         }
-    }
+    },
 );
 
 // File change handler
@@ -161,41 +175,62 @@ const submit = () => {
 
 <template>
     <!-- Drawer Container -->
-    <div v-if="show" class="fixed inset-0 z-50 overflow-hidden animate-in fade-in duration-200">
+    <div
+        v-if="show"
+        class="animate-in fade-in fixed inset-0 z-50 overflow-hidden duration-200"
+    >
         <!-- Backdrop Scrim -->
         <div
             class="absolute inset-0 bg-[#1e2321]/50 backdrop-blur-xs transition-opacity"
             @click="emit('close')"
         />
 
-        <div class="fixed inset-y-0 right-0 max-w-full flex pl-8">
-            <div class="w-screen max-w-lg sm:max-w-xl bg-white dark:bg-[#1c1c1c] shadow-2xl flex flex-col justify-between overflow-hidden border-l dark:border-[#2e2e2e]">
+        <div class="fixed inset-y-0 right-0 flex max-w-full pl-8">
+            <div
+                class="flex w-screen max-w-lg flex-col justify-between overflow-hidden border-l bg-white shadow-2xl sm:max-w-xl dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
                 <!-- 1. Drawer Header -->
-                <div class="px-6 py-5 border-b border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-between bg-white dark:bg-[#1c1c1c] shrink-0">
+                <div
+                    class="flex shrink-0 items-center justify-between border-b border-[#eceae5] bg-white px-6 py-5 dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+                >
                     <div>
-                        <h2 class="text-2xl font-bold text-[#191919] dark:text-[#f0efea] tracking-tight">
+                        <h2
+                            class="text-2xl font-bold tracking-tight text-[#191919] dark:text-[#f0efea]"
+                        >
                             {{ foodToEdit ? 'Ubah makanan' : 'Tambah makanan' }}
                         </h2>
-                        <p class="text-xs text-[#5e5e5e] dark:text-[#a3a3a3] mt-0.5">
-                            {{ foodToEdit ? 'Perbarui informasi kandungan nutrisi makanan' : 'Masukkan data gizi makanan baru ke database CarePlate' }}
+                        <p
+                            class="mt-0.5 text-xs text-[#5e5e5e] dark:text-[#a3a3a3]"
+                        >
+                            {{
+                                foodToEdit
+                                    ? 'Perbarui informasi kandungan nutrisi makanan'
+                                    : 'Masukkan data gizi makanan baru ke database CarePlate'
+                            }}
                         </p>
                     </div>
 
                     <button
                         type="button"
                         @click="emit('close')"
-                        class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-gray-600 dark:hover:text-[#f0efea] hover:bg-[#f4f3f0] dark:hover:bg-[#262626] transition cursor-pointer"
+                        class="cursor-pointer rounded-xl p-2 text-gray-400 transition hover:bg-[#f4f3f0] hover:text-gray-600 dark:text-[#a3a3a3] dark:hover:bg-[#262626] dark:hover:text-[#f0efea]"
                         title="Tutup"
                     >
-                        <X class="w-5 h-5" />
+                        <X class="h-5 w-5" />
                     </button>
                 </div>
 
                 <!-- 2. Drawer Body (Scrollable Form) -->
-                <form id="food-form" @submit.prevent="submit" class="p-6 overflow-y-auto space-y-5 grow">
+                <form
+                    id="food-form"
+                    @submit.prevent="submit"
+                    class="grow space-y-5 overflow-y-auto p-6"
+                >
                     <!-- Foto Makanan Section -->
                     <div>
-                        <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-2">
+                        <label
+                            class="mb-2 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                        >
                             Foto Makanan
                         </label>
                         <input
@@ -209,28 +244,32 @@ const submit = () => {
                         <!-- Preview jika sudah ada foto -->
                         <div
                             v-if="imagePreviewUrl"
-                            class="relative rounded-2xl overflow-hidden border border-[#eceae5] dark:border-[#2e2e2e] bg-gray-50 dark:bg-[#262626] aspect-video max-h-48 group shadow-xs"
+                            class="group relative aspect-video max-h-48 overflow-hidden rounded-2xl border border-[#eceae5] bg-gray-50 shadow-xs dark:border-[#2e2e2e] dark:bg-[#262626]"
                         >
                             <img
                                 :src="imagePreviewUrl"
                                 alt="Preview Foto Makanan"
-                                class="w-full h-full object-cover"
+                                class="h-full w-full object-cover"
                             />
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <div
+                                class="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
+                            >
                                 <button
                                     type="button"
                                     @click="fileInputRef?.click()"
-                                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-[#f0efea] text-xs font-semibold shadow-md hover:bg-gray-50 dark:hover:bg-[#262626] flex items-center gap-1.5 transition cursor-pointer"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3.5 py-1.5 text-xs font-semibold text-gray-800 shadow-md transition hover:bg-gray-50 dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:hover:bg-[#262626]"
                                 >
-                                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043] dark:text-[#3fcb7a]" />
+                                    <RefreshCw
+                                        class="h-3.5 w-3.5 text-[#0b8043] dark:text-[#3fcb7a]"
+                                    />
                                     <span>Ganti</span>
                                 </button>
                                 <button
                                     type="button"
                                     @click="removeImage"
-                                    class="px-3.5 py-1.5 rounded-xl bg-red-600 text-white text-xs font-semibold shadow-md hover:bg-red-700 flex items-center gap-1.5 transition cursor-pointer"
+                                    class="flex cursor-pointer items-center gap-1.5 rounded-xl bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-md transition hover:bg-red-700"
                                 >
-                                    <Trash2 class="w-3.5 h-3.5" />
+                                    <Trash2 class="h-3.5 w-3.5" />
                                     <span>Hapus</span>
                                 </button>
                             </div>
@@ -244,57 +283,76 @@ const submit = () => {
                             @dragleave.prevent="isDragging = false"
                             @drop.prevent="handleDrop"
                             :class="[
-                                'border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200',
+                                'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-5 text-center transition-all duration-200',
                                 isDragging
-                                    ? 'border-[#0b8043] dark:border-[#3fcb7a] bg-emerald-50/50 dark:bg-[#17321f]/50'
-                                    : 'border-[#eceae5] dark:border-[#2e2e2e] hover:border-[#0b8043] dark:hover:border-[#3fcb7a] hover:bg-emerald-50/20 dark:hover:bg-[#17321f]/30 bg-[#f8f9fa] dark:bg-[#262626]'
+                                    ? 'border-[#0b8043] bg-emerald-50/50 dark:border-[#3fcb7a] dark:bg-[#17321f]/50'
+                                    : 'border-[#eceae5] bg-[#f8f9fa] hover:border-[#0b8043] hover:bg-emerald-50/20 dark:border-[#2e2e2e] dark:bg-[#262626] dark:hover:border-[#3fcb7a] dark:hover:bg-[#17321f]/30',
                             ]"
                         >
-                            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#17321f] flex items-center justify-center text-[#0b8043] dark:text-[#3fcb7a] mb-2">
-                                <UploadCloud class="w-5 h-5" />
+                            <div
+                                class="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-[#0b8043] dark:bg-[#17321f] dark:text-[#3fcb7a]"
+                            >
+                                <UploadCloud class="h-5 w-5" />
                             </div>
-                            <span class="text-xs font-semibold text-gray-800 dark:text-[#f0efea]">
+                            <span
+                                class="text-xs font-semibold text-gray-800 dark:text-[#f0efea]"
+                            >
                                 Unggah Foto Makanan
                             </span>
-                            <span class="text-[11px] text-gray-400 dark:text-[#a3a3a3] mt-0.5">
-                                Klik atau tarik file gambar (PNG, JPG, WebP maks 3MB)
+                            <span
+                                class="mt-0.5 text-[11px] text-gray-400 dark:text-[#a3a3a3]"
+                            >
+                                Klik atau tarik file gambar (PNG, JPG, WebP maks
+                                3MB)
                             </span>
                         </div>
-                        <p v-if="form.errors.foto_makanan" class="text-xs text-red-500 mt-1 font-medium">
+                        <p
+                            v-if="form.errors.foto_makanan"
+                            class="mt-1 text-xs font-medium text-red-500"
+                        >
                             {{ form.errors.foto_makanan }}
                         </p>
                     </div>
 
                     <!-- Nama Makanan -->
                     <div>
-                        <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                        <label
+                            class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                        >
                             Nama Makanan <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.nama"
                             type="text"
                             placeholder="Contoh: Pepes ikan kembung"
-                            class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                            class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-4 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                             required
                         />
-                        <p v-if="form.errors.nama" class="text-xs text-red-500 mt-1 font-medium">
+                        <p
+                            v-if="form.errors.nama"
+                            class="mt-1 text-xs font-medium text-red-500"
+                        >
                             {{ form.errors.nama }}
                         </p>
                     </div>
 
                     <!-- Kategori & Takaran Saji (Row 2 Cols) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <!-- Kategori -->
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Kategori <span class="text-red-500">*</span>
                             </label>
                             <select
                                 v-model="form.kategori_makanan_id"
-                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                class="w-full cursor-pointer rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-3 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                 required
                             >
-                                <option value="" disabled>Pilih Kategori</option>
+                                <option value="" disabled>
+                                    Pilih Kategori
+                                </option>
                                 <option
                                     v-for="cat in categories"
                                     :key="cat.id"
@@ -303,14 +361,19 @@ const submit = () => {
                                     {{ cat.kategori }}
                                 </option>
                             </select>
-                            <p v-if="form.errors.kategori_makanan_id" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.kategori_makanan_id"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.kategori_makanan_id }}
                             </p>
                         </div>
 
                         <!-- Takaran Saji (Kuantitas & Satuan) -->
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Takaran Saji <span class="text-red-500">*</span>
                             </label>
                             <div class="flex items-center gap-1.5">
@@ -320,29 +383,74 @@ const submit = () => {
                                     step="any"
                                     min="0.1"
                                     placeholder="100"
-                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-1/2 rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-3 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                     required
                                 />
                                 <select
                                     v-model="form.satuan"
-                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                    class="w-1/2 cursor-pointer rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-3 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                 >
-                                    <option v-for="s in defaultSatuanOptions" :key="s" :value="s">
+                                    <option
+                                        v-for="s in defaultSatuanOptions"
+                                        :key="s"
+                                        :value="s"
+                                    >
                                         {{ s }}
                                     </option>
                                 </select>
                             </div>
-                            <p v-if="form.errors.kuantitas || form.errors.satuan" class="text-xs text-red-500 mt-1 font-medium">
-                                {{ form.errors.kuantitas || form.errors.satuan }}
+                            <p
+                                v-if="
+                                    form.errors.kuantitas || form.errors.satuan
+                                "
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
+                                {{
+                                    form.errors.kuantitas || form.errors.satuan
+                                }}
                             </p>
+
+                            <!-- Weight of ONE unit: lets Chat Gizi convert a non-gram serving to per 100 g -->
+                            <div v-if="form.satuan !== 'g'" class="mt-3">
+                                <label
+                                    for="berat-per-satuan"
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                                >
+                                    Berat per {{ form.satuan }} (gram)
+                                </label>
+                                <input
+                                    id="berat-per-satuan"
+                                    v-model="form.berat_per_satuan_gram"
+                                    type="number"
+                                    step="any"
+                                    min="0.01"
+                                    placeholder="Contoh: 150"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-3 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                />
+                                <p
+                                    class="mt-1 text-xs text-[#5e5e5e] dark:text-[#a3a3a3]"
+                                >
+                                    Opsional. Tanpa ini, Chat Gizi tidak memakai
+                                    makanan ini.
+                                </p>
+                                <p
+                                    v-if="form.errors.berat_per_satuan_gram"
+                                    class="mt-1 text-xs font-medium text-red-500"
+                                >
+                                    {{ form.errors.berat_per_satuan_gram }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Makronutrisi: Energi & Protein -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                Energi (Kalori) <span class="text-red-500">*</span>
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
+                                Energi (Kalori)
+                                <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <input
@@ -351,20 +459,27 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="172"
-                                    class="w-full pl-3 pr-11 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-11 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     kkal
                                 </span>
                             </div>
-                            <p v-if="form.errors.energi" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.energi"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.energi }}
                             </p>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Protein <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -374,14 +489,19 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="22"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-8 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     g
                                 </span>
                             </div>
-                            <p v-if="form.errors.protein" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.protein"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.protein }}
                             </p>
                         </div>
@@ -390,7 +510,9 @@ const submit = () => {
                     <!-- Makronutrisi: Karbohidrat & Lemak -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Karbohidrat <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -400,20 +522,27 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="4"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-8 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     g
                                 </span>
                             </div>
-                            <p v-if="form.errors.karbohidrat" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.karbohidrat"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.karbohidrat }}
                             </p>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Lemak <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -423,14 +552,19 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="8"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-8 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     g
                                 </span>
                             </div>
-                            <p v-if="form.errors.lemak" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.lemak"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.lemak }}
                             </p>
                         </div>
@@ -439,7 +573,9 @@ const submit = () => {
                     <!-- Mikronutrisi: Gula & Natrium -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Gula
                             </label>
                             <div class="relative">
@@ -449,19 +585,26 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="1"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-8 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     g
                                 </span>
                             </div>
-                            <p v-if="form.errors.gula" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.gula"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.gula }}
                             </p>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Natrium
                             </label>
                             <div class="relative">
@@ -471,41 +614,52 @@ const submit = () => {
                                     step="1"
                                     min="0"
                                     placeholder="380"
-                                    class="w-full pl-3 pr-10 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] py-2.5 pr-10 pl-3 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
+                                <span
+                                    class="absolute top-2.5 right-3 text-xs font-bold text-[#5e5e5e] select-none dark:text-[#a3a3a3]"
+                                >
                                     mg
                                 </span>
                             </div>
-                            <p v-if="form.errors.natrium" class="text-xs text-red-500 mt-1 font-medium">
+                            <p
+                                v-if="form.errors.natrium"
+                                class="mt-1 text-xs font-medium text-red-500"
+                            >
                                 {{ form.errors.natrium }}
                             </p>
                         </div>
                     </div>
 
                     <!-- Sumber & Status Verifikasi -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Sumber Rujukan
                             </label>
                             <input
                                 v-model="form.sumber"
                                 type="text"
                                 placeholder="Tabel Komposisi Pangan"
-                                class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                class="w-full rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-4 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                             />
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
+                            <label
+                                class="mb-1.5 block text-xs font-bold tracking-wider text-[#191919] uppercase dark:text-[#f0efea]"
+                            >
                                 Status Verifikasi
                             </label>
                             <select
                                 v-model="form.status"
-                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                class="w-full cursor-pointer rounded-xl border border-[#eceae5] bg-[#f4f3f0] px-3 py-2.5 text-sm font-medium text-[#191919] transition focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/15 focus:outline-none dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:border-[#3fcb7a] dark:focus:bg-[#1c1c1c]"
                             >
-                                <option value="terverifikasi">Terverifikasi</option>
+                                <option value="terverifikasi">
+                                    Terverifikasi
+                                </option>
                                 <option value="menunggu">Menunggu</option>
                                 <option value="ditolak">Ditolak</option>
                             </select>
@@ -513,21 +667,29 @@ const submit = () => {
                     </div>
 
                     <!-- Info Banner -->
-                    <div class="bg-[#e4f6ea] dark:bg-[#17321f] rounded-xl p-3.5 flex items-center gap-3 text-xs text-[#191919] dark:text-[#f0efea] border border-[#0b8043]/20 dark:border-[#3fcb7a]/30">
-                        <ShieldCheck class="w-5 h-5 text-[#0b8043] dark:text-[#3fcb7a] shrink-0" />
+                    <div
+                        class="flex items-center gap-3 rounded-xl border border-[#0b8043]/20 bg-[#e4f6ea] p-3.5 text-xs text-[#191919] dark:border-[#3fcb7a]/30 dark:bg-[#17321f] dark:text-[#f0efea]"
+                    >
+                        <ShieldCheck
+                            class="h-5 w-5 shrink-0 text-[#0b8043] dark:text-[#3fcb7a]"
+                        />
                         <p class="leading-relaxed">
-                            Dibuat Admin langsung <strong>terverifikasi</strong> dan tersinkron ke modul kalkulator serta Chat Gizi.
+                            Dibuat Admin langsung
+                            <strong>terverifikasi</strong> dan tersinkron ke
+                            modul kalkulator serta Chat Gizi.
                         </p>
                     </div>
                 </form>
 
                 <!-- 3. Drawer Footer Actions -->
-                <div class="px-6 py-4 border-t border-[#eceae5] dark:border-[#2e2e2e] bg-white dark:bg-[#1c1c1c] flex items-center justify-end gap-3 shrink-0">
+                <div
+                    class="flex shrink-0 items-center justify-end gap-3 border-t border-[#eceae5] bg-white px-6 py-4 dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+                >
                     <button
                         type="button"
                         @click="emit('close')"
                         :disabled="form.processing"
-                        class="px-5 py-2.5 rounded-full border border-[#191919] dark:border-[#3d3d3d] text-xs font-bold text-[#191919] dark:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer disabled:opacity-50"
+                        class="cursor-pointer rounded-full border border-[#191919] px-5 py-2.5 text-xs font-bold text-[#191919] transition hover:bg-gray-100 disabled:opacity-50 dark:border-[#3d3d3d] dark:text-[#f0efea] dark:hover:bg-[#262626]"
                     >
                         Batal
                     </button>
@@ -535,9 +697,12 @@ const submit = () => {
                         type="submit"
                         form="food-form"
                         :disabled="form.processing"
-                        class="px-6 py-2.5 rounded-full bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] text-xs font-bold hover:bg-[#086637] dark:hover:bg-[#34aa66] shadow-sm transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        class="flex cursor-pointer items-center gap-2 rounded-full bg-[#0b8043] px-6 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-[#086637] disabled:opacity-50 dark:bg-[#3fcb7a] dark:text-[#121212] dark:hover:bg-[#34aa66]"
                     >
-                        <Loader2 v-if="form.processing" class="w-4 h-4 animate-spin" />
+                        <Loader2
+                            v-if="form.processing"
+                            class="h-4 w-4 animate-spin"
+                        />
                         <span>Simpan Makanan</span>
                     </button>
                 </div>

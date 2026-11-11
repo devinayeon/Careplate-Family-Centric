@@ -43,7 +43,7 @@ test('POST rejects any body field, including a forged owner, with INVALID_INPUT'
     expect(ChatSession::count())->toBe(0);
 });
 
-test('auth and permission: 401 guest, 403 without nutrition-chat on every chat route', function () {
+test('auth and permission: 401 guest, 403 without health_tool:use_ai_chat on every chat route', function () {
     $session = ctSession();
     $noPerm = ctUser('');
 

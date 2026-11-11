@@ -8,7 +8,7 @@ const props = withDefaults(
     }>(),
     {
         status: 'terverifikasi',
-    }
+    },
 );
 
 const config = computed(() => {
@@ -42,12 +42,12 @@ const config = computed(() => {
 <template>
     <span
         :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap',
+            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap',
             config.bg,
-            config.text
+            config.text,
         ]"
     >
-        <span :class="['w-1.5 h-1.5 rounded-full shrink-0', config.dot]"></span>
+        <span :class="['h-1.5 w-1.5 shrink-0 rounded-full', config.dot]"></span>
         <span>{{ label || config.defaultLabel }}</span>
     </span>
 </template>

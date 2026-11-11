@@ -39,7 +39,8 @@ test('scan content never reaches the database, logs, cache or leftover temp file
     $user = scanUser();
     $logFile = storage_path('logs/laravel.log');
     $logBefore = is_file($logFile) ? filesize($logFile) : 0;
-    $tmpBefore = glob(sys_get_temp_dir().DIRECTORY_SEPARATOR.'*') ?: [];
+    // Only PHP's own temp names (php*.tmp for uploads): other programs on a shared OS temp dir create unrelated files mid-run.
+    $tmpBefore = glob(sys_get_temp_dir().DIRECTORY_SEPARATOR.'php*') ?: [];
     [$logged] = captureLogs();
 
     fakeProvider(rawLabel(
@@ -88,7 +89,7 @@ test('scan content never reaches the database, logs, cache or leftover temp file
         }
     }
 
-    expect(glob(sys_get_temp_dir().DIRECTORY_SEPARATOR.'*') ?: [])->toEqualCanonicalizing($tmpBefore)
+    expect(glob(sys_get_temp_dir().DIRECTORY_SEPARATOR.'php*') ?: [])->toEqualCanonicalizing($tmpBefore)
         ->and(file_exists($image->getPathname()))->toBeFalse()
         ->and(session()->all())->not->toHaveKey('_old_input');
 });

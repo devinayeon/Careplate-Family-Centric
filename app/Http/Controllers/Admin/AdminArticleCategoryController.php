@@ -52,7 +52,7 @@ class AdminArticleCategoryController extends Controller
     public function update(Request $request, KategoriArtikel $kategoriArtikel): JsonResponse
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:100|unique:kategori_artikel,nama,' . $kategoriArtikel->id,
+            'nama' => 'required|string|max:100|unique:kategori_artikel,nama,'.$kategoriArtikel->id,
             'deskripsi' => 'nullable|string|max:255',
         ]);
 
