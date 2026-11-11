@@ -19,7 +19,11 @@ class DatabaseSeeder extends Seeder
             AiPermissionSeeder::class, // after RolePermissionSeeder: that one syncs (overwrites) role permissions
             KategoriMakananSeeder::class,
             MakananSeeder::class,
-            PenggunaKeluargaSeeder::class,
         ]);
+
+        // Demo accounts use a well-known password: never seed them in production.
+        if (! app()->environment('production')) {
+            $this->call(PenggunaKeluargaSeeder::class);
+        }
     }
 }
