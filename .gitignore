@@ -42,3 +42,10 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Private AI worktree environment and SQLite state
+.env.testing
+/database/careplate-ai-*.sqlite*
+
+# Raw USDA snapshot downloads (the committed record is ai/data/snapshot.manifest.json)
+/ai/data/raw/

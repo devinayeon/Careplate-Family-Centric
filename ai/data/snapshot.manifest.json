@@ -1,0 +1,27 @@
+{
+    "schema_version": "careplate-snapshot-manifest-v1",
+    "snapshots": [
+        {
+            "source_provider": "USDA_FDC",
+            "snapshot_version": "2026-10-29",
+            "data_type": "Foundation",
+            "url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2026-10-29.zip",
+            "sha256": "dd414cc9f1a132626bad354ef6655972c78b44aff14f16114dc899708663c579",
+            "retrieved_at": "2026-11-08T07:38:08+00:00",
+            "record_count": 424,
+            "raw_json_file": "FoodData_Central_foundation_food_json_2026-10-29.json",
+            "imported_source_ids": [
+                "321360",
+                "746771",
+                "746782",
+                "747447",
+                "1750340",
+                "2258586",
+                "2346401",
+                "2346404",
+                "2512381",
+                "2646170"
+            ]
+        }
+    ]
+}
