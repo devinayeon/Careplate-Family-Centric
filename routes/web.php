@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminArticleCategoryController;
 use App\Http\Controllers\Admin\AdminArticleController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFoodController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\DashboardRedirectController;
@@ -72,6 +73,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/verifikasi/{makanan}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
     Route::post('/verifikasi/{makanan}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
     Route::post('/verifikasi/{makanan}/update-approve', [AdminVerificationController::class, 'updateAndApprove'])->name('verifications.update-approve');
+
+    // Profil Admin
+    Route::get('/profil', [AdminProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profil', [AdminProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profil/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // ==========================================

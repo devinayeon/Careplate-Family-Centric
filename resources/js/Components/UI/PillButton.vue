@@ -22,15 +22,15 @@ const props = withDefaults(
 const variantClasses = computed(() => {
   switch (props.variant) {
     case 'primary':
-      return 'bg-[#0b8043] hover:bg-[#086637] text-white shadow-2xs'
+      return 'bg-[#0b8043] hover:bg-[#086637] dark:bg-[#3fcb7a] dark:hover:bg-[#34aa66] text-white dark:text-[#121212] shadow-2xs'
     case 'outline':
-      return 'bg-white border-2 border-[#191919] text-[#191919] hover:bg-gray-50'
+      return 'bg-white dark:bg-[#1c1c1c] border-2 border-[#191919] dark:border-[#3d3d3d] text-[#191919] dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626]'
     case 'danger':
-      return 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+      return 'bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50'
     case 'ghost':
-      return 'bg-transparent hover:bg-gray-100 text-gray-700'
+      return 'bg-transparent hover:bg-gray-100 dark:hover:bg-[#262626] text-gray-700 dark:text-[#a3a3a3]'
     default:
-      return 'bg-[#0b8043] text-white'
+      return 'bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212]'
   }
 })
 

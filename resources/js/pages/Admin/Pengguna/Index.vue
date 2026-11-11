@@ -144,7 +144,7 @@ const deleteUser = (item: UserItem) => {
       <!-- 1. Page Header (Title + Tambah Pengguna Button) -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] tracking-tight">
+          <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
             Pengguna
           </h1>
         </div>
@@ -213,17 +213,17 @@ const deleteUser = (item: UserItem) => {
           <!-- Col 1: Nama & Avatar -->
           <td class="px-6 py-3.5">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-[#e4f6ea] text-[#0b7a46] font-bold text-xs flex items-center justify-center shrink-0">
+              <div class="w-8 h-8 rounded-full bg-[#e4f6ea] dark:bg-[#17321f] text-[#0b7a46] dark:text-[#3fcb7a] font-bold text-xs flex items-center justify-center shrink-0">
                 {{ item.initials }}
               </div>
-              <span class="font-bold text-[#191919] text-sm whitespace-nowrap">
+              <span class="font-bold text-[#191919] dark:text-[#f0efea] text-sm whitespace-nowrap">
                 {{ item.name }}
               </span>
             </div>
           </td>
 
           <!-- Col 2: Email -->
-          <td class="px-6 py-3.5 text-sm text-[#191919] font-medium whitespace-nowrap">
+          <td class="px-6 py-3.5 text-sm text-[#191919] dark:text-[#f0efea] font-medium whitespace-nowrap">
             {{ item.email }}
           </td>
 
@@ -233,12 +233,12 @@ const deleteUser = (item: UserItem) => {
           </td>
 
           <!-- Col 4: Status Keluarga -->
-          <td class="px-6 py-3.5 text-sm text-[#191919] font-medium whitespace-nowrap">
+          <td class="px-6 py-3.5 text-sm text-[#191919] dark:text-[#f0efea] font-medium whitespace-nowrap">
             {{ item.status_keluarga }}
           </td>
 
           <!-- Col 5: Terdaftar -->
-          <td class="px-6 py-3.5 text-sm text-[#191919] font-medium whitespace-nowrap">
+          <td class="px-6 py-3.5 text-sm text-[#191919] dark:text-[#f0efea] font-medium whitespace-nowrap">
             {{ item.terdaftar }}
           </td>
 
@@ -250,9 +250,9 @@ const deleteUser = (item: UserItem) => {
                 type="button"
                 @click="openEditDrawer(item)"
                 aria-label="Ubah"
-                class="w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center text-[#191919] transition-colors"
+                class="w-9 h-9 rounded-xl hover:bg-gray-100 dark:hover:bg-[#262626] flex items-center justify-center text-[#191919] dark:text-[#f0efea] transition-colors cursor-pointer"
               >
-                <Pencil class="w-4 h-4 text-gray-700" />
+                <Pencil class="w-4 h-4 text-gray-700 dark:text-gray-300" />
               </button>
 
               <!-- Tombol Hapus -->
@@ -260,7 +260,7 @@ const deleteUser = (item: UserItem) => {
                 type="button"
                 @click="deleteUser(item)"
                 aria-label="Hapus"
-                class="w-9 h-9 rounded-xl hover:bg-red-50 flex items-center justify-center text-gray-400 hover:text-red-600 transition-colors"
+                class="w-9 h-9 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

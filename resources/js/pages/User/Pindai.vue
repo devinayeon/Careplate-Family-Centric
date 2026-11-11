@@ -92,23 +92,23 @@ function reset() {
     <Head title="Pindai Kemasan" />
     <UserLayout>
         <div class="flex flex-col gap-6">
-            <header class="flex items-center justify-between gap-6 rounded-3xl bg-[#ffece5] px-7 py-6">
+            <header class="flex items-center justify-between gap-6 rounded-3xl bg-[#ffece5] dark:bg-[#3a1e14] px-7 py-6">
                 <div>
-                    <h1 class="font-display text-3xl font-extrabold text-[#191919]">{{ phase === 'done' ? 'Hasil pindai' : 'Pindai Kemasan' }}</h1>
-                    <p class="mt-1 text-base text-[#5e5e5e]">Foto label gizi, lihat gula, lemak, dan natriumnya.</p>
+                    <h1 class="font-display text-3xl font-extrabold text-[#191919] dark:text-[#f0efea]">{{ phase === 'done' ? 'Hasil pindai' : 'Pindai Kemasan' }}</h1>
+                    <p class="mt-1 text-base text-[#5e5e5e] dark:text-[#a3a3a3]">Foto label gizi, lihat gula, lemak, dan natriumnya.</p>
                 </div>
                 <div v-if="phase === 'done'" class="flex shrink-0 flex-wrap justify-end gap-2">
                     <button v-if="canSubmitFood" type="button" class="inline-flex h-11 items-center gap-2 rounded-full bg-[#0b8043] px-5 text-sm font-semibold text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="submitToFoodData">
                         <Database class="h-4 w-4" aria-hidden="true" /> Ajukan ke Data Makanan
                     </button>
-                    <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] bg-white px-5 text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="reset">
+                    <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] dark:border-[#f0efea] bg-white dark:bg-[#1c1c1c] px-5 text-sm font-semibold text-[#191919] dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="reset">
                         <ScanLine class="h-4 w-4" aria-hidden="true" /> Pindai Lagi
                     </button>
                 </div>
-                <ScanLine v-else class="hidden h-16 w-16 shrink-0 text-[#191919] sm:block" aria-hidden="true" />
+                <ScanLine v-else class="hidden h-16 w-16 shrink-0 text-[#191919] dark:text-[#f0efea] sm:block" aria-hidden="true" />
             </header>
 
-            <p v-if="!aiEnabled" class="rounded-2xl bg-[#fff4cc] px-5 py-4 text-sm text-[#7a4b00]" role="status">
+            <p v-if="!aiEnabled" class="rounded-2xl bg-[#fff4cc] dark:bg-amber-950/40 px-5 py-4 text-sm text-[#7a4b00] dark:text-amber-300" role="status">
                 Fitur pindai belum diaktifkan di server ini. Kamu tetap bisa mencari makanan di Data Makanan.
             </p>
 
@@ -119,7 +119,7 @@ function reset() {
                     <section
                         v-else
                         class="flex min-h-[28rem] flex-col items-center justify-center rounded-3xl border-2 border-dashed px-6 py-10 text-center transition-colors"
-                        :class="dragging ? 'border-[#0b8043] bg-[#e4f6ea]' : 'border-[#d6d3cc] bg-white'"
+                        :class="dragging ? 'border-[#0b8043] dark:border-[#3fcb7a] bg-[#e4f6ea] dark:bg-[#17321f]' : 'border-[#d6d3cc] dark:border-[#3d3d3d] bg-white dark:bg-[#1c1c1c]'"
                         aria-labelledby="scan-drop-title"
                         @dragover.prevent="dragging = true"
                         @dragleave="dragging = false"
@@ -127,23 +127,23 @@ function reset() {
                     >
                         <template v-if="busy">
                             <img v-if="previewUrl" :src="previewUrl" alt="Foto label yang sedang dibaca" class="mb-5 h-40 w-auto max-w-full rounded-2xl object-contain" />
-                            <Loader2 class="h-8 w-8 animate-spin text-[#0b8043]" aria-hidden="true" />
-                            <h2 id="scan-drop-title" class="mt-4 text-xl font-bold text-[#191919]" role="status">Membaca label…</h2>
-                            <p class="mt-1 text-sm text-[#5e5e5e]">Biasanya sekitar 5 detik, paling lama 25 detik.</p>
+                            <Loader2 class="h-8 w-8 animate-spin text-[#0b8043] dark:text-[#3fcb7a]" aria-hidden="true" />
+                            <h2 id="scan-drop-title" class="mt-4 text-xl font-bold text-[#191919] dark:text-[#f0efea]" role="status">Membaca label…</h2>
+                            <p class="mt-1 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">Biasanya sekitar 5 detik, paling lama 25 detik.</p>
                         </template>
 
                         <template v-else>
-                            <ScanLine class="h-20 w-20 text-[#191919]" aria-hidden="true" />
-                            <h2 id="scan-drop-title" class="mt-4 text-xl font-bold text-[#191919]">Seret foto label ke sini</h2>
-                            <p class="mt-1 text-sm text-[#5e5e5e]">JPEG atau PNG, di bawah 5 MB.</p>
+                            <ScanLine class="h-20 w-20 text-[#191919] dark:text-[#f0efea]" aria-hidden="true" />
+                            <h2 id="scan-drop-title" class="mt-4 text-xl font-bold text-[#191919] dark:text-[#f0efea]">Seret foto label ke sini</h2>
+                            <p class="mt-1 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">JPEG atau PNG, di bawah 5 MB.</p>
 
-                            <p v-if="phase === 'error'" class="mt-5 max-w-md rounded-xl bg-[#ffece5] px-4 py-3 text-sm text-[#a52f08]" role="alert">{{ errorText }}</p>
+                            <p v-if="phase === 'error'" class="mt-5 max-w-md rounded-xl bg-[#ffece5] dark:bg-[#3a1e14] px-4 py-3 text-sm text-[#a52f08] dark:text-red-300" role="alert">{{ errorText }}</p>
 
                             <div class="mt-6 flex flex-wrap justify-center gap-3">
                                 <button type="button" :disabled="!aiEnabled" class="inline-flex h-11 items-center gap-2 rounded-full bg-[#0b8043] px-6 text-sm font-semibold text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] disabled:cursor-not-allowed disabled:opacity-50" @click="cameraInput?.click()">
                                     <Camera class="h-4 w-4" aria-hidden="true" /> Ambil Foto
                                 </button>
-                                <button type="button" :disabled="!aiEnabled" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] bg-white px-6 text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] disabled:cursor-not-allowed disabled:opacity-50" @click="uploadInput?.click()">
+                                <button type="button" :disabled="!aiEnabled" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] dark:border-[#f0efea] bg-white dark:bg-[#1c1c1c] px-6 text-sm font-semibold text-[#191919] dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] disabled:cursor-not-allowed disabled:opacity-50" @click="uploadInput?.click()">
                                     <Upload class="h-4 w-4" aria-hidden="true" /> Unggah Foto
                                 </button>
                             </div>
@@ -155,28 +155,28 @@ function reset() {
 
                 <aside class="flex flex-col gap-6">
                     <template v-if="phase === 'done'">
-                        <section class="rounded-3xl bg-white p-6 shadow-[0_1px_2px_rgba(30,35,33,0.06),0_4px_12px_rgba(30,35,33,0.06)]">
-                            <h2 class="font-display text-xl font-bold text-[#191919]">Apa artinya?</h2>
-                            <p class="mt-3 text-base text-[#191919]">Periksa gula, lemak, dan natrium per sajian.</p>
-                            <p class="mt-2 text-sm text-[#5e5e5e]">Bandingkan takaran saji dengan porsi yang kamu makan.</p>
+                        <section class="rounded-3xl bg-white dark:bg-[#1c1c1c] p-6 shadow-[0_1px_2px_rgba(30,35,33,0.06),0_4px_12px_rgba(30,35,33,0.06)]">
+                            <h2 class="font-display text-xl font-bold text-[#191919] dark:text-[#f0efea]">Apa artinya?</h2>
+                            <p class="mt-3 text-base text-[#191919] dark:text-[#f0efea]">Periksa gula, lemak, dan natrium per sajian.</p>
+                            <p class="mt-2 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">Bandingkan takaran saji dengan porsi yang kamu makan.</p>
                         </section>
-                        <section class="rounded-3xl bg-[#ffece5] p-6">
-                            <h2 class="font-display text-lg font-bold text-[#191919]">Ingin tahu lebih banyak?</h2>
-                            <p class="mt-2 text-sm text-[#191919]">Tanyakan pengganti atau takaran lewat Chat Gizi.</p>
-                            <Link :href="route('user.chat_gizi')" class="mt-4 inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] bg-white px-5 text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]">
+                        <section class="rounded-3xl bg-[#ffece5] dark:bg-[#3a1e14] p-6">
+                            <h2 class="font-display text-lg font-bold text-[#191919] dark:text-[#f0efea]">Ingin tahu lebih banyak?</h2>
+                            <p class="mt-2 text-sm text-[#191919] dark:text-[#f0efea]">Tanyakan pengganti atau takaran lewat Chat Gizi.</p>
+                            <Link :href="route('user.chat_gizi')" class="mt-4 inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] dark:border-[#f0efea] bg-white dark:bg-[#1c1c1c] px-5 text-sm font-semibold text-[#191919] dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]">
                                 <MessageCircle class="h-4 w-4" aria-hidden="true" /> Tanya Chat Gizi
                             </Link>
                         </section>
                     </template>
-                    <section v-else class="rounded-3xl bg-white p-6 shadow-[0_1px_2px_rgba(30,35,33,0.06),0_4px_12px_rgba(30,35,33,0.06)]">
-                        <h2 class="font-display text-xl font-bold text-[#191919]">Agar terbaca jelas</h2>
-                        <ul class="mt-4 flex flex-col gap-3 text-base text-[#191919]">
-                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea]"><ImageIcon class="h-4 w-4 text-[#0b8043]" aria-hidden="true" /></span>Foto tabel gizinya saja</li>
-                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea]"><Lightbulb class="h-4 w-4 text-[#0b8043]" aria-hidden="true" /></span>Tanpa pantulan cahaya</li>
-                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea]"><ScanLine class="h-4 w-4 text-[#0b8043]" aria-hidden="true" /></span>Semua angka terlihat jelas</li>
+                    <section v-else class="rounded-3xl bg-white dark:bg-[#1c1c1c] p-6 shadow-[0_1px_2px_rgba(30,35,33,0.06),0_4px_12px_rgba(30,35,33,0.06)]">
+                        <h2 class="font-display text-xl font-bold text-[#191919] dark:text-[#f0efea]">Agar terbaca jelas</h2>
+                        <ul class="mt-4 flex flex-col gap-3 text-base text-[#191919] dark:text-[#f0efea]">
+                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea] dark:bg-[#17321f]"><ImageIcon class="h-4 w-4 text-[#0b8043] dark:text-[#3fcb7a]" aria-hidden="true" /></span>Foto tabel gizinya saja</li>
+                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea] dark:bg-[#17321f]"><Lightbulb class="h-4 w-4 text-[#0b8043] dark:text-[#3fcb7a]" aria-hidden="true" /></span>Tanpa pantulan cahaya</li>
+                            <li class="flex items-center gap-3"><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e4f6ea] dark:bg-[#17321f]"><ScanLine class="h-4 w-4 text-[#0b8043] dark:text-[#3fcb7a]" aria-hidden="true" /></span>Semua angka terlihat jelas</li>
                         </ul>
-                        <p class="mt-5 flex items-start gap-2 rounded-xl bg-[#f4f3f0] px-3 py-3 text-sm text-[#191919]"><ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-[#0b8043]" aria-hidden="true" />Foto langsung dibuang setelah dibaca. Fotonya diproses penyedia AI untuk membaca angkanya.</p>
-                        <p class="mt-4 text-sm text-[#5e5e5e]">Batas pindai: {{ props.scanLimitPerDay }} foto per hari.</p>
+                        <p class="mt-5 flex items-start gap-2 rounded-xl bg-[#f4f3f0] dark:bg-[#262626] px-3 py-3 text-sm text-[#191919] dark:text-[#f0efea]"><ShieldCheck class="mt-0.5 h-4 w-4 shrink-0 text-[#0b8043] dark:text-[#3fcb7a]" aria-hidden="true" />Foto langsung dibuang setelah dibaca. Fotonya diproses penyedia AI untuk membaca angkanya.</p>
+                        <p class="mt-4 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">Batas pindai: {{ props.scanLimitPerDay }} foto per hari.</p>
                     </section>
                 </aside>
             </div>

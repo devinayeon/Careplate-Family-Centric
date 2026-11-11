@@ -67,7 +67,7 @@ const removeImage = () => {
         <!-- Preview Box when image is set -->
         <div
             v-if="previewUrl"
-            class="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 aspect-[21/9] max-h-64 group shadow-xs"
+            class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-[#2e2e2e] bg-gray-50 dark:bg-[#262626] aspect-[21/9] max-h-64 group shadow-xs"
         >
             <img
                 :src="previewUrl"
@@ -78,15 +78,15 @@ const removeImage = () => {
                 <button
                     type="button"
                     @click="triggerSelect"
-                    class="px-4 py-2 rounded-xl bg-white text-gray-800 text-xs font-semibold shadow-md hover:bg-gray-50 flex items-center gap-1.5 transition"
+                    class="px-4 py-2 rounded-xl bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-[#f0efea] text-xs font-semibold shadow-md hover:bg-gray-50 dark:hover:bg-[#262626] flex items-center gap-1.5 transition cursor-pointer"
                 >
-                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043]" />
+                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043] dark:text-[#3fcb7a]" />
                     <span>Ganti Foto</span>
                 </button>
                 <button
                     type="button"
                     @click="removeImage"
-                    class="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold shadow-md hover:bg-red-700 flex items-center gap-1.5 transition"
+                    class="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold shadow-md hover:bg-red-700 flex items-center gap-1.5 transition cursor-pointer"
                 >
                     <Trash2 class="w-3.5 h-3.5" />
                     <span>Hapus</span>
@@ -104,20 +104,20 @@ const removeImage = () => {
             :class="[
                 'border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200',
                 isDragging
-                    ? 'border-[#0b8043] bg-emerald-50/50 scale-[0.99]'
-                    : 'border-gray-200 hover:border-[#0b8043] hover:bg-emerald-50/20 bg-white'
+                    ? 'border-[#0b8043] dark:border-[#3fcb7a] bg-emerald-50/50 dark:bg-[#17321f]/50 scale-[0.99]'
+                    : 'border-gray-200 dark:border-[#2e2e2e] hover:border-[#0b8043] dark:hover:border-[#3fcb7a] hover:bg-emerald-50/20 dark:hover:bg-[#17321f]/20 bg-white dark:bg-[#1c1c1c]'
             ]"
         >
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-[#0b8043] mb-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-[#17321f] flex items-center justify-center text-[#0b8043] dark:text-[#3fcb7a] mb-3">
                 <UploadCloud class="w-6 h-6" />
             </div>
-            <h4 class="text-sm font-semibold text-gray-800 mb-1">
+            <h4 class="text-sm font-semibold text-gray-800 dark:text-[#f0efea] mb-1">
                 Unggah Foto Sampul Artikel
             </h4>
-            <p class="text-xs text-gray-500 max-w-sm mb-3">
+            <p class="text-xs text-gray-500 dark:text-[#a3a3a3] max-w-sm mb-3">
                 Tarik dan lepaskan file gambar ke sini, atau klik untuk memilih file dari komputer Anda.
             </p>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-[11px] font-medium text-gray-600">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-[#262626] text-[11px] font-medium text-gray-600 dark:text-[#a3a3a3]">
                 <ImageIcon class="w-3 h-3 text-gray-400" />
                 Format PNG, JPG, WebP (Rasio 16:9 disarankan, maks 3MB)
             </span>

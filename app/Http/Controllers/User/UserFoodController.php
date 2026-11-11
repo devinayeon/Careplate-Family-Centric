@@ -50,7 +50,7 @@ class UserFoodController extends Controller
             'food' => self::card($makanan) + [
                 'lemak' => (float) $makanan->lemak, 'karbohidrat' => (float) $makanan->karbohidrat,
                 'gula' => (float) $makanan->gula, 'natrium' => (float) $makanan->natrium,
-                'sumber' => $makanan->sumber, 'kategori' => $makanan->kategoriMakanan?->kategori,
+                'sumber' => $makanan->sumber, 'kategori' => $makanan->kategoriMakanan()->value('kategori'),
                 'diverifikasi_pada' => $makanan->diverifikasi_pada?->toDateString(),
             ],
         ]);

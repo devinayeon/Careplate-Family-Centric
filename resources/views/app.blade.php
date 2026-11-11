@@ -6,6 +6,21 @@
 
         <title inertia>{{ config('app.name', 'CarePlate') }}</title>
 
+        <!-- Dark Mode Zero-Flash Script -->
+        <script>
+            (function() {
+                try {
+                    const savedTheme = localStorage.getItem('careplate_theme') || 'system';
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark)) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                } catch (e) {}
+            })();
+        </script>
+
         <!-- Fonts: Bricolage Grotesque & Plus Jakarta Sans from Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +31,7 @@
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         @inertiaHead
     </head>
-    <body class="font-sans antialiased text-[#191919] bg-white selection:bg-[#0b8043] selection:text-white">
+    <body class="font-sans antialiased text-[#191919] bg-white dark:bg-[#121212] dark:text-[#f0efea] selection:bg-[#0b8043] selection:text-white transition-colors duration-200">
         @inertia
     </body>
 </html>

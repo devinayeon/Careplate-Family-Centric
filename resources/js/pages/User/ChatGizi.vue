@@ -125,44 +125,44 @@ onMounted(async () => {
 <template>
     <Head title="Chat Gizi" />
     <UserLayout>
-        <div class="grid min-h-[36rem] overflow-hidden rounded-3xl border border-[#eceae5] bg-white lg:h-[calc(100vh-9rem)] lg:grid-cols-[18rem_1fr]">
-            <aside class="flex max-h-64 flex-col gap-3 overflow-y-auto bg-[#e4f6ea] p-4 lg:max-h-none" aria-label="Riwayat chat">
+        <div class="grid min-h-[36rem] overflow-hidden rounded-3xl border border-[#eceae5] dark:border-[#2e2e2e] bg-white dark:bg-[#1c1c1c] lg:h-[calc(100vh-9rem)] lg:grid-cols-[18rem_1fr]">
+            <aside class="flex max-h-64 flex-col gap-3 overflow-y-auto bg-[#e4f6ea] dark:bg-[#17321f] p-4 lg:max-h-none" aria-label="Riwayat chat">
                 <button type="button" class="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#0b8043] text-sm font-semibold text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="newChat">
                     <Plus class="h-4 w-4" aria-hidden="true" /> Chat Baru
                 </button>
-                <p class="px-1 text-xs text-[#5e5e5e]">Riwayat chat · tersimpan 7 hari, hanya kamu yang bisa melihat</p>
+                <p class="px-1 text-xs text-[#5e5e5e] dark:text-[#a3a3a3]">Riwayat chat · tersimpan 7 hari, hanya kamu yang bisa melihat</p>
                 <ul class="flex flex-col gap-1">
-                    <li v-for="s in sessions" :key="s.id" class="group flex items-center gap-1 rounded-xl" :class="s.id === activeId ? 'bg-white' : 'hover:bg-white/60'">
+                    <li v-for="s in sessions" :key="s.id" class="group flex items-center gap-1 rounded-xl" :class="s.id === activeId ? 'bg-white dark:bg-[#1c1c1c]' : 'hover:bg-white/60'">
                         <button type="button" class="min-w-0 flex-1 px-3 py-2 text-left focus-visible:outline-2 focus-visible:outline-[#191919]" :aria-current="s.id === activeId ? 'true' : undefined" @click="openSession(s.id)">
-                            <span class="block truncate text-sm font-semibold text-[#191919]">{{ s.title || 'Percakapan baru' }}</span>
-                            <span class="block text-xs text-[#5e5e5e]">{{ new Date(s.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) }}</span>
+                            <span class="block truncate text-sm font-semibold text-[#191919] dark:text-[#f0efea]">{{ s.title || 'Percakapan baru' }}</span>
+                            <span class="block text-xs text-[#5e5e5e] dark:text-[#a3a3a3]">{{ new Date(s.updated_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) }}</span>
                         </button>
-                        <button type="button" class="mr-1 rounded-full p-2.5 text-[#5e5e5e] hover:bg-[#ffece5] hover:text-[#a52f08] focus-visible:outline-2 focus-visible:outline-[#191919]" :aria-label="`Hapus percakapan ${s.title || 'baru'}`" @click="remove(s)">
+                        <button type="button" class="mr-1 rounded-full p-2.5 text-[#5e5e5e] dark:text-[#a3a3a3] hover:bg-[#ffece5] hover:text-[#a52f08] focus-visible:outline-2 focus-visible:outline-[#191919]" :aria-label="`Hapus percakapan ${s.title || 'baru'}`" @click="remove(s)">
                             <Trash2 class="h-4 w-4" aria-hidden="true" />
                         </button>
                     </li>
                 </ul>
-                <p v-if="!loading && !sessions.length" class="px-1 text-sm text-[#5e5e5e]">Belum ada percakapan.</p>
+                <p v-if="!loading && !sessions.length" class="px-1 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">Belum ada percakapan.</p>
             </aside>
 
             <section class="flex min-h-0 flex-col" aria-labelledby="chat-title">
-                <header class="flex items-center gap-3 border-b border-[#eceae5] px-6 py-4">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4f3f0]"><MessageCircle class="h-5 w-5" aria-hidden="true" /></span>
+                <header class="flex items-center gap-3 border-b border-[#eceae5] dark:border-[#2e2e2e] px-6 py-4">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#f4f3f0] dark:bg-[#262626]"><MessageCircle class="h-5 w-5" aria-hidden="true" /></span>
                     <div>
-                        <h1 id="chat-title" class="font-display text-lg font-bold text-[#191919]">Chat Gizi</h1>
-                        <p class="text-xs text-[#5e5e5e]">Asisten otomatis, bukan ahli gizi</p>
+                        <h1 id="chat-title" class="font-display text-lg font-bold text-[#191919] dark:text-[#f0efea]">Chat Gizi</h1>
+                        <p class="text-xs text-[#5e5e5e] dark:text-[#a3a3a3]">Asisten otomatis, bukan ahli gizi</p>
                     </div>
                 </header>
 
                 <div ref="scroller" class="flex-1 overflow-y-auto px-6 py-5" role="log" aria-live="polite" aria-label="Percakapan">
-                    <p v-if="loading" class="text-sm text-[#5e5e5e]" role="status">Memuat percakapan…</p>
-                    <p v-else-if="loadError" class="rounded-xl bg-[#ffece5] px-4 py-3 text-sm text-[#a52f08]" role="alert">{{ loadError }}</p>
+                    <p v-if="loading" class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3]" role="status">Memuat percakapan…</p>
+                    <p v-else-if="loadError" class="rounded-xl bg-[#ffece5] dark:bg-[#3a1e14] px-4 py-3 text-sm text-[#a52f08] dark:text-red-300" role="alert">{{ loadError }}</p>
 
                     <div v-else-if="!messages.length" class="mx-auto flex max-w-md flex-col items-center gap-4 py-10 text-center">
-                        <h2 class="font-display text-xl font-bold text-[#191919]">Tanya apa saja soal gizi makanan</h2>
-                        <p class="text-sm text-[#5e5e5e]">Angka gizi hanya diambil dari Database CarePlate yang sudah diperiksa admin. Kalau tidak ada di sana, jawabannya ditandai sebagai pengetahuan umum.</p>
+                        <h2 class="font-display text-xl font-bold text-[#191919] dark:text-[#f0efea]">Tanya apa saja soal gizi makanan</h2>
+                        <p class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">Angka gizi hanya diambil dari Database CarePlate yang sudah diperiksa admin. Kalau tidak ada di sana, jawabannya ditandai sebagai pengetahuan umum.</p>
                         <div class="flex flex-wrap justify-center gap-2">
-                            <button v-for="s in suggestions" :key="s" type="button" :disabled="!aiEnabled" class="rounded-full border border-[#d6d3cc] px-4 py-2 text-sm text-[#191919] hover:bg-[#f4f3f0] focus-visible:outline-2 focus-visible:outline-[#191919] disabled:opacity-50" @click="ask(s)">{{ s }}</button>
+                            <button v-for="s in suggestions" :key="s" type="button" :disabled="!aiEnabled" class="rounded-full border border-[#d6d3cc] dark:border-[#3d3d3d] px-4 py-2 text-sm text-[#191919] dark:text-[#f0efea] hover:bg-[#f4f3f0] dark:hover:bg-[#262626] focus-visible:outline-2 focus-visible:outline-[#191919] disabled:opacity-50" @click="ask(s)">{{ s }}</button>
                         </div>
                     </div>
 
@@ -171,16 +171,16 @@ onMounted(async () => {
                     </div>
                 </div>
 
-                <form class="border-t border-[#eceae5] px-6 py-4" @submit.prevent="ask(draft)">
-                    <p v-if="!aiEnabled" class="mb-3 rounded-xl bg-[#fff4cc] px-4 py-2 text-sm text-[#7a4b00]" role="status">Chat Gizi belum diaktifkan di server ini.</p>
-                    <div class="flex items-end gap-3 rounded-3xl bg-[#f4f3f0] py-2 pl-5 pr-2">
+                <form class="border-t border-[#eceae5] dark:border-[#2e2e2e] px-6 py-4" @submit.prevent="ask(draft)">
+                    <p v-if="!aiEnabled" class="mb-3 rounded-xl bg-[#fff4cc] dark:bg-amber-950/40 px-4 py-2 text-sm text-[#7a4b00] dark:text-amber-300" role="status">Chat Gizi belum diaktifkan di server ini.</p>
+                    <div class="flex items-end gap-3 rounded-3xl bg-[#f4f3f0] dark:bg-[#262626] py-2 pl-5 pr-2">
                         <label for="chat-input" class="sr-only">Pertanyaan tentang gizi makanan</label>
-                        <textarea id="chat-input" v-model="draft" rows="1" :maxlength="MAX_CHARS" :disabled="!aiEnabled" placeholder="Tanya soal gizi makanan" class="max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent py-2 text-base text-[#191919] placeholder:text-[#5e5e5e] focus:ring-0 focus-visible:outline-none" @keydown.enter.exact.prevent="ask(draft)" />
+                        <textarea id="chat-input" v-model="draft" rows="1" :maxlength="MAX_CHARS" :disabled="!aiEnabled" placeholder="Tanya soal gizi makanan" class="max-h-32 min-h-10 flex-1 resize-none border-0 bg-transparent py-2 text-base text-[#191919] dark:text-[#f0efea] placeholder:text-[#5e5e5e] focus:ring-0 focus-visible:outline-none" @keydown.enter.exact.prevent="ask(draft)" />
                         <button type="submit" :disabled="!aiEnabled || sending || !draft.trim()" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0b8043] text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] disabled:cursor-not-allowed disabled:opacity-50" aria-label="Kirim pertanyaan">
                             <Send class="h-4 w-4" aria-hidden="true" />
                         </button>
                     </div>
-                    <p class="mt-2 flex items-start gap-2 text-xs text-[#5e5e5e]"><Info class="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />Jawaban otomatis bisa keliru. Untuk kondisi medis, ajukan Konsultasi dengan Ahli Gizi. Pertanyaanmu diproses penyedia AI.</p>
+                    <p class="mt-2 flex items-start gap-2 text-xs text-[#5e5e5e] dark:text-[#a3a3a3]"><Info class="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />Jawaban otomatis bisa keliru. Untuk kondisi medis, ajukan Konsultasi dengan Ahli Gizi. Pertanyaanmu diproses penyedia AI.</p>
                 </form>
             </section>
         </div>

@@ -39,19 +39,23 @@ final class MakananSource
         if (! self::isGram($m) && self::unitWeight($m) === null) {
             return 'unit_not_gram';
         }
-        if (! is_numeric($m->kuantitas) || bccomp((string) $m->kuantitas, '0', 4) <= 0) {
+        if (bccomp(self::decimal($m->kuantitas), '0', 4) <= 0) {
             return 'quantity_invalid';
         }
 
         return null;
     }
 
-    /** Grams of the whole serving as a decimal string (call only on an eligible row). */
+    /**
+     * Grams of the whole serving as a decimal string (call only on an eligible row).
+     *
+     * @return numeric-string
+     */
     public static function servingGrams(Makanan $m): string
     {
-        $quantity = (string) $m->kuantitas;
+        $quantity = self::decimal($m->kuantitas);
 
-        return self::isGram($m) ? $quantity : bcmul($quantity, (string) self::unitWeight($m), 8);
+        return self::isGram($m) ? $quantity : bcmul($quantity, self::unitWeight($m) ?? '0', 8);
     }
 
     /**
@@ -107,24 +111,33 @@ final class MakananSource
         return in_array(mb_strtolower(trim((string) $m->satuan)), self::GRAM_UNITS, true);
     }
 
-    /** Grams per one unit, or null when missing, not numeric or not above zero. */
+    /**
+     * Grams per one unit, or null when missing, not numeric or not above zero.
+     *
+     * @return numeric-string|null
+     */
     private static function unitWeight(Makanan $m): ?string
     {
-        $weight = $m->berat_per_satuan_gram;
+        $weight = self::decimal($m->berat_per_satuan_gram);
 
-        return is_numeric($weight) && bccomp((string) $weight, '0', 4) > 0 ? (string) $weight : null;
+        return bccomp($weight, '0', 4) > 0 ? $weight : null;
     }
 
+    /** @param numeric-string $quantity */
     private static function optional(mixed $value, string $quantity): ?string
     {
-        if ($value === null || bccomp((string) $value, '0', 4) === 0) {
+        if ($value === null || bccomp(self::decimal($value), '0', 4) === 0) {
             return null;
         }
 
         return self::scale($value, $quantity);
     }
 
-    /** value * 100 / quantity, rounded half up to 4 decimals (BCMath; never a float). */
+    /**
+     * value * 100 / quantity, rounded half up to 4 decimals (BCMath; never a float).
+     *
+     * @param  numeric-string  $quantity
+     */
     private static function scale(mixed $value, string $quantity): string
     {
         $raw = bcdiv(bcmul(self::decimal($value), '100', 8), $quantity, 8);
@@ -132,6 +145,7 @@ final class MakananSource
         return bcadd($raw, '0.00005', 4);
     }
 
+    /** @return numeric-string a non-negative decimal, or '0' for anything else */
     private static function decimal(mixed $value): string
     {
         $text = is_scalar($value) ? (string) $value : '0';
