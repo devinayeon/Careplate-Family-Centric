@@ -202,3 +202,11 @@ it('completes the dashboard breakfast mission only with a breakfast log, and cou
     mlLog($this->user, $food, ['waktu_makan' => 'makan_malam']);
     expect($misi()['Catat sarapan'])->toBeTrue()->and($misi()['Catat tiga waktu makan'])->toBeTrue();
 });
+
+it('renders the dashboard for a user who has a profile but no log today', function () {
+    $this->user->pengguna()->create([]);
+
+    $misi = collect($this->actingAs($this->user)->get('/beranda')->assertOk()->viewData('page')['props']['misi']['list'])->pluck('completed', 'title');
+
+    expect($misi['Catat sarapan'])->toBeFalse()->and($misi['Catat tiga waktu makan'])->toBeFalse();
+});
