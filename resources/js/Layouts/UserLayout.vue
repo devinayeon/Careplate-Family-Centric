@@ -68,7 +68,7 @@ const logout = () => {
     >
         <!-- Desktop Sidebar -->
         <aside
-            class="hidden md:flex md:w-64 flex-col bg-white dark:bg-[#1c1c1c] border-r border-gray-100 dark:border-[#2e2e2e] min-h-screen p-5 shrink-0 justify-between transition-colors"
+            class="hidden md:flex md:w-64 flex-col bg-white dark:bg-[#1c1c1c] border-r border-gray-100 dark:border-[#2e2e2e] h-screen sticky top-0 p-5 shrink-0 justify-between overflow-y-auto custom-scrollbar transition-colors z-30"
         >
             <div>
                 <!-- Logo -->

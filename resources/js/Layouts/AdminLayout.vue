@@ -67,7 +67,7 @@ const logout = () => {
     >
         <!-- Desktop Sidebar -->
         <aside
-            class="hidden md:flex md:w-64 flex-col bg-white dark:bg-[#1c1c1c] border-r border-gray-100 dark:border-[#2e2e2e] min-h-screen p-5 shrink-0 justify-between transition-colors"
+            class="hidden md:flex md:w-64 flex-col bg-white dark:bg-[#1c1c1c] border-r border-gray-100 dark:border-[#2e2e2e] h-screen sticky top-0 p-5 shrink-0 justify-between overflow-y-auto custom-scrollbar transition-colors z-30"
         >
             <div>
                 <!-- Logo & Admin Role Badge -->
@@ -238,25 +238,8 @@ const logout = () => {
         <div class="flex-1 flex flex-col min-w-0">
             <!-- Top Bar -->
             <header
-                class="bg-white/70 dark:bg-[#1c1c1c]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-[#2e2e2e] px-6 py-3.5 flex items-center justify-between gap-4 transition-colors"
+                class="bg-white/70 dark:bg-[#1c1c1c]/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-100 dark:border-[#2e2e2e] px-6 py-3.5 flex items-center justify-end gap-4 transition-colors"
             >
-                <!-- Search bar -->
-                <div class="relative flex-1 max-w-md">
-                    <Search
-                        class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Cari pengguna, artikel, atau makanan"
-                        class="w-full bg-[#f4f5f6] dark:bg-[#262626] hover:bg-[#eceef0] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm text-gray-800 dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-gray-500 pl-10 pr-14 py-2 rounded-xl border border-transparent dark:border-[#2e2e2e] focus:ring-2 focus:ring-[#0f6b36]/30 transition-all outline-none"
-                    />
-                    <span
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] font-medium text-gray-400 dark:text-gray-500 bg-white dark:bg-[#1c1c1c] px-1.5 py-0.5 rounded border border-gray-200 dark:border-[#2e2e2e]"
-                    >
-                        Ctrl K
-                    </span>
-                </div>
-
                 <!-- Right Side: Theme Toggle, Bell & Admin Dropdown -->
                 <div class="flex items-center gap-3 shrink-0">
                     <!-- Dark Mode Toggle Button -->
