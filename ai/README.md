@@ -11,6 +11,7 @@ DEFAULT (since 2026-11-09): `AI_PROVIDER=gemini`, model `gemini-3.5-flash-lite` 
 Checked live on 2026-11-09: `ai:preflight` ok (model `qwen3.8-max`, about 6 s); a text+schema call and a label-image call (FDA label: 230 kcal, 160 mg read correctly) work. Offline tests: `tests/Feature/Ai/OpenAiClientTest.php` (13).
 
 Limits, stated plainly:
+
 - The gateway is a FREE Qwen tier that returns HTTP 429 "at capacity" with `Retry-After` of 6 to 26 s. Our scan deadline is 25 s, so a longer `Retry-After` is not retried and the request fails with `AI_PROVIDER_ERROR`. In a live eval of 8 samples only a minority was read; a 3-image run read 1 of 3. Latency of a successful label read was about 10 to 22 s. Plan for a paid or reserved capacity before the demo.
 - There is no `store:false` equivalent: retention and training use are the gateway operator's policy. Do not send real user photos or chats until that policy is known.
 - The earlier eval numbers in this README were produced with Gemini, not Qwen. Accuracy of `qwen/qwen3.8-max` on the label sets is NOT measured yet (capacity-blocked).

@@ -61,15 +61,24 @@ onUnmounted(() => {
         <div class="relative z-10">
             <Link
                 href="/"
-                class="inline-block transition-opacity hover:opacity-90"
+                class="inline-flex items-center transition-opacity hover:opacity-90"
             >
+                <div
+                    class="flex h-9 w-9 items-center justify-center rounded-full bg-white p-1.5 shadow-xs"
+                >
+                    <img
+                        src="/assets/logo.png"
+                        alt="CarePlate Logo"
+                        class="h-full w-full object-contain"
+                    />
+                </div>
                 <span
                     class="font-display text-3xl font-bold tracking-tight text-white"
                 >
-                    CarePlate
+                    arePlate
                 </span>
             </Link>
-            <p class="mt-1 text-sm font-medium text-white/90">
+            <p class="mt-2 text-sm font-medium text-white/90">
                 Selamat datang di CarePlate
             </p>
         </div>

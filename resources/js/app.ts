@@ -9,6 +9,9 @@ import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 const appName = import.meta.env.VITE_APP_NAME || 'CarePlate';
 
 function getPageData() {
+    if (typeof document === 'undefined') {
+        return undefined;
+    }
     const scriptEl = document.querySelector<HTMLScriptElement>(
         'script[data-page="app"][type="application/json"]',
     );
@@ -33,7 +36,7 @@ function getPageData() {
 const pageData = getPageData();
 
 void createInertiaApp({
-    page: pageData,
+    ...(pageData ? { page: pageData } : {}),
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => {
         const pages = import.meta.glob<DefineComponent>([
@@ -45,10 +48,15 @@ void createInertiaApp({
             : resolvePageComponent(`./Pages/${name}.vue`, pages);
     },
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
-            .use(ZiggyVue)
-            .mount(el);
+            .use(ZiggyVue);
+
+        if (el) {
+            app.mount(el);
+        }
+
+        return app;
     },
     progress: {
         color: '#0b8043',
