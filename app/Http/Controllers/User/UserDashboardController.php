@@ -4,7 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\PelacakanMakanan;
+use App\Models\Pengguna;
+use App\Services\Profile\ProfileProgress;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +17,7 @@ class UserDashboardController extends Controller
     /**
      * Tampilkan halaman Beranda Pengguna (Customer).
      */
-    public function index(Request $request): Response
+    public function index(Request $request, ProfileProgress $progress): Response
     {
         $user = $request->user();
         $today = Carbon::today();
@@ -74,7 +77,7 @@ class UserDashboardController extends Controller
             'pengguna' => $pengguna,
             'targetKalori' => $targetKalori,
             'kaloriTerkonsumsi' => $kaloriTerkonsumsi,
-            'streakHari' => 0,
+            'streakHari' => $progress->forUser($user, $pengguna instanceof Pengguna ? $pengguna : null, CarbonImmutable::today())['streak']['saat_ini'],
             'keluarga' => $pengguna?->keluarga,
             'misi' => [
                 'list' => $misiList,
