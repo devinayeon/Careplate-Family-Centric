@@ -99,8 +99,19 @@ class AdminDashboardController extends Controller
                 'needs_weight' => $ai['needs_weight'],
                 'failed' => $ai['failed'],
                 'failed_names' => $ai['failed_names'],
-                'terakhir_sinkron' => $ai['last_sync']?->locale('id')->diffForHumans(),
+                'terakhir_sinkron' => $this->syncedAgo($ai['last_sync']),
             ],
         ]);
+    }
+
+    /** "16 menit yang lalu" for the sync panel, or null when nothing was ever published. */
+    private function syncedAgo(?Carbon $at): ?string
+    {
+        if ($at === null) {
+            return null;
+        }
+        $at->setLocale('id');
+
+        return $at->diffForHumans();
     }
 }
