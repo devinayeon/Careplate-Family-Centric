@@ -17,6 +17,16 @@ Limits, stated plainly:
 - The earlier eval numbers in this README were produced with Gemini, not Qwen. Accuracy of `qwen/qwen3.8-max` on the label sets is NOT measured yet (capacity-blocked).
 - `php tools/ai-dev.php doctor` still reports the Gemini key flag only (the baseline helper was not changed).
 
+## Food catalog: the team's `makanan` feeds the AI
+
+The chat reads only `foods` (verified, per 100 g, with citations). Foods the admin verifies in the team's `makanan` table (`status = terverifikasi`) are published into `foods` automatically, through `ReviewFood` only (provider `CAREPLATE_MAKANAN`, audit id `sync:makanan`). One AI food per content version: a changed row revokes the old food and approves a new one; a rejected, deleted or no longer eligible row is revoked.
+
+- **Only gram units.** `makanan` stores nutrients per portion (`kuantitas` + `satuan`). Rows in `g`/`gram` are converted to per 100 g with BCMath (rounded half up to 4 decimals). `ml`, `porsi`, `buah`, `mangkok` and similar are NOT published: no density or weight is known, and guessing would invent numbers.
+- **Unknown stays null.** `gula` and `natrium` were added with a default of 0, so a stored 0 cannot be told from unknown and is published as null.
+- **How it runs.** `MakananObserver` syncs after the team's transaction commits and never breaks the admin screen (a failure is logged with metadata only). Seeders run without model events: run `php artisan ai:sync-makanan` after `db:seed` and to repair or backfill (output: `published`, `unchanged`, `revoked`, `skipped:<reason>`, `failed`). Turn the observer off with `AI_SYNC_MAKANAN=false`.
+- **Verification.** The approval is accepted only if the makanan row is still verified and the version was built from its current content (hash check in `ReviewCandidate`); users cannot submit this provider.
+- **Limit.** The AI sees this food as "source-reviewed by an admin", not as nutritionist-verified.
+
 ## What exists
 
 | Feature      | Summary                                                                                                                                                        |

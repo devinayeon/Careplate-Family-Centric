@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Makanan;
+use App\Observers\MakananObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -24,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // AI food catalog follows the team's verified `makanan` rows (after their commit; failures never reach the admin screen).
+        Makanan::observe(MakananObserver::class);
 
         foreach (['scan', 'chat', 'submit'] as $feature) {
             // Distinct keys per window: Laravel counts hits per key, so sharing one would merge them.
