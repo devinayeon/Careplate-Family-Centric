@@ -1,16 +1,27 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     CheckCircle2,
     Database,
     MessageCircle,
+    Plus,
     Utensils,
 } from 'lucide-vue-next';
 import UserLayout from '@/Layouts/UserLayout.vue';
 import FoodStatusBadge from '@/Components/UI/FoodStatusBadge.vue';
 import { DAILY_REFERENCE, idNumber } from '@/lib/foodUi';
+
+// Figma 07.2 "Catat Makanan Ini": only a verified food can be logged, and only by a user allowed to log meals.
+const canLog = computed(
+    () =>
+        props.food.status === 'terverifikasi' &&
+        (
+            (usePage().props.auth as { user?: { permissions?: string[] } })
+                ?.user?.permissions ?? []
+        ).includes('meal_log:create'),
+);
 
 const props = defineProps<{
     food: {
@@ -149,8 +160,15 @@ const verifiedOn = computed(() =>
                         </div>
                     </dl>
                     <Link
+                        v-if="canLog"
+                        :href="route('user.meals', { tambah: food.id })"
+                        class="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-[#0b8043] text-sm font-semibold text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]"
+                        ><Plus class="h-4 w-4" aria-hidden="true" /> Catat
+                        Makanan Ini</Link
+                    >
+                    <Link
                         :href="route('user.chat_gizi')"
-                        class="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-[#191919] bg-white text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] dark:border-[#f0efea] dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:hover:bg-[#262626]"
+                        class="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-[#191919] bg-white text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919] dark:border-[#f0efea] dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:hover:bg-[#262626]"
                         ><MessageCircle class="h-4 w-4" aria-hidden="true" />
                         Tanya Chat Gizi</Link
                     >

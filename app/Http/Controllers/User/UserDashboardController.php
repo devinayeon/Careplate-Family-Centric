@@ -4,7 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\PelacakanMakanan;
+use App\Models\Pengguna;
+use App\Services\Profile\ProfileProgress;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,7 +17,7 @@ class UserDashboardController extends Controller
     /**
      * Tampilkan halaman Beranda Pengguna (Customer).
      */
-    public function index(Request $request): Response
+    public function index(Request $request, ProfileProgress $progress): Response
     {
         $user = $request->user();
         $today = Carbon::today();
@@ -40,21 +43,24 @@ class UserDashboardController extends Controller
 
         $targetKalori = (float) ($pengguna?->kalori ?? 0.00);
 
-        // Misi harian
+        // Misi harian: judged by meal time (sarapan, makan_siang, makan_malam), not by the number of rows.
+        $waktuMakanHariIni = $catatanMakananHariIni->toBase()->map(fn (PelacakanMakanan $c) => $c->waktuMakanEfektif())->unique();
+        $waktuUtama = $waktuMakanHariIni->intersect(['sarapan', 'makan_siang', 'makan_malam']);
+
         $misiList = [
             [
                 'id' => 1,
                 'title' => 'Catat sarapan',
                 'action_label' => 'Catat',
                 'route' => 'user.meals',
-                'completed' => count($catatanMakananHariIni) > 0,
+                'completed' => $waktuMakanHariIni->contains('sarapan'),
             ],
             [
                 'id' => 2,
                 'title' => 'Catat tiga waktu makan',
                 'action_label' => 'Lihat catatan',
                 'route' => 'user.meals',
-                'completed' => count($catatanMakananHariIni) >= 3,
+                'completed' => $waktuUtama->count() >= 3,
             ],
             [
                 'id' => 3,
@@ -71,7 +77,7 @@ class UserDashboardController extends Controller
             'pengguna' => $pengguna,
             'targetKalori' => $targetKalori,
             'kaloriTerkonsumsi' => $kaloriTerkonsumsi,
-            'streakHari' => 0,
+            'streakHari' => $progress->forUser($user, $pengguna instanceof Pengguna ? $pengguna : null, CarbonImmutable::today())['streak']['saat_ini'],
             'keluarga' => $pengguna?->keluarga,
             'misi' => [
                 'list' => $misiList,
