@@ -30,6 +30,9 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        if ($user) {
+            $user->loadMissing(['pengguna.keluarga']);
+        }
 
         return [
             ...parent::share($request),
@@ -37,6 +40,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? array_merge($user->toArray(), [
                     'roles' => $user->getRoleNames(),
                     'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'pengguna' => $user->pengguna,
+                    'keluarga' => $user->pengguna?->keluarga,
                 ]) : null,
             ],
         ];
