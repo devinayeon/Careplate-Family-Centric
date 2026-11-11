@@ -70,4 +70,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(Artikel::class, 'penulis_id');
     }
+
+    /**
+     * Riwayat konsultasi yang diajukan user sebagai klien.
+     */
+    public function konsultasiSebagaiKlien(): HasMany
+    {
+        return $this->hasMany(Konsultasi::class, 'user_id');
+    }
+
+    /**
+     * Pesan konsultasi yang dikirim user.
+     */
+    public function pesanKonsultasi(): HasMany
+    {
+        return $this->hasMany(PesanKonsultasi::class, 'sender_id');
+    }
 }

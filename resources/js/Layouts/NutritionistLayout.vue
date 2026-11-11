@@ -36,6 +36,10 @@ const navItems = [
     },
 ];
 
+const isRouteActive = (routeName: string) => {
+    return route().current(routeName) || route().current(`${routeName}*`);
+};
+
 const userInitials = computed(() => {
     if (!user.value?.name) return 'AG';
     return user.value.name
@@ -78,10 +82,10 @@ const logout = () => {
                         >
                     </Link>
                     <div
-                        class="inline-flex items-center gap-1.5 rounded-full bg-gray-100/90 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-[#262626] dark:text-[#a3a3a3]"
+                        class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-[#17321f] dark:text-[#3fcb7a]"
                     >
                         <span
-                            class="h-1.5 w-1.5 rounded-full bg-teal-500"
+                            class="h-1.5 w-1.5 rounded-full bg-emerald-500"
                         ></span>
                         <span>Ahli Gizi</span>
                     </div>
@@ -99,17 +103,17 @@ const logout = () => {
                         "
                         class="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all"
                         :class="
-                            route().current(item.routeName)
-                                ? 'bg-teal-50 font-semibold text-teal-800 dark:bg-teal-950/60 dark:text-teal-300'
+                            isRouteActive(item.routeName)
+                                ? 'bg-[#e7f5ec] font-semibold text-[#0f6b36] shadow-2xs dark:bg-[#17321f] dark:text-[#3fcb7a]'
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-[#a3a3a3] dark:hover:bg-[#262626] dark:hover:text-[#f0efea]'
                         "
                     >
                         <component
                             :is="item.icon"
-                            class="h-4 w-4 shrink-0"
+                            class="h-4 w-4 shrink-0 transition-colors"
                             :class="
-                                route().current(item.routeName)
-                                    ? 'text-teal-600 dark:text-teal-400'
+                                isRouteActive(item.routeName)
+                                    ? 'text-[#0f6b36] dark:text-[#3fcb7a]'
                                     : 'text-gray-400 dark:text-gray-500'
                             "
                         />
@@ -172,12 +176,20 @@ const logout = () => {
                 @click="isMobileMenuOpen = false"
                 class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium"
                 :class="
-                    route().current(item.routeName)
-                        ? 'bg-teal-50 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300'
+                    isRouteActive(item.routeName)
+                        ? 'bg-[#e7f5ec] font-semibold text-[#0f6b36] dark:bg-[#17321f] dark:text-[#3fcb7a]'
                         : 'text-gray-600 dark:text-gray-300'
                 "
             >
-                <component :is="item.icon" class="h-4 w-4" />
+                <component
+                    :is="item.icon"
+                    class="h-4 w-4"
+                    :class="
+                        isRouteActive(item.routeName)
+                            ? 'text-[#0f6b36] dark:text-[#3fcb7a]'
+                            : 'text-gray-400 dark:text-gray-500'
+                    "
+                />
                 <span>{{ item.name }}</span>
             </Link>
             <button
@@ -203,7 +215,7 @@ const logout = () => {
                     <input
                         type="text"
                         placeholder="Cari klien atau konsultasi"
-                        class="w-full rounded-xl border border-transparent bg-[#f4f5f6] py-2 pr-14 pl-10 text-sm text-gray-800 placeholder-gray-400 transition-all outline-none hover:bg-[#eceef0] focus:bg-white focus:ring-2 focus:ring-teal-600/30 dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:placeholder-gray-500 dark:hover:bg-[#2e2e2e] dark:focus:bg-[#1c1c1c]"
+                        class="w-full rounded-xl border border-transparent bg-[#f4f5f6] py-2 pr-14 pl-10 text-sm text-gray-800 placeholder-gray-400 transition-all outline-none hover:bg-[#eceef0] focus:bg-white focus:ring-2 focus:ring-[#0f6b36]/30 dark:border-[#2e2e2e] dark:bg-[#262626] dark:text-[#f0efea] dark:placeholder-gray-500 dark:hover:bg-[#2e2e2e] dark:focus:bg-[#1c1c1c]"
                     />
                     <span
                         class="absolute top-1/2 right-3 -translate-y-1/2 rounded border border-gray-200 bg-white px-1.5 py-0.5 text-[11px] font-medium text-gray-400 dark:border-[#2e2e2e] dark:bg-[#1c1c1c] dark:text-gray-500"
@@ -230,7 +242,7 @@ const logout = () => {
                             class="flex cursor-pointer items-center gap-2.5 rounded-full p-1 text-left transition-colors hover:bg-gray-50 dark:hover:bg-[#262626]"
                         >
                             <div
-                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-[#0f6b36] dark:bg-[#17321f] dark:text-[#3fcb7a]"
                             >
                                 {{ userInitials }}
                             </div>
