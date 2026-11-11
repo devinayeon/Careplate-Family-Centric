@@ -149,7 +149,7 @@ class AdminArticleController extends Controller
     {
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:artikel,slug,' . $artikel->id,
+            'slug' => 'nullable|string|max:255|unique:artikel,slug,'.$artikel->id,
             'kategori' => 'required|string|max:100',
             'ringkasan' => 'nullable|string|max:500',
             'konten' => 'required|string',
@@ -219,7 +219,7 @@ class AdminArticleController extends Controller
         $path = $request->file('image')->store('artikel/inline', 'public');
 
         return response()->json([
-            'url' => asset('storage/' . $path),
+            'url' => asset('storage/'.$path),
         ]);
     }
 

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -13,10 +15,10 @@ use Illuminate\Support\Str;
  * @property string $nama_keluarga
  * @property string|null $kode_keluarga
  * @property int $kepala_keluarga_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Pengguna $kepalaKeluarga
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Pengguna> $anggota
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Pengguna $kepalaKeluarga
+ * @property-read Collection<int, Pengguna> $anggota
  */
 class Keluarga extends Model
 {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,12 +23,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property int|null $keluarga_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $user
- * @property-read \App\Models\Keluarga|null $keluarga
- * @property-read \App\Models\Keluarga|null $keluargaDipimpin
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Bmi> $bmiHistori
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\KebutuhanKalori> $kebutuhanKaloriHistori
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PelacakanMakanan> $pelacakanMakanan
+ * @property-read User $user
+ * @property-read Keluarga|null $keluarga
+ * @property-read Keluarga|null $keluargaDipimpin
+ * @property-read Collection<int, Bmi> $bmiHistori
+ * @property-read Collection<int, KebutuhanKalori> $kebutuhanKaloriHistori
+ * @property-read Collection<int, PelacakanMakanan> $pelacakanMakanan
  * @property-read int|null $usia
  */
 class Pengguna extends Model

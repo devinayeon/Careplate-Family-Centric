@@ -29,31 +29,31 @@ The chat reads only `foods` (verified, per 100 g, with citations). Foods the adm
 
 ## What exists
 
-| Feature      | Summary                                                                                                                                                        |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                 |
-| Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
-| Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                        |
-| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                     |
-| Data Makanan | `/data-makanan` (verified list), `/data-makanan/ajukan` (6-step submission, status `menunggu`, owned by the user), `/pengajuan-saya`. A scan result can prefill the wizard. Verified gram or weighted rows reach the chat through `MakananObserver`. |
+| Feature      | Summary                                                                                                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                                                                                                                                             |
+| Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days.                                                                                                                             |
+| Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                                                                                                                                                    |
+| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                                                                                                                                                 |
+| Data Makanan | `/data-makanan` (verified list), `/data-makanan/ajukan` (6-step submission, status `menunggu`, owned by the user), `/pengajuan-saya`. A scan result can prefill the wizard. Verified gram or weighted rows reach the chat through `MakananObserver`.                                       |
 | Screens      | `/pindai-kemasan` and `/chat-gizi` (Inertia pages `User/Pindai`, `User/ChatGizi`, same permissions as the API) call `/ai/v1/*` from the browser with the session cookie and the `XSRF-TOKEN` header (`resources/js/lib/aiApi.ts`). A chat is titled by its first question (60 characters). |
-| Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                   |
+| Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                                                                                                                                               |
 
 ## Routes
 
 Base: same origin as the Laravel app (local: `http://127.0.0.1:8001`). All routes sit in the `web`, `auth` group: session cookie, CSRF, JSON errors. Every response has `Cache-Control: no-store, private` and `X-Request-Id`.
 
-| Method and path                                           | Needs                                | Success                       | Notes                                                           |
-| --------------------------------------------------------- | ------------------------------------ | ----------------------------- | --------------------------------------------------------------- |
-| POST `/ai/v1/scan`                                        | `health_tool:use_scanner`, throttle `ai-scan` | 200                           | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
-| GET `/ai/v1/foods`                                        | `health_tool:use_ai_chat`                     | 200                           | `q` (<=200 chars, optional), `limit` 1 to 5                     |
-| POST `/ai/v1/chat/sessions`                               | `health_tool:use_ai_chat`                     | 201                           | empty JSON object body                                          |
-| GET `/ai/v1/chat/sessions`                                | `health_tool:use_ai_chat`                     | 200                           | `cursor`, `limit` 1 to 20; own sessions only                    |
-| DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                | 204                           | content erased at once; late results are refused                |
-| GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                | 200                           | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
-| POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`            | 200                           | one turn; see idempotency below                                 |
-| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `food:verify` and role `admin`       | 200                           | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
-| POST `/ai/v1/admin/foods/{food}/revoke`                   | `food:verify` and role `admin`       | 200                           | `{expected_revision, reason}`                                   |
+| Method and path                                           | Needs                                         | Success | Notes                                                           |
+| --------------------------------------------------------- | --------------------------------------------- | ------- | --------------------------------------------------------------- |
+| POST `/ai/v1/scan`                                        | `health_tool:use_scanner`, throttle `ai-scan` | 200     | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
+| GET `/ai/v1/foods`                                        | `health_tool:use_ai_chat`                     | 200     | `q` (<=200 chars, optional), `limit` 1 to 5                     |
+| POST `/ai/v1/chat/sessions`                               | `health_tool:use_ai_chat`                     | 201     | empty JSON object body                                          |
+| GET `/ai/v1/chat/sessions`                                | `health_tool:use_ai_chat`                     | 200     | `cursor`, `limit` 1 to 20; own sessions only                    |
+| DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                         | 204     | content erased at once; late results are refused                |
+| GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                         | 200     | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
+| POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`                     | 200     | one turn; see idempotency below                                 |
+| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `food:verify` and role `admin`                | 200     | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
+| POST `/ai/v1/admin/foods/{food}/revoke`                   | `food:verify` and role `admin`                | 200     | `{expected_revision, reason}`                                   |
 
 Permissions are the team's own names (no separate AI list): `health_tool:use_scanner` (scan), `health_tool:use_ai_chat` (chat, food search) and `food:verify` (admin approve/revoke, plus the `admin` role). `user`, `ahli_gizi` and `admin` get scan and chat; only `admin` verifies food, never `ahli_gizi`. Registration assigns `user`. `AiPermissionSeeder` must run after `RolePermissionSeeder` (which uses `syncPermissions`). There is no user food-submission endpoint: foods enter through the team's `makanan` (admin verifies) or the catalog seeder. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
 

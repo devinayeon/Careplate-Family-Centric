@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\KategoriMakanan;
 use App\Models\Makanan;
 use App\Services\Ai\Foods\AiFoodStatus;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -74,9 +73,6 @@ class AdminVerificationController extends Controller
             ];
         });
 
-
-        
-
         // Item terpilih untuk panel detail
         $selectedId = $request->query('selected');
         $selectedItem = null;
@@ -123,14 +119,14 @@ class AdminVerificationController extends Controller
                 'energi_hitung' => round($totalHitung),
                 'energi_input' => round($energiInput),
                 'persen_selisih' => $persenSelisih,
-                'formula_text' => "4×{$p} + 4×{$c} + 9×{$f} = " . round($totalHitung) . " kkal, selisih {$persenSelisih}% dari " . round($energiInput) . " kkal.",
+                'formula_text' => "4×{$p} + 4×{$c} + 9×{$f} = ".round($totalHitung)." kkal, selisih {$persenSelisih}% dari ".round($energiInput).' kkal.',
             ];
 
             // 2. Deteksi Makanan Serupa di Database
             $similar = Makanan::where('status', 'terverifikasi')
                 ->where('id', '!=', $selectedItem['id'])
                 ->where(function ($q) use ($selectedItem) {
-                    $q->where('nama', 'like', '%' . Str::words($selectedItem['nama'], 2, '') . '%')
+                    $q->where('nama', 'like', '%'.Str::words($selectedItem['nama'], 2, '').'%')
                         ->orWhere('kategori_makanan_id', $selectedItem['kategori_makanan_id']);
                 })
                 ->first();
@@ -142,7 +138,7 @@ class AdminVerificationController extends Controller
                     'nama' => $similar->nama,
                     'energi' => round((float) $similar->energi),
                     'takaran' => "{$similarFormattedTakaran} {$similar->satuan}",
-                    'text' => "Mirip dengan \"{$similar->nama}\" (" . round((float) $similar->energi) . " kkal per {$similarFormattedTakaran} {$similar->satuan}) di database.",
+                    'text' => "Mirip dengan \"{$similar->nama}\" (".round((float) $similar->energi)." kkal per {$similarFormattedTakaran} {$similar->satuan}) di database.",
                 ];
             }
         }
