@@ -12,25 +12,25 @@ it('gives the team roles their AI permissions when the AI seeder runs after the 
     $expert = Role::findByName('ahli_gizi', 'web');
     $admin = Role::findByName('admin', 'web');
 
-    expect($user->hasPermissionTo('scan-nutrition', 'web'))->toBeTrue()
-        ->and($user->hasPermissionTo('nutrition-chat', 'web'))->toBeTrue()
-        ->and($user->hasPermissionTo('submit-food', 'web'))->toBeTrue()
-        ->and($user->hasPermissionTo('verify-food', 'web'))->toBeFalse()
-        ->and($expert->hasPermissionTo('nutrition-chat', 'web'))->toBeTrue()
-        ->and($expert->hasPermissionTo('submit-food', 'web'))->toBeFalse()
-        ->and($admin->hasPermissionTo('verify-food', 'web'))->toBeTrue();
+    expect($user->hasPermissionTo('health_tool:use_scanner', 'web'))->toBeTrue()
+        ->and($user->hasPermissionTo('health_tool:use_ai_chat', 'web'))->toBeTrue()
+        ->and($user->hasPermissionTo('food:verify', 'web'))->toBeFalse()
+        ->and($expert->hasPermissionTo('health_tool:use_ai_chat', 'web'))->toBeTrue()
+        ->and($expert->hasPermissionTo('food:verify', 'web'))->toBeFalse()
+        ->and($admin->hasPermissionTo('food:verify', 'web'))->toBeTrue();
 });
 
-it('loses the AI permissions if the role seeder runs last (documents the required order)', function () {
+it('ahli_gizi loses its AI permissions if the role seeder runs last (documents the required order)', function () {
     $this->seed(AiPermissionSeeder::class);
     $this->seed(RolePermissionSeeder::class);
 
-    expect(Role::findByName('user', 'web')->hasPermissionTo('scan-nutrition', 'web'))->toBeFalse();
+    expect(Role::findByName('ahli_gizi', 'web')->hasPermissionTo('health_tool:use_scanner', 'web'))->toBeFalse()
+        ->and(Role::findByName('user', 'web')->hasPermissionTo('health_tool:use_scanner', 'web'))->toBeTrue();
 });
 
 it('DatabaseSeeder runs the AI seeder after the role seeder and keeps it repeatable', function () {
     $this->seed();
     $this->seed();
 
-    expect(Role::findByName('user', 'web')->hasPermissionTo('nutrition-chat', 'web'))->toBeTrue();
+    expect(Role::findByName('user', 'web')->hasPermissionTo('health_tool:use_ai_chat', 'web'))->toBeTrue();
 });

@@ -22,8 +22,8 @@ final class ChatEvalSandbox
         $user = User::create(['name' => 'AI Eval', 'email' => 'eval-'.bin2hex(random_bytes(6)).'@eval.invalid', 'password' => Str::random(40)]);
         $this->userIds[] = $user->id;
         $user->assignRole('family_head');
-        if (! $user->can('nutrition-chat')) {
-            throw new RuntimeException('The family_head role lacks the nutrition-chat permission; run the permission seeder.');
+        if (! $user->can('health_tool:use_ai_chat')) {
+            throw new RuntimeException('The family_head role lacks the health_tool:use_ai_chat permission; run the permission seeder.');
         }
 
         return $user;

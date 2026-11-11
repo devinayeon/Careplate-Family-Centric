@@ -27,8 +27,8 @@ it('registers new users with the role `user` that holds the AI permissions', fun
     $this->assertAuthenticated();
     $user = User::where('email', 'new@example.com')->firstOrFail();
     expect($user->hasRole('user'))->toBeTrue()
-        ->and($user->hasPermissionTo('scan-nutrition'))->toBeTrue()
-        ->and($user->hasPermissionTo('verify-food'))->toBeFalse();
+        ->and($user->hasPermissionTo('health_tool:use_scanner'))->toBeTrue()
+        ->and($user->hasPermissionTo('food:verify'))->toBeFalse();
 });
 
 it('never creates demo accounts with the default password in production', function () {

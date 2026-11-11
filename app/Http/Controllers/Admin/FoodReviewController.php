@@ -8,7 +8,7 @@ use App\Http\Requests\Ai\ReviewDecisionRequest;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Thin HTTP wrapper over ReviewFood (the only publish path). Access (permission verify-food AND role admin)
+ * Thin HTTP wrapper over ReviewFood (the only publish path). Access (permission food:verify AND role admin)
  * is enforced by route middleware before this runs; ids are plain strings so ReviewFood answers 404/409/422.
  */
 class FoodReviewController extends Controller

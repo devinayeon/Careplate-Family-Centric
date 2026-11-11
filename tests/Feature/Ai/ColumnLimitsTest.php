@@ -36,7 +36,7 @@ test('a submission at every validation maximum is stored and read back unchanged
         'source' => ['source_id' => '900001', 'source_url' => clUrl(500), 'snapshot_version' => str_repeat('v', 100)],
     ]);
 
-    $row = FoodSubmission::query()->findOrFail(fsSubmit(fsUser(), $body)->assertCreated()->json('submission_id'));
+    $row = fsCreate($body);
 
     expect(mb_strlen($row->source_url))->toBe(500)->and($row->source_url)->toBe(clUrl(500))
         ->and($row->snapshot_version)->toBe(str_repeat('v', 100))
@@ -47,11 +47,11 @@ test('a submission at every validation maximum is stored and read back unchanged
 test('a maximum submission approves into foods with its 500-character url and 100-character source id', function () {
     $sourceId = str_repeat('9', 100);
     fsManifest([$sourceId]);
-    $submission = FoodSubmission::query()->findOrFail(fsSubmit(fsUser(), fsBody([
+    $submission = fsCreate(fsBody([
         'name' => str_repeat('é', 120),
         'nutrients' => array_fill_keys(['energy_kcal', 'protein_g', 'fat_g', 'carbohydrate_g', 'sodium_mg', 'sugars_total_g'], '100000.0000'),
         'source' => ['source_id' => $sourceId, 'source_url' => clUrl(500)],
-    ]))->assertCreated()->json('submission_id'));
+    ]));
 
     clApprove($submission);
 

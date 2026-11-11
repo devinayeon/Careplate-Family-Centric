@@ -95,11 +95,10 @@ test('approve vs revoke on one food: the side blocked on the food row lock is DB
         ->and(DB::connection('cc_b')->table('food_revisions')->pluck('actor_audit_id')->all())->toBe(['audit-a']);
 })->with(['approve', 'revoke']);
 
-test('a lock wait timeout in approve, revoke or a submission insert is a retryable DB_BUSY, not a 500', function () {
+test('a lock wait timeout in approve or revoke is a retryable DB_BUSY, not a 500', function () {
     $food = cmSameTripleFood();
     $submission = rfSubmission(['revision_counter' => 2]);
     fsManifest();
-    $user = fsUser();
     $blocker = DB::connection('cc_b');
     $blocker->beginTransaction();
     $blocker->table('foods')->where('id', $food->id)->lockForUpdate()->first();
@@ -108,14 +107,12 @@ test('a lock wait timeout in approve, revoke or a submission insert is a retryab
 
     $approve = cmCaught(fn () => cmReview()->approve($submission->id, null, 'audit-a', 2, 'Setuju'));
     $revoke = cmCaught(fn () => cmReview()->revoke($food->id, null, 'audit-a', 3, 'Alasan'));
-    $post = fsSubmit($user, fsBody());
     $blocker->rollBack();
 
     foreach ([$approve, $revoke] as $error) {
         expect($error)->toBeInstanceOf(AiException::class)
             ->and($error->errorCode)->toBe('DB_BUSY')->and($error->retryable)->toBeTrue();
     }
-    chatError($post, 503, 'DB_BUSY', true);
     expect(DB::connection('cc_a')->table('food_revisions')->count())->toBe(0)
         ->and(DB::connection('cc_a')->table('food_submissions')->count())->toBe(1)
         ->and((int) DB::connection('cc_a')->table('foods')->value('current_revision'))->toBe(3);

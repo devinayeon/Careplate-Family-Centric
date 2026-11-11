@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         // AI food catalog follows the team's verified `makanan` rows (after their commit; failures never reach the admin screen).
         Makanan::observe(MakananObserver::class);
 
-        foreach (['scan', 'chat', 'submit'] as $feature) {
+        foreach (['scan', 'chat'] as $feature) {
             // Distinct keys per window: Laravel counts hits per key, so sharing one would merge them.
             RateLimiter::for('ai-'.$feature, fn (Request $request) => [
                 Limit::perMinute((int) config("ai.quotas.$feature.per_minute"))->by("ai:$feature:minute:".self::quotaKey($request)),

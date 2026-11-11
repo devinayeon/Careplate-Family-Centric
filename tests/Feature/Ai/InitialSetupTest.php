@@ -30,13 +30,12 @@ test('AI permissions reserve food verification for admins', function () {
     $familyHead = Role::findByName('family_head', 'web');
     $nutritionist = Role::findByName('nutritionist', 'web');
 
-    expect($admin->hasPermissionTo('verify-food', 'web'))->toBeTrue()
-        ->and($familyHead->hasPermissionTo('nutrition-chat', 'web'))->toBeTrue()
-        ->and($familyHead->hasPermissionTo('submit-food', 'web'))->toBeTrue()
-        ->and($nutritionist->hasPermissionTo('scan-nutrition', 'web'))->toBeTrue()
-        ->and($nutritionist->hasPermissionTo('nutrition-chat', 'web'))->toBeTrue()
-        ->and($familyHead->hasPermissionTo('verify-food', 'web'))->toBeFalse()
-        ->and($nutritionist->hasPermissionTo('verify-food', 'web'))->toBeFalse();
+    expect($admin->hasPermissionTo('food:verify', 'web'))->toBeTrue()
+        ->and($familyHead->hasPermissionTo('health_tool:use_ai_chat', 'web'))->toBeTrue()
+        ->and($nutritionist->hasPermissionTo('health_tool:use_scanner', 'web'))->toBeTrue()
+        ->and($nutritionist->hasPermissionTo('health_tool:use_ai_chat', 'web'))->toBeTrue()
+        ->and($familyHead->hasPermissionTo('food:verify', 'web'))->toBeFalse()
+        ->and($nutritionist->hasPermissionTo('food:verify', 'web'))->toBeFalse();
 });
 
 test('AI permission seeding preserves existing role permissions', function () {

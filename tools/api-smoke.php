@@ -116,11 +116,15 @@ try {
     expectStatus('B deletes A session', $b->send('DELETE', "/ai/v1/chat/sessions/$sid"), 404);
 
     $name = 'Smoke Uji '.$tag;
-    $submission = expectStatus('A submits food (MANUAL)', $a->send('POST', '/ai/v1/food-submissions', [
-        'name' => $name, 'aliases' => [strtolower($name)], 'basis' => '100g',
-        'nutrients' => ['energy_kcal' => 80, 'protein_g' => 10, 'fat_g' => 4.8, 'carbohydrate_g' => 1.9, 'sodium_mg' => 7, 'sugars_total_g' => null],
-        'source' => ['provider' => 'MANUAL', 'source_id' => 'smoke-'.$tag, 'source_url' => 'https://example.test/smoke/'.$tag, 'snapshot_version' => 'smoke-'.$tag, 'source_sha256' => null],
-    ]), 201);
+    // No user endpoint any more: a pending row is created directly, like the importer does.
+    $created = FoodSubmission::create([
+        'user_id' => null, 'status' => 'pending', 'revision_counter' => 1,
+        'source_provider' => 'MANUAL', 'source_id' => 'smoke-'.$tag, 'source_url' => 'https://example.test/smoke/'.$tag,
+        'snapshot_version' => 'smoke-'.$tag, 'source_sha256' => null,
+        'candidate' => ['requires_review' => true, 'name' => $name, 'aliases' => [strtolower($name)], 'basis' => '100g',
+            'nutrients' => ['energy_kcal' => '80.0000', 'protein_g' => '10.0000', 'fat_g' => '4.8000', 'carbohydrate_g' => '1.9000', 'sodium_mg' => '7.0000', 'sugars_total_g' => null, 'energy_method' => null]],
+    ]);
+    $submission = ['submission_id' => $created->getKey(), 'status' => $created->status, 'revision_counter' => $created->revision_counter];
     say('     status='.$submission['status'].' revision_counter='.$submission['revision_counter']);
 
     // Admin approve only runs when the source triple is provably absent from the manifest (then it must be refused);

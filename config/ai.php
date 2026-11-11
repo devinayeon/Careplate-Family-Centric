@@ -52,18 +52,16 @@ return [
         'max_amount_g' => 2000,
     ],
 
+    // Per signed-in user. Hard-coded on purpose (not env): edit the numbers here when moving off the free tier.
+    // Free tier today: 10 scans per user per day. Paid tier: raise per_day (for example 60).
     'quotas' => [
         'scan' => [
             'per_minute' => 5,
-            'per_day' => 60,
+            'per_day' => 10,
         ],
         'chat' => [
             'per_minute' => 10,
             'per_day' => 100,
-        ],
-        'submit' => [
-            'per_minute' => 5,
-            'per_day' => 30,
         ],
     ],
 ];

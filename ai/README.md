@@ -34,7 +34,6 @@ The chat reads only `foods` (verified, per 100 g, with citations). Foods the adm
 | Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                 |
 | Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
 | Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                        |
-| Submissions  | `POST /ai/v1/food-submissions`: a user proposes a food; it stays `pending` and is not searchable.                                                              |
 | Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                     |
 | Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                   |
 
@@ -44,18 +43,17 @@ Base: same origin as the Laravel app (local: `http://127.0.0.1:8001`). All route
 
 | Method and path                                           | Needs                                | Success                       | Notes                                                           |
 | --------------------------------------------------------- | ------------------------------------ | ----------------------------- | --------------------------------------------------------------- |
-| POST `/ai/v1/scan`                                        | `scan-nutrition`, throttle `ai-scan` | 200                           | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
-| GET `/ai/v1/foods`                                        | `nutrition-chat`                     | 200                           | `q` (<=200 chars, optional), `limit` 1 to 5                     |
-| POST `/ai/v1/chat/sessions`                               | `nutrition-chat`                     | 201                           | empty JSON object body                                          |
-| GET `/ai/v1/chat/sessions`                                | `nutrition-chat`                     | 200                           | `cursor`, `limit` 1 to 20; own sessions only                    |
+| POST `/ai/v1/scan`                                        | `health_tool:use_scanner`, throttle `ai-scan` | 200                           | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
+| GET `/ai/v1/foods`                                        | `health_tool:use_ai_chat`                     | 200                           | `q` (<=200 chars, optional), `limit` 1 to 5                     |
+| POST `/ai/v1/chat/sessions`                               | `health_tool:use_ai_chat`                     | 201                           | empty JSON object body                                          |
+| GET `/ai/v1/chat/sessions`                                | `health_tool:use_ai_chat`                     | 200                           | `cursor`, `limit` 1 to 20; own sessions only                    |
 | DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                | 204                           | content erased at once; late results are refused                |
 | GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                | 200                           | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
 | POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`            | 200                           | one turn; see idempotency below                                 |
-| POST `/ai/v1/food-submissions`                            | `submit-food`, throttle `ai-submit`  | 201 (200 on identical resend) | body is closed: unknown keys are 422                            |
-| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `verify-food` and role `admin`       | 200                           | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
-| POST `/ai/v1/admin/foods/{food}/revoke`                   | `verify-food` and role `admin`       | 200                           | `{expected_revision, reason}`                                   |
+| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `food:verify` and role `admin`       | 200                           | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
+| POST `/ai/v1/admin/foods/{food}/revoke`                   | `food:verify` and role `admin`       | 200                           | `{expected_revision, reason}`                                   |
 
-Roles from `AiPermissionSeeder`: `family_head` has scan, chat, submit. `nutritionist` has scan and chat only. `admin` has everything. Registration assigns `family_head`. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
+Permissions are the team's own names (no separate AI list): `health_tool:use_scanner` (scan), `health_tool:use_ai_chat` (chat, food search) and `food:verify` (admin approve/revoke, plus the `admin` role). `user`, `ahli_gizi` and `admin` get scan and chat; only `admin` verifies food, never `ahli_gizi`. Registration assigns `user`. `AiPermissionSeeder` must run after `RolePermissionSeeder` (which uses `syncPermissions`). There is no user food-submission endpoint: foods enter through the team's `makanan` (admin verifies) or the catalog seeder. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
 
 ## Auth and CSRF flow
 
@@ -242,7 +240,7 @@ Envelope: `{"error":{"code","message","retryable"},"request_id":"req_..."}`. Mes
 
 ## Quotas (per user, server side)
 
-Scan 5 per minute and 60 per day. Chat 10 per minute and 100 per day. Submit 5 per minute and 30 per day. A request that fails validation still spends quota. Quota is checked before any provider call.
+Scan 5 per minute and 10 per day per user (free tier). Chat 10 per minute and 100 per day. Edit the hard-coded numbers in `config/ai.php` (`quotas`) when you move to a paid tier. A request that fails validation still spends quota. Quota is checked before any provider call.
 
 ## Privacy facts
 
@@ -314,7 +312,7 @@ Status of the MySQL runs: the full MySQL suite was run on the final code (commit
 
 ## Provider quota
 
-The Gemini key used for development is a free-tier key. Observed: about 20 requests per day on `gemini-3.6-flash` (free tier; other models may differ), rejected by the provider with HTTP 429 and shown to clients as 502 `AI_PROVIDER_ERROR`, and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 60 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
+The Gemini key used for development is a free-tier key. Observed: about 20 requests per day on `gemini-3.6-flash` (free tier; other models may differ), rejected by the provider with HTTP 429 and shown to clients as 502 `AI_PROVIDER_ERROR`, and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 10 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
 
 - For the competition demo and for real users use a paid-tier key (this also removes the free-tier content-use clause, see Privacy facts), or temporarily lower the AI quotas in `config/ai.php`.
 - Database-mode chat answers (a catalog food asked about by name) never call the model and keep working without the provider; `GET /ai/v1/foods` too. Scan and general-knowledge chat need the provider. Mixed mode (a catalog food plus an education question) calls the model once; only the database part survives a provider failure: the answer then holds the catalog facts and citation without the education text, plus a warning that the explanation is unavailable.

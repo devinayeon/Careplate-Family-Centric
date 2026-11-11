@@ -188,3 +188,22 @@ test('an unexpected failure inside the pipeline is a bare 500 INTERNAL without c
     expect($response->getContent())->not->toContain('LEAK-CANARY-4411')
         ->and(implode("\n", $logged->getArrayCopy()))->not->toContain('LEAK-CANARY-4411');
 });
+
+// Owner decision 2026-11-11: free tier = 10 scans per user per day, a hard-coded number in config/ai.php.
+test('free tier: a user scans 10 labels per day and the 11th is RATE_LIMITED before any provider call', function () {
+    $user = scanUser();
+    config(['ai.quotas.scan.per_minute' => 100]);
+    expect(config('ai.quotas.scan.per_day'))->toBe(10);
+
+    fakeProvider(rawLabel());
+    foreach (range(1, 10) as $i) {
+        scanPost($user, scanJpeg())->assertOk();
+    }
+    Http::assertSentCount(10);
+
+    expectScanError(scanPost($user, scanJpeg()), 429, 'RATE_LIMITED', true);
+    Http::assertSentCount(10);
+
+    // The quota is per user: another user still scans.
+    scanPost(scanUser(), scanJpeg())->assertOk();
+});

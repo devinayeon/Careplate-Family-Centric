@@ -63,19 +63,33 @@ function fsActor(?User $user): mixed
     return test()->actingAs($user);
 }
 
-function fsSubmit(?User $user, array $body): TestResponse
+/** Creates a pending submission row the way the retired user endpoint did (candidate + source triple from an fsBody() array). */
+function fsCreate(array $body): FoodSubmission
 {
-    $test = fsActor($user);
+    $source = $body['source'];
+    $decimal = fn ($v) => $v === null ? null : number_format((float) $v, 4, '.', '');
+    $nutrients = array_map($decimal, $body['nutrients']);
 
-    return $test->postJson('/ai/v1/food-submissions', $body);
+    return FoodSubmission::create([
+        'user_id' => null, 'status' => 'pending', 'revision_counter' => 1,
+        'source_provider' => $source['provider'], 'source_id' => $source['source_id'], 'source_url' => $source['source_url'],
+        'snapshot_version' => $source['snapshot_version'], 'source_sha256' => $source['source_sha256'],
+        'candidate' => [
+            'requires_review' => true, 'review_reasons' => ['user_submission'],
+            'name' => trim($body['name']), 'aliases' => array_values($body['aliases']), 'basis' => '100g',
+            'nutrients' => $nutrients + ['energy_method' => null], 'source_description' => null,
+            'provenance' => ['source' => [
+                'provider' => $source['provider'], 'fdc_id' => $source['source_id'], 'snapshot_version' => $source['snapshot_version'],
+                'sha256' => $source['source_sha256'], 'url' => $source['source_url'],
+            ]],
+        ],
+    ]);
 }
 
-/** Submits as a family head and returns the submission model (asserts 201). */
+/** A pending submission with the default (or overridden) fsBody(). */
 function fsPending(array $overrides = []): FoodSubmission
 {
-    $response = fsSubmit(fsUser(), fsBody($overrides))->assertCreated();
-
-    return FoodSubmission::query()->findOrFail($response->json('submission_id'));
+    return fsCreate(fsBody($overrides));
 }
 
 function fsApprove(?User $user, string $id, array $body): TestResponse

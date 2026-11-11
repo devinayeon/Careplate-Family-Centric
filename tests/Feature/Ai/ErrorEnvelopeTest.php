@@ -18,7 +18,7 @@ beforeEach(function () {
         Route::get('_ai', fn () => throw AiException::for('AI_TIMEOUT'));
         Route::get('_boom', fn () => throw new RuntimeException('SELECT secret FROM users /tmp/trace'));
         Route::get('_forbidden', fn () => throw new AuthorizationException('nope'));
-        Route::get('_spatie', fn () => throw UnauthorizedException::forPermissions(['verify-food']));
+        Route::get('_spatie', fn () => throw UnauthorizedException::forPermissions(['food:verify']));
         Route::get('_missing', fn () => throw new ModelNotFoundException);
         Route::get('_invalid', fn () => Validator::make(['a' => ''], ['a' => 'required'])->validate());
         Route::get('_limited', fn () => response()->json(['ok' => true]))->middleware('throttle:ai-scan');
