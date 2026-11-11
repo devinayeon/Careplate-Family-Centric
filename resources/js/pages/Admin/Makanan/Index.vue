@@ -174,10 +174,10 @@ const executeSoftDelete = () => {
             <!-- 1. Header Section -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] tracking-tight">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
                         Data Makanan
                     </h1>
-                    <p class="text-sm text-[#5e5e5e] mt-1">
+                    <p class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3] mt-1">
                         {{ counts.terverifikasi }} makanan terverifikasi. Perubahan otomatis tersinkron ke Chat Gizi.
                     </p>
                 </div>
@@ -234,7 +234,7 @@ const executeSoftDelete = () => {
             </div>
 
             <!-- 3. Table Card -->
-            <div class="bg-white rounded-2xl border border-[#eceae5] shadow-xs overflow-hidden">
+            <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl border border-[#eceae5] dark:border-[#2e2e2e] shadow-xs overflow-hidden">
                 <DataTable
                     :columns="tableColumns"
                     :items="foods.data"
@@ -252,26 +252,26 @@ const executeSoftDelete = () => {
                         <td class="px-6 py-3.5">
                             <div class="flex items-center gap-3">
                                 <!-- Thumbnail Foto Makanan 48x48 -->
-                                <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-[#f4f3f0] border border-[#eceae5] flex items-center justify-center">
+                                <div class="w-12 h-12 shrink-0 rounded-xl overflow-hidden bg-[#f4f3f0] dark:bg-[#262626] border border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-center">
                                     <img
                                         v-if="item.foto_makanan_url"
                                         :src="item.foto_makanan_url"
                                         :alt="item.nama"
                                         class="w-full h-full object-cover"
                                     />
-                                    <Utensils v-else class="w-5 h-5 text-gray-400" />
+                                    <Utensils v-else class="w-5 h-5 text-gray-400 dark:text-[#a3a3a3]" />
                                 </div>
 
                                 <div class="min-w-0 pr-2">
                                     <button
                                         type="button"
                                         @click="openEditDrawer(item)"
-                                        class="font-bold text-[#191919] hover:text-[#0b8043] transition line-clamp-1 block text-sm text-left cursor-pointer"
+                                        class="font-bold text-[#191919] dark:text-[#f0efea] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] transition line-clamp-1 block text-sm text-left cursor-pointer"
                                         :title="item.nama"
                                     >
                                         {{ item.nama }}
                                     </button>
-                                    <span class="text-xs font-semibold text-[#5e5e5e] block mt-0.5">
+                                    <span class="text-xs font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] block mt-0.5">
                                         {{ item.takaran_saji }}
                                     </span>
                                 </div>
@@ -279,17 +279,17 @@ const executeSoftDelete = () => {
                         </td>
 
                         <!-- Col 2: Kategori -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] font-medium">
+                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] dark:text-[#f0efea] font-medium">
                             {{ item.kategori }}
                         </td>
 
                         <!-- Col 3: Energi -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919]">
+                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919] dark:text-[#f0efea]">
                             {{ Math.round(item.energi) }} kkal
                         </td>
 
                         <!-- Col 4: Protein -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919]">
+                        <td class="px-6 py-3.5 whitespace-nowrap text-right font-bold text-sm text-[#191919] dark:text-[#f0efea]">
                             {{ Math.round(item.protein) }} g
                         </td>
 
@@ -299,7 +299,7 @@ const executeSoftDelete = () => {
                         </td>
 
                         <!-- Col 6: Pengaju -->
-                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] font-medium">
+                        <td class="px-6 py-3.5 whitespace-nowrap text-sm text-[#191919] dark:text-[#f0efea] font-medium">
                             {{ item.pengaju }}
                         </td>
 
@@ -309,7 +309,7 @@ const executeSoftDelete = () => {
                                 <button
                                     type="button"
                                     @click="openEditDrawer(item)"
-                                    class="p-2 rounded-xl text-gray-400 hover:text-[#0b8043] hover:bg-emerald-50 transition cursor-pointer"
+                                    class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] hover:bg-emerald-50 dark:hover:bg-[#17321f] transition cursor-pointer"
                                     title="Ubah Makanan"
                                 >
                                     <Pencil class="w-4 h-4" />
@@ -317,7 +317,7 @@ const executeSoftDelete = () => {
                                 <button
                                     type="button"
                                     @click="confirmDelete(item)"
-                                    class="p-2 rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer"
+                                    class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition cursor-pointer"
                                     title="Hapus Makanan (Soft Delete)"
                                 >
                                     <Trash2 class="w-4 h-4" />
@@ -341,21 +341,21 @@ const executeSoftDelete = () => {
         <!-- Modal Konfirmasi Soft Delete -->
         <div
             v-if="isDeleteModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
         >
-            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
-                <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
+            <div class="bg-white dark:bg-[#1c1c1c] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-[#2e2e2e]">
+                <div class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mb-4">
                     <AlertCircle class="w-6 h-6" />
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-[#f0efea] mb-1">
                     Hapus Data Makanan?
                 </h3>
-                <p class="text-sm text-gray-600 mb-4 leading-relaxed">
+                <p class="text-sm text-gray-600 dark:text-[#a3a3a3] mb-4 leading-relaxed">
                     Apakah Anda yakin ingin menghapus
-                    <strong class="text-gray-900">"{{ foodToDelete?.nama }}"</strong>?
+                    <strong class="text-gray-900 dark:text-[#f0efea]">"{{ foodToDelete?.nama }}"</strong>?
                 </p>
-                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200/60 mb-6 text-xs text-amber-800 flex items-start gap-2">
-                    <CheckCircle2 class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl border border-amber-200/60 dark:border-amber-900/40 mb-6 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2">
+                    <CheckCircle2 class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     <span>
                         <strong>Soft Delete Aktif:</strong> Data ini akan disembunyikan dari katalog, namun data historis pencatatan makanan pengguna yang pernah mencatat makanan ini akan tetap aman terjaga.
                     </span>
@@ -365,7 +365,7 @@ const executeSoftDelete = () => {
                         type="button"
                         @click="isDeleteModalOpen = false"
                         :disabled="isDeleting"
-                        class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+                        class="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer"
                     >
                         Batal
                     </button>

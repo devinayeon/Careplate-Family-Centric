@@ -169,14 +169,14 @@ const submit = () => {
         />
 
         <div class="fixed inset-y-0 right-0 max-w-full flex pl-8">
-            <div class="w-screen max-w-lg sm:max-w-xl bg-white shadow-2xl flex flex-col justify-between overflow-hidden">
+            <div class="w-screen max-w-lg sm:max-w-xl bg-white dark:bg-[#1c1c1c] shadow-2xl flex flex-col justify-between overflow-hidden border-l dark:border-[#2e2e2e]">
                 <!-- 1. Drawer Header -->
-                <div class="px-6 py-5 border-b border-[#eceae5] flex items-center justify-between bg-white shrink-0">
+                <div class="px-6 py-5 border-b border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-between bg-white dark:bg-[#1c1c1c] shrink-0">
                     <div>
-                        <h2 class="text-2xl font-bold text-[#191919] tracking-tight">
+                        <h2 class="text-2xl font-bold text-[#191919] dark:text-[#f0efea] tracking-tight">
                             {{ foodToEdit ? 'Ubah makanan' : 'Tambah makanan' }}
                         </h2>
-                        <p class="text-xs text-[#5e5e5e] mt-0.5">
+                        <p class="text-xs text-[#5e5e5e] dark:text-[#a3a3a3] mt-0.5">
                             {{ foodToEdit ? 'Perbarui informasi kandungan nutrisi makanan' : 'Masukkan data gizi makanan baru ke database CarePlate' }}
                         </p>
                     </div>
@@ -184,7 +184,7 @@ const submit = () => {
                     <button
                         type="button"
                         @click="emit('close')"
-                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-[#f4f3f0] transition cursor-pointer"
+                        class="p-2 rounded-xl text-gray-400 dark:text-[#a3a3a3] hover:text-gray-600 dark:hover:text-[#f0efea] hover:bg-[#f4f3f0] dark:hover:bg-[#262626] transition cursor-pointer"
                         title="Tutup"
                     >
                         <X class="w-5 h-5" />
@@ -195,7 +195,7 @@ const submit = () => {
                 <form id="food-form" @submit.prevent="submit" class="p-6 overflow-y-auto space-y-5 grow">
                     <!-- Foto Makanan Section -->
                     <div>
-                        <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-2">
+                        <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-2">
                             Foto Makanan
                         </label>
                         <input
@@ -209,7 +209,7 @@ const submit = () => {
                         <!-- Preview jika sudah ada foto -->
                         <div
                             v-if="imagePreviewUrl"
-                            class="relative rounded-2xl overflow-hidden border border-[#eceae5] bg-gray-50 aspect-video max-h-48 group shadow-xs"
+                            class="relative rounded-2xl overflow-hidden border border-[#eceae5] dark:border-[#2e2e2e] bg-gray-50 dark:bg-[#262626] aspect-video max-h-48 group shadow-xs"
                         >
                             <img
                                 :src="imagePreviewUrl"
@@ -220,9 +220,9 @@ const submit = () => {
                                 <button
                                     type="button"
                                     @click="fileInputRef?.click()"
-                                    class="px-3.5 py-1.5 rounded-xl bg-white text-gray-800 text-xs font-semibold shadow-md hover:bg-gray-50 flex items-center gap-1.5 transition cursor-pointer"
+                                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-[#f0efea] text-xs font-semibold shadow-md hover:bg-gray-50 dark:hover:bg-[#262626] flex items-center gap-1.5 transition cursor-pointer"
                                 >
-                                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043]" />
+                                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043] dark:text-[#3fcb7a]" />
                                     <span>Ganti</span>
                                 </button>
                                 <button
@@ -246,17 +246,17 @@ const submit = () => {
                             :class="[
                                 'border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200',
                                 isDragging
-                                    ? 'border-[#0b8043] bg-emerald-50/50'
-                                    : 'border-[#eceae5] hover:border-[#0b8043] hover:bg-emerald-50/20 bg-[#f8f9fa]'
+                                    ? 'border-[#0b8043] dark:border-[#3fcb7a] bg-emerald-50/50 dark:bg-[#17321f]/50'
+                                    : 'border-[#eceae5] dark:border-[#2e2e2e] hover:border-[#0b8043] dark:hover:border-[#3fcb7a] hover:bg-emerald-50/20 dark:hover:bg-[#17321f]/30 bg-[#f8f9fa] dark:bg-[#262626]'
                             ]"
                         >
-                            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#0b8043] mb-2">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#17321f] flex items-center justify-center text-[#0b8043] dark:text-[#3fcb7a] mb-2">
                                 <UploadCloud class="w-5 h-5" />
                             </div>
-                            <span class="text-xs font-semibold text-gray-800">
+                            <span class="text-xs font-semibold text-gray-800 dark:text-[#f0efea]">
                                 Unggah Foto Makanan
                             </span>
-                            <span class="text-[11px] text-gray-400 mt-0.5">
+                            <span class="text-[11px] text-gray-400 dark:text-[#a3a3a3] mt-0.5">
                                 Klik atau tarik file gambar (PNG, JPG, WebP maks 3MB)
                             </span>
                         </div>
@@ -267,14 +267,14 @@ const submit = () => {
 
                     <!-- Nama Makanan -->
                     <div>
-                        <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                        <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                             Nama Makanan <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.nama"
                             type="text"
                             placeholder="Contoh: Pepes ikan kembung"
-                            class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                            class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                             required
                         />
                         <p v-if="form.errors.nama" class="text-xs text-red-500 mt-1 font-medium">
@@ -286,12 +286,12 @@ const submit = () => {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Kategori -->
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Kategori <span class="text-red-500">*</span>
                             </label>
                             <select
                                 v-model="form.kategori_makanan_id"
-                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
                                 required
                             >
                                 <option value="" disabled>Pilih Kategori</option>
@@ -310,7 +310,7 @@ const submit = () => {
 
                         <!-- Takaran Saji (Kuantitas & Satuan) -->
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Takaran Saji <span class="text-red-500">*</span>
                             </label>
                             <div class="flex items-center gap-1.5">
@@ -320,12 +320,12 @@ const submit = () => {
                                     step="any"
                                     min="0.1"
                                     placeholder="100"
-                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                     required
                                 />
                                 <select
                                     v-model="form.satuan"
-                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
                                 >
                                     <option v-for="s in defaultSatuanOptions" :key="s" :value="s">
                                         {{ s }}
@@ -341,7 +341,7 @@ const submit = () => {
                     <!-- Makronutrisi: Energi & Protein -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Energi (Kalori) <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -351,10 +351,10 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="172"
-                                    class="w-full pl-3 pr-11 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-11 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     kkal
                                 </span>
                             </div>
@@ -364,7 +364,7 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Protein <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -374,10 +374,10 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="22"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     g
                                 </span>
                             </div>
@@ -390,7 +390,7 @@ const submit = () => {
                     <!-- Makronutrisi: Karbohidrat & Lemak -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Karbohidrat <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -400,10 +400,10 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="4"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     g
                                 </span>
                             </div>
@@ -413,7 +413,7 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Lemak <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
@@ -423,10 +423,10 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="8"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                     required
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     g
                                 </span>
                             </div>
@@ -439,7 +439,7 @@ const submit = () => {
                     <!-- Mikronutrisi: Gula & Natrium -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Gula
                             </label>
                             <div class="relative">
@@ -449,9 +449,9 @@ const submit = () => {
                                     step="0.1"
                                     min="0"
                                     placeholder="1"
-                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-8 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     g
                                 </span>
                             </div>
@@ -461,7 +461,7 @@ const submit = () => {
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Natrium
                             </label>
                             <div class="relative">
@@ -471,9 +471,9 @@ const submit = () => {
                                     step="1"
                                     min="0"
                                     placeholder="380"
-                                    class="w-full pl-3 pr-10 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                    class="w-full pl-3 pr-10 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                                 />
-                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] select-none">
+                                <span class="absolute right-3 top-2.5 text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] select-none">
                                     mg
                                 </span>
                             </div>
@@ -486,24 +486,24 @@ const submit = () => {
                     <!-- Sumber & Status Verifikasi -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Sumber Rujukan
                             </label>
                             <input
                                 v-model="form.sumber"
                                 type="text"
                                 placeholder="Tabel Komposisi Pangan"
-                                class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                class="w-full px-4 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                             />
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Status Verifikasi
                             </label>
                             <select
                                 v-model="form.status"
-                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
+                                class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-[#f4f3f0] dark:bg-[#262626] focus:bg-white dark:focus:bg-[#1c1c1c] text-sm font-medium text-[#191919] dark:text-[#f0efea] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition cursor-pointer"
                             >
                                 <option value="terverifikasi">Terverifikasi</option>
                                 <option value="menunggu">Menunggu</option>
@@ -513,8 +513,8 @@ const submit = () => {
                     </div>
 
                     <!-- Info Banner -->
-                    <div class="bg-[#e4f6ea] rounded-xl p-3.5 flex items-center gap-3 text-xs text-[#191919]">
-                        <ShieldCheck class="w-5 h-5 text-[#0b8043] shrink-0" />
+                    <div class="bg-[#e4f6ea] dark:bg-[#17321f] rounded-xl p-3.5 flex items-center gap-3 text-xs text-[#191919] dark:text-[#f0efea] border border-[#0b8043]/20 dark:border-[#3fcb7a]/30">
+                        <ShieldCheck class="w-5 h-5 text-[#0b8043] dark:text-[#3fcb7a] shrink-0" />
                         <p class="leading-relaxed">
                             Dibuat Admin langsung <strong>terverifikasi</strong> dan tersinkron ke modul kalkulator serta Chat Gizi.
                         </p>
@@ -522,12 +522,12 @@ const submit = () => {
                 </form>
 
                 <!-- 3. Drawer Footer Actions -->
-                <div class="px-6 py-4 border-t border-[#eceae5] bg-white flex items-center justify-end gap-3 shrink-0">
+                <div class="px-6 py-4 border-t border-[#eceae5] dark:border-[#2e2e2e] bg-white dark:bg-[#1c1c1c] flex items-center justify-end gap-3 shrink-0">
                     <button
                         type="button"
                         @click="emit('close')"
                         :disabled="form.processing"
-                        class="px-5 py-2.5 rounded-full border border-[#191919] text-xs font-bold text-[#191919] hover:bg-gray-100 transition cursor-pointer disabled:opacity-50"
+                        class="px-5 py-2.5 rounded-full border border-[#191919] dark:border-[#3d3d3d] text-xs font-bold text-[#191919] dark:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#262626] transition cursor-pointer disabled:opacity-50"
                     >
                         Batal
                     </button>
@@ -535,7 +535,7 @@ const submit = () => {
                         type="submit"
                         form="food-form"
                         :disabled="form.processing"
-                        class="px-6 py-2.5 rounded-full bg-[#0b8043] text-white text-xs font-bold hover:bg-[#086637] shadow-sm transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                        class="px-6 py-2.5 rounded-full bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] text-xs font-bold hover:bg-[#086637] dark:hover:bg-[#34aa66] shadow-sm transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                         <Loader2 v-if="form.processing" class="w-4 h-4 animate-spin" />
                         <span>Simpan Makanan</span>

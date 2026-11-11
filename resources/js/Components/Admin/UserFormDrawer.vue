@@ -141,16 +141,16 @@ const submit = () => {
 
     <!-- Slide-over Drawer Panel -->
     <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-      <div class="w-screen max-w-md sm:max-w-[560px] bg-white shadow-2xl flex flex-col justify-between overflow-y-auto">
+      <div class="w-screen max-w-md sm:max-w-[560px] bg-white dark:bg-[#1c1c1c] text-[#191919] dark:text-[#f0efea] shadow-2xl flex flex-col justify-between overflow-y-auto border-l dark:border-[#2e2e2e]">
         <!-- Drawer Header -->
-        <div class="px-7 pt-6 pb-4 border-b border-[#eceae5] flex items-center justify-between">
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#191919] tracking-tight">
+        <div class="px-7 pt-6 pb-4 border-b border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-between">
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
             {{ userToEdit ? 'Ubah pengguna' : 'Tambah pengguna' }}
           </h2>
           <button
             type="button"
             @click="handleClose"
-            class="w-10 h-10 rounded-xl hover:bg-gray-100 flex items-center justify-center text-gray-500 transition-colors"
+            class="w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-[#262626] flex items-center justify-center text-gray-500 dark:text-[#a3a3a3] transition-colors"
           >
             <X class="w-5 h-5" />
           </button>
@@ -160,23 +160,23 @@ const submit = () => {
         <form @submit.prevent="submit" id="userForm" class="p-7 space-y-5 flex-1">
           <!-- Role Segmented Control -->
           <div>
-            <label class="block text-sm font-bold text-[#191919] mb-2">
+            <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-2">
               Peran
             </label>
-            <div class="border-[1.5px] border-[#191919] rounded-xl flex overflow-hidden p-0.5 bg-[#f4f3f0]">
+            <div class="border-[1.5px] border-[#191919] dark:border-[#3d3d3d] rounded-xl flex overflow-hidden p-0.5 bg-[#f4f3f0] dark:bg-[#262626]">
               <button
                 type="button"
                 @click="form.role = 'customer'"
                 class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-center"
-                :class="form.role === 'customer' ? 'bg-[#191919] text-white shadow-2xs' : 'text-[#191919] hover:bg-white/60'"
+                :class="form.role === 'customer' ? 'bg-[#191919] text-white dark:bg-[#3fcb7a] dark:text-[#121212] shadow-2xs' : 'text-[#191919] dark:text-[#a3a3a3] hover:bg-white/60 dark:hover:bg-[#1c1c1c]'"
               >
                 Customer
               </button>
               <button
                 type="button"
                 @click="form.role = 'ahli_gizi'"
-                class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-center border-l border-r border-[#191919]/20"
-                :class="form.role === 'ahli_gizi' ? 'bg-[#191919] text-white shadow-2xs' : 'text-[#191919] hover:bg-white/60'"
+                class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-center border-l border-r border-[#191919]/20 dark:border-[#3d3d3d]"
+                :class="form.role === 'ahli_gizi' ? 'bg-[#191919] text-white dark:bg-[#3fcb7a] dark:text-[#121212] shadow-2xs' : 'text-[#191919] dark:text-[#a3a3a3] hover:bg-white/60 dark:hover:bg-[#1c1c1c]'"
               >
                 Ahli Gizi
               </button>
@@ -184,7 +184,7 @@ const submit = () => {
                 type="button"
                 @click="form.role = 'admin'"
                 class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg transition-all text-center"
-                :class="form.role === 'admin' ? 'bg-[#191919] text-white shadow-2xs' : 'text-[#191919] hover:bg-white/60'"
+                :class="form.role === 'admin' ? 'bg-[#191919] text-white dark:bg-[#3fcb7a] dark:text-[#121212] shadow-2xs' : 'text-[#191919] dark:text-[#a3a3a3] hover:bg-white/60 dark:hover:bg-[#1c1c1c]'"
               >
                 Admin
               </button>
@@ -194,7 +194,7 @@ const submit = () => {
 
           <!-- Nama Lengkap -->
           <div>
-            <label class="block text-sm font-bold text-[#191919] mb-1.5">
+            <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-1.5">
               Nama lengkap
             </label>
             <input
@@ -202,14 +202,14 @@ const submit = () => {
               type="text"
               placeholder="Contoh: Rina Santoso"
               required
-              class="w-full bg-[#f4f3f0] hover:bg-[#eceae5] focus:bg-white border-2 border-transparent focus:border-[#191919] rounded-xl h-12 px-4 text-sm text-[#191919] transition-all outline-hidden"
+              class="w-full bg-[#f4f3f0] dark:bg-[#262626] hover:bg-[#eceae5] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] border-2 border-transparent focus:border-[#191919] dark:focus:border-[#3fcb7a] rounded-xl h-12 px-4 text-sm text-[#191919] dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] transition-all outline-hidden"
             />
             <InputError :message="form.errors.name" class="mt-1" />
           </div>
 
           <!-- Email -->
           <div>
-            <label class="block text-sm font-bold text-[#191919] mb-1.5">
+            <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-1.5">
               Email
             </label>
             <input
@@ -217,51 +217,51 @@ const submit = () => {
               type="email"
               placeholder="nama@email.com"
               required
-              class="w-full bg-[#f4f3f0] hover:bg-[#eceae5] focus:bg-white border-2 border-transparent focus:border-[#191919] rounded-xl h-12 px-4 text-sm text-[#191919] transition-all outline-hidden"
+              class="w-full bg-[#f4f3f0] dark:bg-[#262626] hover:bg-[#eceae5] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] border-2 border-transparent focus:border-[#191919] dark:focus:border-[#3fcb7a] rounded-xl h-12 px-4 text-sm text-[#191919] dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] transition-all outline-hidden"
             />
             <InputError :message="form.errors.email" class="mt-1" />
           </div>
 
           <!-- Conditional Fields for Ahli Gizi -->
-          <div v-if="form.role === 'ahli_gizi'" class="space-y-5 pt-2 border-t border-[#eceae5]">
+          <div v-if="form.role === 'ahli_gizi'" class="space-y-5 pt-2 border-t border-[#eceae5] dark:border-[#2e2e2e]">
             <!-- Spesialisasi -->
             <div>
-              <label class="block text-sm font-bold text-[#191919] mb-1.5">
+              <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-1.5">
                 Spesialisasi
               </label>
               <input
                 v-model="form.spesialisasi"
                 type="text"
                 placeholder="Contoh: Gizi Keluarga, Gizi Anak"
-                class="w-full bg-white border-2 border-[#191919] rounded-xl h-12 px-4 text-sm text-[#191919] transition-all outline-hidden font-medium"
+                class="w-full bg-[#f4f3f0] dark:bg-[#262626] hover:bg-[#eceae5] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] border-2 border-[#191919] dark:border-[#3d3d3d] focus:border-[#0b8043] dark:focus:border-[#3fcb7a] rounded-xl h-12 px-4 text-sm text-[#191919] dark:text-[#f0efea] transition-all outline-hidden font-medium"
               />
               <InputError :message="form.errors.spesialisasi" class="mt-1" />
             </div>
 
             <!-- Nomor STR -->
             <div>
-              <label class="block text-sm font-bold text-[#191919] mb-1.5">
+              <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-1.5">
                 Nomor STR
               </label>
               <input
                 v-model="form.nomor_str"
                 type="text"
                 placeholder="1234 5678 9012 3456"
-                class="w-full bg-[#f4f3f0] hover:bg-[#eceae5] focus:bg-white border-2 border-transparent focus:border-[#191919] rounded-xl h-12 px-4 text-sm text-[#191919] transition-all outline-hidden font-mono"
+                class="w-full bg-[#f4f3f0] dark:bg-[#262626] hover:bg-[#eceae5] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] border-2 border-transparent focus:border-[#191919] dark:focus:border-[#3fcb7a] rounded-xl h-12 px-4 text-sm text-[#191919] dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] transition-all outline-hidden font-mono"
               />
               <InputError :message="form.errors.nomor_str" class="mt-1" />
             </div>
 
             <!-- Jam Layanan -->
             <div>
-              <label class="block text-sm font-bold text-[#191919] mb-1.5">
+              <label class="block text-sm font-bold text-[#191919] dark:text-[#f0efea] mb-1.5">
                 Jam layanan
               </label>
               <input
                 v-model="form.jam_layanan"
                 type="text"
                 placeholder="Senin sampai Sabtu, 08.00 sampai 12.00"
-                class="w-full bg-[#f4f3f0] hover:bg-[#eceae5] focus:bg-white border-2 border-transparent focus:border-[#191919] rounded-xl h-12 px-4 text-sm text-[#191919] transition-all outline-hidden"
+                class="w-full bg-[#f4f3f0] dark:bg-[#262626] hover:bg-[#eceae5] dark:hover:bg-[#2e2e2e] focus:bg-white dark:focus:bg-[#1c1c1c] border-2 border-transparent focus:border-[#191919] dark:focus:border-[#3fcb7a] rounded-xl h-12 px-4 text-sm text-[#191919] dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] transition-all outline-hidden"
               />
               <InputError :message="form.errors.jam_layanan" class="mt-1" />
             </div>
@@ -270,39 +270,39 @@ const submit = () => {
           <!-- Password / Kata Sandi Sementara -->
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <label class="text-sm font-bold text-[#191919]">
+              <label class="text-sm font-bold text-[#191919] dark:text-[#f0efea]">
                 {{ userToEdit ? 'Kata sandi baru (kosongkan jika tidak diubah)' : 'Kata sandi sementara' }}
               </label>
               <button
                 type="button"
                 @click="generatePassword"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-[#0b8043] hover:underline"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-[#0b8043] dark:text-[#3fcb7a] hover:underline"
               >
                 <RefreshCw class="w-3 h-3" />
                 <span>Acak Sandi</span>
               </button>
             </div>
 
-            <div class="bg-[#f4f3f0] rounded-xl h-12 px-4 flex items-center justify-between gap-3 border-2 border-transparent focus-within:border-[#191919] focus-within:bg-white">
+            <div class="bg-[#f4f3f0] dark:bg-[#262626] rounded-xl h-12 px-4 flex items-center justify-between gap-3 border-2 border-transparent focus-within:border-[#191919] dark:focus-within:border-[#3fcb7a] focus-within:bg-white dark:focus-within:bg-[#1c1c1c]">
               <input
                 v-model="form.password"
                 type="text"
                 :placeholder="userToEdit ? '••••••••' : 'Buat kata sandi'"
                 :required="!userToEdit"
-                class="w-full bg-transparent border-none text-sm text-[#191919] font-mono outline-hidden p-0"
+                class="w-full bg-transparent border-none text-sm text-[#191919] dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] font-mono outline-hidden p-0"
               />
               <button
                 v-if="form.password"
                 type="button"
                 @click="copyPassword"
-                class="inline-flex items-center gap-1 text-xs font-bold text-[#086637] hover:bg-emerald-50 px-2.5 py-1 rounded-md transition-colors shrink-0"
+                class="inline-flex items-center gap-1 text-xs font-bold text-[#086637] dark:text-[#3fcb7a] hover:bg-emerald-50 dark:hover:bg-[#17321f] px-2.5 py-1 rounded-md transition-colors shrink-0"
               >
-                <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-600" />
-                <Copy v-else class="w-3.5 h-3.5 text-[#086637]" />
+                <Check v-if="copied" class="w-3.5 h-3.5 text-emerald-600 dark:text-[#3fcb7a]" />
+                <Copy v-else class="w-3.5 h-3.5 text-[#086637] dark:text-[#3fcb7a]" />
                 <span>{{ copied ? 'Tersalin' : 'Salin' }}</span>
               </button>
             </div>
-            <p class="text-xs text-[#5e5e5e] mt-1.5">
+            <p class="text-xs text-[#5e5e5e] dark:text-[#a3a3a3] mt-1.5">
               Ditampilkan sekali. Pengguna menggantinya saat pertama masuk.
             </p>
             <InputError :message="form.errors.password" class="mt-1" />
@@ -310,7 +310,7 @@ const submit = () => {
         </form>
 
         <!-- Drawer Footer -->
-        <div class="px-7 py-4 border-t border-[#eceae5] bg-[#faf9f7] flex items-center justify-end gap-3">
+        <div class="px-7 py-4 border-t border-[#eceae5] dark:border-[#2e2e2e] bg-[#faf9f7] dark:bg-[#1c1c1c] flex items-center justify-end gap-3">
           <PillButton
             variant="outline"
             type="button"

@@ -23,21 +23,21 @@ const badgeConfig = computed(() => {
   const r = props.role.toLowerCase()
   if (r === 'ahli_gizi' || r === 'nutritionist') {
     return {
-      bg: 'bg-[#e4f6ea]',
-      text: 'text-[#0b7a46]',
+      bg: 'bg-[#e4f6ea] dark:bg-[#17321f]',
+      text: 'text-[#0b7a46] dark:text-[#3fcb7a]',
       icon: Sparkles,
     }
   }
   if (r === 'admin') {
     return {
-      bg: 'bg-[#e1f4f5]',
-      text: 'text-[#0b6a73]',
+      bg: 'bg-[#e1f4f5] dark:bg-cyan-950/60',
+      text: 'text-[#0b6a73] dark:text-cyan-300',
       icon: Shield,
     }
   }
   return {
-    bg: 'bg-[#f4f3f0]',
-    text: 'text-[#5e5e5e]',
+    bg: 'bg-[#f4f3f0] dark:bg-[#262626]',
+    text: 'text-[#5e5e5e] dark:text-[#a3a3a3]',
     icon: User,
   }
 })

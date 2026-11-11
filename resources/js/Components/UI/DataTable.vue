@@ -35,13 +35,13 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="bg-white border border-[#eceae5] rounded-2xl overflow-hidden shadow-2xs w-full">
+  <div class="bg-white dark:bg-[#1c1c1c] border border-[#eceae5] dark:border-[#2e2e2e] rounded-2xl overflow-hidden shadow-2xs w-full transition-colors">
     <!-- Responsive Table Wrapper -->
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
-        <!-- Table Header (bg #f4f3f0) -->
+        <!-- Table Header (bg #f4f3f0 / dark #262626) -->
         <thead>
-          <tr class="bg-[#f4f3f0] text-xs font-bold text-[#5e5e5e]">
+          <tr class="bg-[#f4f3f0] dark:bg-[#262626] text-xs font-bold text-[#5e5e5e] dark:text-[#a3a3a3] border-b border-[#eceae5] dark:border-[#2e2e2e]">
             <th
               v-for="col in columns"
               :key="col.key"
@@ -59,25 +59,25 @@ defineEmits<{
         </thead>
 
         <!-- Table Body -->
-        <tbody class="divide-y divide-[#eceae5] text-sm text-[#191919]">
+        <tbody class="divide-y divide-[#eceae5] dark:divide-[#2e2e2e] text-sm text-[#191919] dark:text-[#f0efea]">
           <tr
             v-for="(item, index) in items"
             :key="item.id ?? index"
-            class="hover:bg-[#faf9f7] transition-colors"
+            class="hover:bg-[#faf9f7] dark:hover:bg-[#262626]/60 transition-colors"
           >
             <slot name="row" :item="item" :index="index" />
           </tr>
 
           <!-- Empty State -->
           <tr v-if="items.length === 0">
-            <td :colspan="columns.length" class="py-16 text-center text-gray-500">
+            <td :colspan="columns.length" class="py-16 text-center text-gray-500 dark:text-[#a3a3a3]">
               <slot name="empty">
                 <div class="flex flex-col items-center justify-center">
-                  <div class="w-12 h-12 rounded-full bg-[#f4f3f0] flex items-center justify-center mb-3 text-gray-400">
+                  <div class="w-12 h-12 rounded-full bg-[#f4f3f0] dark:bg-[#262626] flex items-center justify-center mb-3 text-gray-400 dark:text-gray-500">
                     <Inbox class="w-6 h-6" />
                   </div>
-                  <p class="font-bold text-gray-900 text-sm">{{ emptyTitle }}</p>
-                  <p class="text-xs text-gray-400 mt-1 max-w-xs">{{ emptyDescription }}</p>
+                  <p class="font-bold text-gray-900 dark:text-[#f0efea] text-sm">{{ emptyTitle }}</p>
+                  <p class="text-xs text-gray-400 dark:text-[#a3a3a3] mt-1 max-w-xs">{{ emptyDescription }}</p>
                 </div>
               </slot>
             </td>
@@ -89,7 +89,7 @@ defineEmits<{
     <!-- Table Pagination Footer -->
     <div
       v-if="total > 0"
-      class="border-t border-[#eceae5] px-6 py-3.5 flex items-center justify-between text-xs text-[#5e5e5e] font-medium"
+      class="border-t border-[#eceae5] dark:border-[#2e2e2e] px-6 py-3.5 flex items-center justify-between text-xs text-[#5e5e5e] dark:text-[#a3a3a3] font-medium"
     >
       <div>
         <span>{{ from ?? 1 }} sampai {{ to ?? items.length }} dari {{ total }}</span>
@@ -101,7 +101,7 @@ defineEmits<{
           :disabled="!prevUrl"
           @click="prevUrl && $emit('page-change', prevUrl)"
           aria-label="Sebelumnya"
-          class="w-10 h-10 rounded-xl border border-[#eceae5] bg-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 active:scale-95 text-[#191919]"
+          class="w-10 h-10 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-white dark:bg-[#262626] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#333333] active:scale-95 text-[#191919] dark:text-[#f0efea] cursor-pointer"
         >
           <ChevronLeft class="w-4 h-4" />
         </button>
@@ -111,7 +111,7 @@ defineEmits<{
           :disabled="!nextUrl"
           @click="nextUrl && $emit('page-change', nextUrl)"
           aria-label="Berikutnya"
-          class="w-10 h-10 rounded-xl border border-[#eceae5] bg-white flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 active:scale-95 text-[#191919]"
+          class="w-10 h-10 rounded-xl border border-[#eceae5] dark:border-[#2e2e2e] bg-white dark:bg-[#262626] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-[#333333] active:scale-95 text-[#191919] dark:text-[#f0efea] cursor-pointer"
         >
           <ChevronRight class="w-4 h-4" />
         </button>

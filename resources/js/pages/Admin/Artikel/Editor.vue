@@ -166,30 +166,30 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
 
         <div class="space-y-6 max-w-7xl mx-auto pb-16">
             <!-- Navigation & Actions Bar -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#1c1c1c] p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs">
                 <div class="flex items-center gap-3">
                     <Link
                         :href="route('admin.articles')"
-                        class="p-2 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition"
+                        class="p-2 rounded-xl text-gray-500 dark:text-[#a3a3a3] hover:text-gray-800 dark:hover:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#262626] transition"
                         title="Kembali ke Daftar Artikel"
                     >
                         <ArrowLeft class="w-5 h-5" />
                     </Link>
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-[#737373]">
                                 {{ mode === 'create' ? 'Artikel Baru' : 'Perbarui Artikel' }}
                             </span>
                             <span
                                 :class="[
                                     'inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold',
-                                    status === 'terbit' ? 'bg-[#e6f6ec] text-[#0b7a46]' : 'bg-gray-100 text-gray-600'
+                                    status === 'terbit' ? 'bg-[#e6f6ec] dark:bg-[#17321f] text-[#0b7a46] dark:text-[#3fcb7a]' : 'bg-gray-100 dark:bg-[#262626] text-gray-600 dark:text-[#a3a3a3]'
                                 ]"
                             >
                                 {{ status === 'terbit' ? 'Siap Terbit' : 'Draf' }}
                             </span>
                         </div>
-                        <h1 class="text-xl sm:text-2xl font-bold text-[#191919] tracking-tight line-clamp-1">
+                        <h1 class="text-xl sm:text-2xl font-bold text-[#191919] dark:text-[#f0efea] tracking-tight line-clamp-1">
                             {{ judul || (mode === 'create' ? 'Tulis Artikel Baru' : 'Edit Artikel') }}
                         </h1>
                     </div>
@@ -201,16 +201,16 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                         type="button"
                         @click="submitForm('draf')"
                         :disabled="isSubmitting"
-                        class="px-4 py-2.5 rounded-full border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center gap-1.5 disabled:opacity-50"
+                        class="px-4 py-2.5 rounded-full border border-gray-200 dark:border-[#3d3d3d] text-sm font-semibold text-gray-700 dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626] transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
-                        <Save class="w-4 h-4 text-gray-500" />
+                        <Save class="w-4 h-4 text-gray-500 dark:text-[#a3a3a3]" />
                         <span>Simpan Draf</span>
                     </button>
                     <button
                         type="button"
                         @click="submitForm('terbit')"
                         :disabled="isSubmitting"
-                        class="px-5 py-2.5 rounded-full bg-[#0b8043] text-white text-sm font-semibold hover:bg-[#096836] shadow-sm transition flex items-center gap-1.5 disabled:opacity-50"
+                        class="px-5 py-2.5 rounded-full bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] text-sm font-semibold hover:bg-[#096836] dark:hover:bg-[#34aa66] shadow-sm transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                     >
                         <Loader2 v-if="isSubmitting" class="w-4 h-4 animate-spin" />
                         <Send v-else class="w-4 h-4" />
@@ -224,16 +224,16 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                 <!-- Main Content Column (Col 8) -->
                 <div class="lg:col-span-8 space-y-6">
                     <!-- Title & Slug Card -->
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
+                    <div class="bg-white dark:bg-[#1c1c1c] p-6 rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-2">
                                 Judul Artikel <span class="text-red-500">*</span>
                             </label>
                             <input
                                 v-model="judul"
                                 type="text"
                                 placeholder="Contoh: Satu Meja, Satu Piring: Panduan Makan Sehat Keluarga"
-                                class="w-full px-4 py-3 text-lg font-medium rounded-2xl border border-gray-200 focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                class="w-full px-4 py-3 text-lg font-medium rounded-2xl border border-gray-200 dark:border-[#3d3d3d] bg-white dark:bg-[#262626] text-gray-900 dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                             />
                             <p v-if="errors.judul" class="text-xs text-red-500 mt-1 font-medium">
                                 {{ errors.judul }}
@@ -242,18 +242,18 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
 
                         <!-- Slug URL helper -->
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-[#a3a3a3] uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                 <Globe class="w-3.5 h-3.5 text-gray-400" />
                                 <span>Slug URL (Permalink)</span>
                             </label>
-                            <div class="flex items-center rounded-xl border border-gray-200 bg-gray-50/70 overflow-hidden px-3 py-2 text-xs text-gray-600 focus-within:border-[#0b8043] focus-within:bg-white transition">
-                                <span class="text-gray-400 select-none mr-1">/artikel/</span>
+                            <div class="flex items-center rounded-xl border border-gray-200 dark:border-[#3d3d3d] bg-gray-50/70 dark:bg-[#262626] overflow-hidden px-3 py-2 text-xs text-gray-600 dark:text-[#a3a3a3] focus-within:border-[#0b8043] dark:focus-within:border-[#3fcb7a] focus-within:bg-white dark:focus-within:bg-[#1c1c1c] transition">
+                                <span class="text-gray-400 dark:text-[#737373] select-none mr-1">/artikel/</span>
                                 <input
                                     v-model="slug"
                                     type="text"
                                     placeholder="slug-artikel"
                                     @input="onSlugInput"
-                                    class="w-full bg-transparent border-0 p-0 text-xs font-medium text-gray-800 focus:outline-none focus:ring-0"
+                                    class="w-full bg-transparent border-0 p-0 text-xs font-medium text-gray-800 dark:text-[#f0efea] focus:outline-none focus:ring-0"
                                 />
                             </div>
                             <p v-if="errors.slug" class="text-xs text-red-500 mt-1 font-medium">
@@ -263,14 +263,14 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
 
                         <!-- Excerpt / Ringkasan -->
                         <div>
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
                                 Ringkasan Singkat (Lead / Excerpt)
                             </label>
                             <textarea
                                 v-model="ringkasan"
                                 rows="2"
                                 placeholder="Tuliskan 1-2 kalimat ringkasan tentang isi artikel untuk ditampilkan di kartu cuplikan..."
-                                class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 dark:border-[#3d3d3d] bg-white dark:bg-[#262626] text-gray-900 dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-2 focus:ring-[#0b8043]/15 transition"
                             ></textarea>
                             <p v-if="errors.ringkasan" class="text-xs text-red-500 mt-1 font-medium">
                                 {{ errors.ringkasan }}
@@ -279,12 +279,12 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                     </div>
 
                     <!-- TipTap Rich Text Editor Card -->
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-3">
+                    <div class="bg-white dark:bg-[#1c1c1c] p-6 rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs space-y-3">
                         <div class="flex items-center justify-between mb-1">
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider">
                                 Konten Artikel Lengkap <span class="text-red-500">*</span>
                             </label>
-                            <span class="text-[11px] text-gray-400">
+                            <span class="text-[11px] text-gray-400 dark:text-[#a3a3a3]">
                                 Mendukung heading, gambar inline, & video YouTube
                             </span>
                         </div>
@@ -302,12 +302,12 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                 <!-- Sidebar Settings Column (Col 4) -->
                 <div class="lg:col-span-4 space-y-6">
                     <!-- Card 1: Cover Foto Sampul -->
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-3">
-                        <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                            <FileText class="w-4 h-4 text-[#0b8043]" />
+                    <div class="bg-white dark:bg-[#1c1c1c] p-6 rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs space-y-3">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-[#f0efea] flex items-center gap-2">
+                            <FileText class="w-4 h-4 text-[#0b8043] dark:text-[#3fcb7a]" />
                             <span>Foto Sampul (Cover Banner)</span>
                         </h3>
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-500 dark:text-[#a3a3a3]">
                             Foto ini akan dijadikan thumbnail di daftar artikel dan banner di halaman baca artikel.
                         </p>
                         <ArticleCoverUpload
@@ -318,19 +318,19 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                     </div>
 
                     <!-- Card 2: Pengaturan Publikasi & Status -->
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
-                        <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                            <CheckCircle2 class="w-4 h-4 text-[#0b8043]" />
+                    <div class="bg-white dark:bg-[#1c1c1c] p-6 rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs space-y-4">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-[#f0efea] flex items-center gap-2">
+                            <CheckCircle2 class="w-4 h-4 text-[#0b8043] dark:text-[#3fcb7a]" />
                             <span>Status Publikasi</span>
                         </h3>
 
-                        <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-2xl">
+                        <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 dark:bg-[#262626] rounded-2xl">
                             <button
                                 type="button"
                                 @click="status = 'draf'"
                                 :class="[
-                                    'py-2 px-3 rounded-xl text-xs font-semibold transition',
-                                    status === 'draf' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-800'
+                                    'py-2 px-3 rounded-xl text-xs font-semibold transition cursor-pointer',
+                                    status === 'draf' ? 'bg-white dark:bg-[#1c1c1c] text-gray-900 dark:text-[#f0efea] shadow-xs' : 'text-gray-500 dark:text-[#a3a3a3] hover:text-gray-800 dark:hover:text-[#f0efea]'
                                 ]"
                             >
                                 Draf
@@ -339,37 +339,37 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                                 type="button"
                                 @click="status = 'terbit'"
                                 :class="[
-                                    'py-2 px-3 rounded-xl text-xs font-semibold transition',
-                                    status === 'terbit' ? 'bg-[#0b8043] text-white shadow-xs' : 'text-gray-500 hover:text-gray-800'
+                                    'py-2 px-3 rounded-xl text-xs font-semibold transition cursor-pointer',
+                                    status === 'terbit' ? 'bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] shadow-xs' : 'text-gray-500 dark:text-[#a3a3a3] hover:text-gray-800 dark:hover:text-[#f0efea]'
                                 ]"
                             >
                                 Terbit
                             </button>
                         </div>
 
-                        <div v-if="props.artikel?.published_at" class="text-xs text-gray-500 flex items-center gap-1.5 pt-1 border-t border-gray-100">
+                        <div v-if="props.artikel?.published_at" class="text-xs text-gray-500 dark:text-[#a3a3a3] flex items-center gap-1.5 pt-1 border-t border-gray-100 dark:border-[#2e2e2e]">
                             <Calendar class="w-3.5 h-3.5 text-gray-400" />
                             <span>Pertama kali terbit: {{ props.artikel.published_at }}</span>
                         </div>
                     </div>
 
                     <!-- Card 3: Kategori & Penulis -->
-                    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-xs space-y-4">
-                        <h3 class="text-sm font-bold text-gray-900 flex items-center gap-2">
-                            <Folder class="w-4 h-4 text-[#0b8043]" />
+                    <div class="bg-white dark:bg-[#1c1c1c] p-6 rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs space-y-4">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-[#f0efea] flex items-center gap-2">
+                            <Folder class="w-4 h-4 text-[#0b8043] dark:text-[#3fcb7a]" />
                             <span>Kategori & Penulis</span>
                         </h3>
 
                         <!-- Kategori Selection -->
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider">
                                     Kategori
                                 </label>
                                 <button
                                     type="button"
                                     @click="isCategoryModalOpen = true"
-                                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0b8043] hover:text-[#086637] transition cursor-pointer"
+                                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0b8043] dark:text-[#3fcb7a] hover:text-[#086637] transition cursor-pointer"
                                     title="Kelola Daftar Kategori"
                                 >
                                     <Settings2 class="w-3.5 h-3.5" />
@@ -386,8 +386,8 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                                     :class="[
                                         'px-3 py-1.5 rounded-full text-xs font-medium transition cursor-pointer',
                                         kategori === opt
-                                            ? 'bg-[#0b8043] text-white shadow-xs font-semibold'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                            ? 'bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] shadow-xs font-semibold'
+                                            : 'bg-gray-100 dark:bg-[#262626] text-gray-600 dark:text-[#a3a3a3] hover:bg-gray-200 dark:hover:bg-[#3d3d3d]'
                                     ]"
                                 >
                                     {{ opt }}
@@ -399,8 +399,8 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                         </div>
 
                         <!-- Penulis Field -->
-                        <div class="pt-2 border-t border-gray-100">
-                            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                        <div class="pt-2 border-t border-gray-100 dark:border-[#2e2e2e]">
+                            <label class="block text-xs font-semibold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                 <UserIcon class="w-3.5 h-3.5 text-gray-400" />
                                 <span>Nama Penulis</span>
                             </label>
@@ -408,7 +408,7 @@ const submitForm = (targetStatus: 'draf' | 'terbit') => {
                                 v-model="namaPenulis"
                                 type="text"
                                 placeholder="Contoh: Tim Redaksi CarePlate"
-                                class="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:border-[#0b8043] focus:ring-1 focus:ring-[#0b8043]"
+                                class="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-[#3d3d3d] bg-white dark:bg-[#262626] text-gray-900 dark:text-[#f0efea] placeholder-gray-400 dark:placeholder-[#737373] focus:outline-none focus:border-[#0b8043] dark:focus:border-[#3fcb7a] focus:ring-1 focus:ring-[#0b8043]"
                             />
                         </div>
                     </div>

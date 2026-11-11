@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Artikel;
 use App\Models\Keluarga;
 use App\Models\Makanan;
+use App\Models\Pengguna;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -13,94 +16,97 @@ use Inertia\Response;
 class AdminDashboardController extends Controller
 {
     /**
-     * Tampilkan halaman Dashboard Admin.
+     * Tampilkan halaman Dashboard Admin dengan data real dari database.
      */
     public function index(Request $request): Response
     {
-        // Hitung statistik pengguna berdasarkan role
+        // 1. Statistik Pengguna Real
         $totalCustomer = User::role('user')->count();
-        if ($totalCustomer === 0) {
-            $totalCustomer = 2390; // Fallback data demo untuk preview sesuai figma
-        }
         $totalAhliGizi = User::role(['ahli_gizi', 'nutritionist'])->count();
-        if ($totalAhliGizi === 0) {
-            $totalAhliGizi = 21;
-        }
         $totalAdmin = User::role('admin')->count();
-        if ($totalAdmin === 0) {
-            $totalAdmin = 7;
-        }
-        $totalUserAll = $totalCustomer + $totalAhliGizi + $totalAdmin;
+        $totalUsers = User::count();
 
+        // 2. Statistik Artikel Real
+        $totalArtikel = Artikel::count();
+        $totalArtikelTerbit = Artikel::where('status', 'terbit')->count();
+        $totalArtikelDraf = Artikel::where('status', 'draf')->count();
+
+        // 3. Statistik Database Makanan Real
         $totalMakanan = Makanan::count();
-        if ($totalMakanan < 50) {
-            $totalMakananFormatted = '1.276';
-        } else {
-            $totalMakananFormatted = number_format($totalMakanan, 0, ',', '.');
-        }
+        $totalMakananTerverifikasi = Makanan::where('status', 'terverifikasi')->count();
+        $totalMakananMenunggu = Makanan::where('status', 'menunggu')->count();
 
+        // 4. Statistik Grup Keluarga Real
         $totalKeluarga = Keluarga::count();
-        if ($totalKeluarga === 0) {
-            $totalKeluargaFormatted = '532';
-            $avgAnggota = '3,4';
-        } else {
-            $totalKeluargaFormatted = number_format($totalKeluarga, 0, ',', '.');
-            $avgAnggota = '3,4';
-        }
+        $totalAnggota = Pengguna::whereNotNull('keluarga_id')->count();
+        $avgAnggota = $totalKeluarga > 0
+            ? number_format($totalAnggota / $totalKeluarga, 1, ',', '.')
+            : '0';
 
-        // Pengajuan makanan (menunggu verifikasi)
-        $pengajuanTerbaru = [
-            [
-                'id' => 1,
-                'nama' => 'Oseng tempe kecap',
-                'pengaju' => 'Rina Santoso',
-                'tanggal' => '3 Nov',
-                'status' => 'Menunggu',
-            ],
-            [
-                'id' => 2,
-                'nama' => 'Kerupuk udang',
-                'pengaju' => 'Hendra P.',
-                'tanggal' => '2 Nov',
-                'status' => 'Menunggu',
-            ],
-            [
-                'id' => 3,
-                'nama' => 'Sayur bening bayam',
-                'pengaju' => 'Maya W.',
-                'tanggal' => '28 Okt',
-                'status' => 'Terverifikasi',
-            ],
-        ];
+        // 5. Antrean Verifikasi Makanan Real
+        $antreanQuery = Makanan::where('status', 'menunggu');
+        $jumlahPending = $antreanQuery->count();
+        $oldestPending = (clone $antreanQuery)->oldest('created_at')->first();
+        $terlamaHari = $oldestPending && $oldestPending->created_at
+            ? (int) max(0, Carbon::now()->diffInDays($oldestPending->created_at))
+            : 0;
+
+        // 6. Pengajuan Makanan Terbaru Real (5 item teratas)
+        $pengajuanTerbaru = Makanan::with('pengaju')
+            ->latest('created_at')
+            ->take(5)
+            ->get()
+            ->map(function (Makanan $item) {
+                return [
+                    'id' => $item->id,
+                    'nama' => $item->nama,
+                    'pengaju' => $item->pengaju?->name ?? $item->nama_pengaju ?: 'Pengguna CarePlate',
+                    'tanggal' => Carbon::parse($item->created_at)->translatedFormat('j M'),
+                    'status' => ucfirst($item->status),
+                ];
+            });
+
+        // 7. Status Sinkronisasi Basis Data & AI Chat Gizi Real
+        $lastSyncFood = Makanan::where('status', 'terverifikasi')->latest('updated_at')->first();
+        $terakhirSinkron = $lastSyncFood && $lastSyncFood->updated_at
+            ? Carbon::parse($lastSyncFood->updated_at)->diffForHumans()
+            : 'Terkini';
+
+        // Deteksi anomali integritas data (contoh: makanan terverifikasi tapi energi null/<=0)
+        $anomaliItem = Makanan::where('status', 'terverifikasi')
+            ->where(function ($q) {
+                $q->whereNull('energi')->orWhere('energi', '<=', 0);
+            })
+            ->first();
 
         return Inertia::render('Admin/Dashboard', [
             'metrics' => [
                 'total_pengguna' => [
-                    'total' => number_format($totalUserAll, 0, ',', '.'),
+                    'total' => number_format($totalUsers, 0, ',', '.'),
                     'detail' => "Customer {$totalCustomer} • Ahli Gizi {$totalAhliGizi} • Admin {$totalAdmin}",
                 ],
                 'total_artikel' => [
-                    'total' => '64',
-                    'detail' => '58 terbit • 6 draf',
+                    'total' => number_format($totalArtikel, 0, ',', '.'),
+                    'detail' => "{$totalArtikelTerbit} terbit • {$totalArtikelDraf} draf",
                 ],
                 'total_makanan' => [
-                    'total' => $totalMakananFormatted,
-                    'detail' => 'Terverifikasi',
+                    'total' => number_format($totalMakanan, 0, ',', '.'),
+                    'detail' => "{$totalMakananTerverifikasi} terverifikasi" . ($totalMakananMenunggu > 0 ? " • {$totalMakananMenunggu} menunggu" : ''),
                 ],
                 'total_keluarga' => [
-                    'total' => $totalKeluargaFormatted,
-                    'detail' => "Rata-rata {$avgAnggota} anggota",
+                    'total' => number_format($totalKeluarga, 0, ',', '.'),
+                    'detail' => $totalKeluarga > 0 ? "Rata-rata {$avgAnggota} anggota" : 'Belum ada grup keluarga',
                 ],
             ],
             'antrean_verifikasi' => [
-                'jumlah' => 12,
-                'terlama_hari' => 2,
+                'jumlah' => $jumlahPending,
+                'terlama_hari' => $terlamaHari,
             ],
             'pengajuan_terbaru' => $pengajuanTerbaru,
             'sinkronisasi_ai' => [
                 'status' => 'Terkini',
-                'terakhir_sinkron' => '2 menit lalu',
-                'error_item' => 'Sayur bening bayam',
+                'terakhir_sinkron' => $terakhirSinkron,
+                'error_item' => $anomaliItem ? $anomaliItem->nama : null,
             ],
         ]);
     }

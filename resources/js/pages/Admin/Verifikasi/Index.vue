@@ -226,10 +226,10 @@ const confirmReject = (reason: string) => {
             <!-- 1. Header Section -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] tracking-tight">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
                         Verifikasi pengajuan
                     </h1>
-                    <p class="text-sm text-[#5e5e5e] mt-1">
+                    <p class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3] mt-1">
                         {{ counts.menunggu }} menunggu. Urut dari yang terlama.
                     </p>
                 </div>
@@ -273,19 +273,19 @@ const confirmReject = (reason: string) => {
             <!-- 3. Master-Detail Layout Grid (Figma Node 22-5458) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <!-- Left Column (Col 4): Antrean Pengajuan List -->
-                <div class="lg:col-span-5 xl:col-span-4 bg-white border border-[#eceae5] rounded-2xl overflow-hidden shadow-xs flex flex-col">
+                <div class="lg:col-span-5 xl:col-span-4 bg-white dark:bg-[#1c1c1c] border border-[#eceae5] dark:border-[#2e2e2e] rounded-2xl overflow-hidden shadow-xs flex flex-col">
                     <!-- List Header -->
-                    <div class="px-5 py-3.5 bg-[#f8f9fa] border-b border-[#eceae5] flex items-center justify-between">
-                        <span class="text-xs font-bold text-[#191919] uppercase tracking-wider">
+                    <div class="px-5 py-3.5 bg-[#f8f9fa] dark:bg-[#262626] border-b border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-between">
+                        <span class="text-xs font-bold text-[#191919] dark:text-[#f0efea] uppercase tracking-wider">
                             Daftar Pengajuan ({{ submissions.total }})
                         </span>
-                        <span class="text-[11px] font-semibold text-[#5e5e5e]">
+                        <span class="text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3]">
                             Urut terlama
                         </span>
                     </div>
 
                     <!-- Items List -->
-                    <div v-if="submissions.data.length > 0" class="divide-y divide-[#eceae5]">
+                    <div v-if="submissions.data.length > 0" class="divide-y divide-[#eceae5] dark:divide-[#2e2e2e]">
                         <button
                             v-for="item in submissions.data"
                             :key="item.id"
@@ -294,15 +294,15 @@ const confirmReject = (reason: string) => {
                             :class="[
                                 'w-full px-5 py-4 flex items-center justify-between text-left transition cursor-pointer',
                                 selectedItem?.id === item.id
-                                    ? 'bg-[#e4f6ea] hover:bg-[#d8f2df]'
-                                    : 'bg-white hover:bg-[#faf9f7]'
+                                    ? 'bg-[#e4f6ea] dark:bg-[#17321f] hover:bg-[#d8f2df] dark:hover:bg-[#1f422a]'
+                                    : 'bg-white dark:bg-[#1c1c1c] hover:bg-[#faf9f7] dark:hover:bg-[#262626]'
                             ]"
                         >
                             <div class="min-w-0 pr-3">
-                                <h4 class="font-bold text-sm text-[#191919] truncate leading-snug">
+                                <h4 class="font-bold text-sm text-[#191919] dark:text-[#f0efea] truncate leading-snug">
                                     {{ item.nama }}
                                 </h4>
-                                <p class="text-xs text-[#5e5e5e] font-semibold mt-1 flex items-center gap-1.5 truncate">
+                                <p class="text-xs text-[#5e5e5e] dark:text-[#a3a3a3] font-semibold mt-1 flex items-center gap-1.5 truncate">
                                     <span>{{ item.pengaju }}</span>
                                     <span>•</span>
                                     <span>{{ item.waktu_pengajuan }}</span>
@@ -312,7 +312,7 @@ const confirmReject = (reason: string) => {
                             <ChevronRight
                                 :class="[
                                     'w-4 h-4 shrink-0 transition',
-                                    selectedItem?.id === item.id ? 'text-[#0b8043] translate-x-0.5' : 'text-gray-400'
+                                    selectedItem?.id === item.id ? 'text-[#0b8043] dark:text-[#3fcb7a] translate-x-0.5' : 'text-gray-400 dark:text-[#737373]'
                                 ]"
                             />
                         </button>
@@ -320,9 +320,9 @@ const confirmReject = (reason: string) => {
 
                     <!-- Empty List State -->
                     <div v-else class="p-12 text-center">
-                        <Inbox class="w-10 h-10 text-gray-300 mx-auto mb-2" />
-                        <p class="text-sm font-bold text-gray-800">Tidak ada pengajuan</p>
-                        <p class="text-xs text-gray-400 mt-1">
+                        <Inbox class="w-10 h-10 text-gray-300 dark:text-[#3d3d3d] mx-auto mb-2" />
+                        <p class="text-sm font-bold text-gray-800 dark:text-[#f0efea]">Tidak ada pengajuan</p>
+                        <p class="text-xs text-gray-400 dark:text-[#a3a3a3] mt-1">
                             Tidak ada data dengan status {{ activeStatusFilter }}.
                         </p>
                     </div>
@@ -330,7 +330,7 @@ const confirmReject = (reason: string) => {
                     <!-- Pagination Footer (Left Panel) -->
                     <div
                         v-if="submissions.total > 0"
-                        class="px-5 py-3.5 bg-[#f8f9fa] border-t border-[#eceae5] flex items-center justify-between text-xs text-[#5e5e5e] font-medium"
+                        class="px-5 py-3.5 bg-[#f8f9fa] dark:bg-[#262626] border-t border-[#eceae5] dark:border-[#2e2e2e] flex items-center justify-between text-xs text-[#5e5e5e] dark:text-[#a3a3a3] font-medium"
                     >
                         <span>
                             {{ submissions.from || 0 }} - {{ submissions.to || 0 }} dari {{ submissions.total }}
@@ -340,19 +340,19 @@ const confirmReject = (reason: string) => {
                                 type="button"
                                 @click="handlePageChange(submissions.prev_page_url)"
                                 :disabled="!submissions.prev_page_url"
-                                class="p-1.5 rounded-lg border border-[#eceae5] bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 transition cursor-pointer"
+                                class="p-1.5 rounded-lg border border-[#eceae5] dark:border-[#3d3d3d] bg-white dark:bg-[#1c1c1c] text-gray-700 dark:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#3d3d3d] disabled:opacity-40 transition cursor-pointer"
                                 title="Sebelumnya"
                             >
                                 <ChevronLeft class="w-4 h-4" />
                             </button>
-                            <span v-if="submissions.last_page > 1" class="px-1.5 text-xs text-gray-500 font-semibold select-none">
+                            <span v-if="submissions.last_page > 1" class="px-1.5 text-xs text-gray-500 dark:text-[#a3a3a3] font-semibold select-none">
                                 {{ submissions.current_page }} / {{ submissions.last_page }}
                             </span>
                             <button
                                 type="button"
                                 @click="handlePageChange(submissions.next_page_url)"
                                 :disabled="!submissions.next_page_url"
-                                class="p-1.5 rounded-lg border border-[#eceae5] bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40 transition cursor-pointer"
+                                class="p-1.5 rounded-lg border border-[#eceae5] dark:border-[#3d3d3d] bg-white dark:bg-[#1c1c1c] text-gray-700 dark:text-[#f0efea] hover:bg-gray-100 dark:hover:bg-[#3d3d3d] disabled:opacity-40 transition cursor-pointer"
                                 title="Berikutnya"
                             >
                                 <ChevronRight class="w-4 h-4" />
@@ -362,16 +362,16 @@ const confirmReject = (reason: string) => {
                 </div>
 
                 <!-- Right Column (Col 8): Detail Review & Actions Panel -->
-                <div class="lg:col-span-7 xl:col-span-8 bg-white border border-[#eceae5] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+                <div class="lg:col-span-7 xl:col-span-8 bg-white dark:bg-[#1c1c1c] border border-[#eceae5] dark:border-[#2e2e2e] rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
                     <template v-if="selectedItem">
                         <!-- Detail Header -->
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-[#eceae5] pb-5">
+                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-[#eceae5] dark:border-[#2e2e2e] pb-5">
                             <div>
-                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#191919] tracking-tight">
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
                                     {{ selectedItem.nama }}
                                 </h2>
-                                <p class="text-xs sm:text-sm text-[#5e5e5e] mt-1.5 font-medium leading-relaxed">
-                                    Diajukan <strong>{{ selectedItem.pengaju }}</strong> • {{ selectedItem.tanggal_lengkap }} • Sumber: <span class="text-gray-800">{{ selectedItem.sumber }}</span>
+                                <p class="text-xs sm:text-sm text-[#5e5e5e] dark:text-[#a3a3a3] mt-1.5 font-medium leading-relaxed">
+                                    Diajukan <strong class="text-[#191919] dark:text-[#f0efea]">{{ selectedItem.pengaju }}</strong> • {{ selectedItem.tanggal_lengkap }} • Sumber: <span class="text-gray-800 dark:text-[#f0efea]">{{ selectedItem.sumber }}</span>
                                 </p>
                             </div>
 
@@ -381,81 +381,81 @@ const confirmReject = (reason: string) => {
                         <!-- 8 Nutrition Metric Cards Grid (Figma Node 22-5552) -->
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                             <!-- Card 1: Takaran Saji -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Takaran saji
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ selectedItem.takaran_saji }}
                                 </span>
                             </div>
 
                             <!-- Card 2: Energi -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Energi
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ Math.round(selectedItem.energi) }} kkal
                                 </span>
                             </div>
 
                             <!-- Card 3: Protein -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Protein
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ Math.round(selectedItem.protein) }} g
                                 </span>
                             </div>
 
                             <!-- Card 4: Karbohidrat -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Karbohidrat
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ Math.round(selectedItem.karbohidrat) }} g
                                 </span>
                             </div>
 
                             <!-- Card 5: Lemak -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Lemak
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ Math.round(selectedItem.lemak) }} g
                                 </span>
                             </div>
 
                             <!-- Card 6: Gula -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Gula
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ selectedItem.gula }} g
                                 </span>
                             </div>
 
                             <!-- Card 7: Natrium -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Natrium
                                 </span>
-                                <span class="block text-base font-bold text-[#191919]">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea]">
                                     {{ selectedItem.natrium }} mg
                                 </span>
                             </div>
 
                             <!-- Card 8: Kategori -->
-                            <div class="bg-[#f4f3f0] p-3.5 rounded-xl space-y-1">
-                                <span class="block text-[11px] font-semibold text-[#5e5e5e] uppercase tracking-wider">
+                            <div class="bg-[#f4f3f0] dark:bg-[#262626] p-3.5 rounded-xl space-y-1">
+                                <span class="block text-[11px] font-semibold text-[#5e5e5e] dark:text-[#a3a3a3] uppercase tracking-wider">
                                     Kategori
                                 </span>
-                                <span class="block text-base font-bold text-[#191919] truncate">
+                                <span class="block text-base font-bold text-[#191919] dark:text-[#f0efea] truncate">
                                     {{ selectedItem.kategori }}
                                 </span>
                             </div>
@@ -464,7 +464,7 @@ const confirmReject = (reason: string) => {
                         <!-- Cek Energi Atwater Box (Figma Node 22-5580) -->
                         <div
                             v-if="atwaterCheck"
-                            class="bg-[#e6f6ec] rounded-xl p-4 flex items-start sm:items-center gap-3 text-xs sm:text-sm text-[#0b7a46] font-medium leading-relaxed"
+                            class="bg-[#e6f6ec] dark:bg-[#17321f] rounded-xl p-4 flex items-start sm:items-center gap-3 text-xs sm:text-sm text-[#0b7a46] dark:text-[#3fcb7a] font-medium leading-relaxed border border-[#0b7a46]/20 dark:border-[#3fcb7a]/20"
                         >
                             <CheckCircle2 class="w-5 h-5 shrink-0 mt-0.5 sm:mt-0" />
                             <span>
@@ -475,10 +475,10 @@ const confirmReject = (reason: string) => {
                         <!-- Similar Food Warning Box (Figma Node 22-5585) -->
                         <div
                             v-if="similarFood"
-                            class="bg-[#fff1d6] rounded-xl p-4 flex items-start sm:items-center justify-between gap-3 text-xs sm:text-sm text-[#9a4a00] font-medium"
+                            class="bg-[#fff1d6] dark:bg-[#3a1e14] rounded-xl p-4 flex items-start sm:items-center justify-between gap-3 text-xs sm:text-sm text-[#9a4a00] dark:text-[#fca052] font-medium border border-[#9a4a00]/20 dark:border-[#fca052]/20"
                         >
                             <div class="flex items-start sm:items-center gap-3">
-                                <AlertTriangle class="w-5 h-5 shrink-0 text-[#9a4a00] mt-0.5 sm:mt-0" />
+                                <AlertTriangle class="w-5 h-5 shrink-0 text-[#9a4a00] dark:text-[#fca052] mt-0.5 sm:mt-0" />
                                 <span>{{ similarFood.text }}</span>
                             </div>
                         </div>
@@ -486,7 +486,7 @@ const confirmReject = (reason: string) => {
                         <!-- Rejection Note Alert if already rejected -->
                         <div
                             v-if="selectedItem.status === 'ditolak' && selectedItem.alasan_penolakan"
-                            class="bg-[#fde8e6] rounded-xl p-4 flex items-start gap-3 text-xs sm:text-sm text-[#b42318]"
+                            class="bg-[#fde8e6] dark:bg-red-950/40 rounded-xl p-4 flex items-start gap-3 text-xs sm:text-sm text-[#b42318] dark:text-red-400 border border-[#b42318]/20 dark:border-red-900/40"
                         >
                             <AlertCircle class="w-5 h-5 shrink-0 mt-0.5" />
                             <div>
@@ -496,14 +496,14 @@ const confirmReject = (reason: string) => {
                         </div>
 
                         <!-- Action Buttons Section -->
-                        <div class="pt-4 border-t border-[#eceae5] flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
+                        <div class="pt-4 border-t border-[#eceae5] dark:border-[#2e2e2e] flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3">
                             <!-- Buttons when status is 'menunggu' -->
                             <template v-if="selectedItem.status === 'menunggu'">
                                 <!-- 1. Tolak Button -->
                                 <button
                                     type="button"
                                     @click="openRejectModal"
-                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#b42318] text-[#b42318] text-xs font-bold hover:bg-red-50 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#b42318] dark:border-red-500 text-[#b42318] dark:text-red-400 text-xs font-bold hover:bg-red-50 dark:hover:bg-red-950/40 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                                 >
                                     <X class="w-4 h-4" />
                                     <span>Tolak</span>
@@ -513,9 +513,9 @@ const confirmReject = (reason: string) => {
                                 <button
                                     type="button"
                                     @click="openEditDrawer"
-                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#191919] text-[#191919] text-xs font-bold hover:bg-gray-100 transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#191919] dark:border-[#3d3d3d] text-[#191919] dark:text-[#f0efea] text-xs font-bold hover:bg-gray-100 dark:hover:bg-[#262626] transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                                 >
-                                    <Pencil class="w-3.5 h-3.5 text-gray-700" />
+                                    <Pencil class="w-3.5 h-3.5 text-gray-700 dark:text-[#a3a3a3]" />
                                     <span>Ubah lalu Verifikasi</span>
                                 </button>
 
@@ -523,7 +523,7 @@ const confirmReject = (reason: string) => {
                                 <button
                                     type="button"
                                     @click="approveSubmission"
-                                    class="px-6 py-2.5 rounded-full bg-[#0b8043] text-white text-xs font-bold hover:bg-[#086637] shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                    class="px-6 py-2.5 rounded-full bg-[#0b8043] dark:bg-[#3fcb7a] text-white dark:text-[#121212] text-xs font-bold hover:bg-[#086637] dark:hover:bg-[#34aa66] shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                                 >
                                     <Check class="w-4 h-4" />
                                     <span>Verifikasi</span>
@@ -535,7 +535,7 @@ const confirmReject = (reason: string) => {
                                 <button
                                     type="button"
                                     @click="openEditDrawer"
-                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#191919] text-[#191919] text-xs font-bold hover:bg-gray-100 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                                    class="px-5 py-2.5 rounded-full border-[1.5px] border-[#191919] dark:border-[#3d3d3d] text-[#191919] dark:text-[#f0efea] text-xs font-bold hover:bg-gray-100 dark:hover:bg-[#262626] transition flex items-center justify-center gap-1.5 cursor-pointer"
                                 >
                                     <Pencil class="w-3.5 h-3.5" />
                                     <span>Perbaiki & Verifikasi Ulang</span>
@@ -544,7 +544,7 @@ const confirmReject = (reason: string) => {
 
                             <!-- State when status is 'terverifikasi' -->
                             <template v-else>
-                                <span class="text-xs font-semibold text-[#0b7a46] flex items-center gap-1.5 bg-[#e6f6ec] px-4 py-2 rounded-full">
+                                <span class="text-xs font-semibold text-[#0b7a46] dark:text-[#3fcb7a] flex items-center gap-1.5 bg-[#e6f6ec] dark:bg-[#17321f] px-4 py-2 rounded-full">
                                     <CheckCircle2 class="w-4 h-4" />
                                     <span>Makanan ini telah diverifikasi dan aktif di katalog.</span>
                                 </span>
@@ -552,19 +552,19 @@ const confirmReject = (reason: string) => {
                         </div>
 
                         <!-- Database Sync Info Note (Figma Node 22-5606) -->
-                        <div class="pt-2 flex items-center gap-2 text-xs text-[#5e5e5e] font-medium border-t border-dashed border-[#eceae5]">
-                            <Database class="w-4 h-4 text-gray-400 shrink-0" />
+                        <div class="pt-2 flex items-center gap-2 text-xs text-[#5e5e5e] dark:text-[#a3a3a3] font-medium border-t border-dashed border-[#eceae5] dark:border-[#2e2e2e]">
+                            <Database class="w-4 h-4 text-gray-400 dark:text-[#737373] shrink-0" />
                             <span>Setelah diverifikasi, Chat Gizi bisa mengutip makanan ini dalam sekitar 2 menit.</span>
                         </div>
                     </template>
 
                     <!-- Empty Selected State -->
                     <div v-else class="py-20 text-center space-y-2">
-                        <Inbox class="w-12 h-12 text-gray-300 mx-auto" />
-                        <h3 class="text-base font-bold text-gray-800">
+                        <Inbox class="w-12 h-12 text-gray-300 dark:text-[#3d3d3d] mx-auto" />
+                        <h3 class="text-base font-bold text-gray-800 dark:text-[#f0efea]">
                             Pilih Pengajuan Makanan
                         </h3>
-                        <p class="text-xs text-gray-500 max-w-sm mx-auto">
+                        <p class="text-xs text-gray-500 dark:text-[#a3a3a3] max-w-sm mx-auto">
                             Klik salah satu makanan di antrean sebelah kiri untuk meninjau detail nutrisi, cek Atwater, dan melakukan verifikasi.
                         </p>
                     </div>
