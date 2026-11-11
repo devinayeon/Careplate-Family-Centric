@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             KategoriMakananSeeder::class,
             MakananSeeder::class,
             PenggunaKeluargaSeeder::class,
+            ArtikelSeeder::class,
         ]);
     }
 }

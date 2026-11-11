@@ -47,14 +47,14 @@ class UserDashboardController extends Controller
                 'title' => 'Catat sarapan',
                 'action_label' => 'Catat',
                 'route' => 'user.meals',
-                'completed' => $catatanMakananHariIni->isNotEmpty(),
+                'completed' => count($catatanMakananHariIni) > 0,
             ],
             [
                 'id' => 2,
                 'title' => 'Catat tiga waktu makan',
                 'action_label' => 'Lihat catatan',
                 'route' => 'user.meals',
-                'completed' => $catatanMakananHariIni->count() >= 3,
+                'completed' => count($catatanMakananHariIni) >= 3,
             ],
             [
                 'id' => 3,
@@ -83,7 +83,7 @@ class UserDashboardController extends Controller
                     'id' => 'first_step',
                     'title' => 'Langkah Pertama',
                     'description' => 'Catat satu makanan',
-                    'achieved' => $catatanMakananHariIni->isNotEmpty(),
+                    'achieved' => count($catatanMakananHariIni) > 0,
                 ],
                 [
                     'id' => 'one_table',
