@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\FoodReviewController;
 use App\Http\Controllers\Ai\ChatSessionController;
 use App\Http\Controllers\Ai\ChatTurnController;
 use App\Http\Controllers\Ai\FoodController;
-use App\Http\Controllers\Ai\FoodSubmissionController;
 use App\Http\Controllers\Ai\ScanController;
 use App\Http\Middleware\Ai\AiResponseHeaders;
 use Illuminate\Support\Facades\Route;
@@ -16,19 +15,13 @@ Route::prefix('ai/v1')
     ->group(function (): void {
         // Real order: Authenticate > ThrottleRequests > SubstituteBindings > Permission > Authorize. Throttle runs before the permission alias, so a 403 user spends their own scan quota; both run before any provider call.
         Route::post('scan', ScanController::class)
-            ->middleware(['permission:scan-nutrition', 'throttle:ai-scan'])
+            ->middleware(['permission:health_tool:use_scanner', 'throttle:ai-scan'])
             ->name('scan');
 
-        // Submission only creates a pending row; publishing is admin-only below and always goes through ReviewFood.
-        // The per-user throttle bounds pending-row spam (observed: it runs before the permission alias, so a 403 user only spends their own bucket).
-        Route::post('food-submissions', [FoodSubmissionController::class, 'store'])
-            ->middleware(['permission:submit-food', 'throttle:ai-submit'])
-            ->name('food-submissions.store');
-
-        // Permission AND admin role (nutritionist has neither). Ids stay plain strings: no model binding before the gate.
+        // Permission AND admin role (ahli_gizi and nutritionist have neither). Foods arrive only through the team's `makanan` (ai:sync-makanan) or the catalog seeder: there is no user submission endpoint. Ids stay plain strings: no model binding before the gate.
         Route::prefix('admin')
             ->name('admin.')
-            ->middleware(['permission:verify-food', 'role:admin'])
+            ->middleware(['permission:food:verify', 'role:admin'])
             ->group(function (): void {
                 Route::post('food-submissions/{submission}/approve', [FoodReviewController::class, 'approve'])
                     ->whereUuid('submission')->name('food-submissions.approve');
@@ -37,13 +30,13 @@ Route::prefix('ai/v1')
             });
 
         Route::get('foods', FoodController::class)
-            ->middleware('permission:nutrition-chat')
+            ->middleware('permission:health_tool:use_ai_chat')
             ->name('foods.index');
 
         // {session} binds through ChatSessionPolicy: foreign or deleted sessions are 404, never 403.
         Route::prefix('chat/sessions')
             ->name('chat.sessions.')
-            ->middleware('permission:nutrition-chat')
+            ->middleware('permission:health_tool:use_ai_chat')
             ->group(function (): void {
                 Route::post('/', [ChatSessionController::class, 'store'])->name('store');
                 Route::get('/', [ChatSessionController::class, 'index'])->name('index');

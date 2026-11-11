@@ -11,40 +11,51 @@ DEFAULT (since 2026-11-09): `AI_PROVIDER=gemini`, model `gemini-3.5-flash-lite` 
 Checked live on 2026-11-09: `ai:preflight` ok (model `qwen3.8-max`, about 6 s); a text+schema call and a label-image call (FDA label: 230 kcal, 160 mg read correctly) work. Offline tests: `tests/Feature/Ai/OpenAiClientTest.php` (13).
 
 Limits, stated plainly:
+
 - The gateway is a FREE Qwen tier that returns HTTP 429 "at capacity" with `Retry-After` of 6 to 26 s. Our scan deadline is 25 s, so a longer `Retry-After` is not retried and the request fails with `AI_PROVIDER_ERROR`. In a live eval of 8 samples only a minority was read; a 3-image run read 1 of 3. Latency of a successful label read was about 10 to 22 s. Plan for a paid or reserved capacity before the demo.
 - There is no `store:false` equivalent: retention and training use are the gateway operator's policy. Do not send real user photos or chats until that policy is known.
 - The earlier eval numbers in this README were produced with Gemini, not Qwen. Accuracy of `qwen/qwen3.8-max` on the label sets is NOT measured yet (capacity-blocked).
 - `php tools/ai-dev.php doctor` still reports the Gemini key flag only (the baseline helper was not changed).
 
+## Food catalog: the team's `makanan` feeds the AI
+
+The chat reads only `foods` (verified, per 100 g, with citations). Foods the admin verifies in the team's `makanan` table (`status = terverifikasi`) are published into `foods` automatically, through `ReviewFood` only (provider `CAREPLATE_MAKANAN`, audit id `sync:makanan`). One AI food per content version: a changed row revokes the old food and approves a new one; a rejected, deleted or no longer eligible row is revoked.
+
+- **Grams, or a weight per unit.** `makanan` stores nutrients per portion (`kuantitas` + `satuan`). Rows in `g`/`gram` are converted to per 100 g with BCMath (rounded half up to 4 decimals). For any other unit (`ml`, `porsi`, `butir`, ...) the admin fills `berat_per_satuan_gram` (grams of ONE unit; for `ml` the density): the serving then weighs `kuantitas` x that weight. Without a weight the row is NOT published (guessing would invent numbers). The admin Data Makanan table and the Verifikasi detail show `Dipakai Chat Gizi` or what is missing (`AiFoodStatus`). Users submit foods in `g` or `ml` only (Figma 07); an `ml` or other row needs the admin's weight before the chat uses it.
+- **Unknown stays null.** `gula` and `natrium` were added with a default of 0, so a stored 0 cannot be told from unknown and is published as null.
+- **How it runs.** `MakananObserver` syncs after the team's transaction commits and never breaks the admin screen (a failure is logged with metadata only). Seeders run without model events: run `php artisan ai:sync-makanan` after `db:seed` and to repair or backfill (output: `published`, `unchanged`, `revoked`, `skipped:<reason>`, `failed`). Turn the observer off with `AI_SYNC_MAKANAN=false`.
+- **Verification.** The approval is accepted only if the makanan row is still verified and the version was built from its current content (hash check in `ReviewCandidate`); users cannot submit this provider.
+- **Limit.** The AI sees this food as "source-reviewed by an admin", not as nutritionist-verified.
+
 ## What exists
 
-| Feature      | Summary                                                                                                                                                        |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                 |
-| Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days. |
-| Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                        |
-| Submissions  | `POST /ai/v1/food-submissions`: a user proposes a food; it stays `pending` and is not searchable.                                                              |
-| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                     |
-| Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                   |
+| Feature      | Summary                                                                                                                                                                                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Scan         | `POST /ai/v1/scan`: one label photo to structured nutrition facts plus a provisional assessment. Stateless: photo and result are never stored.                                                                                                                                             |
+| Chat         | Sessions and turns. Numbers always come from the verified catalog (database mode) or the answer says it is general knowledge. Stored for the owner for 7 days.                                                                                                                             |
+| Foods        | `GET /ai/v1/foods`: search the verified catalog (no nutrient values, those arrive through chat claims).                                                                                                                                                                                    |
+| Admin review | Approve a submission or revoke a food, with optimistic revision checks and an audit trail.                                                                                                                                                                                                 |
+| Data Makanan | `/data-makanan` (verified list), `/data-makanan/ajukan` (6-step submission, status `menunggu`, owned by the user), `/pengajuan-saya`. A scan result can prefill the wizard. Verified gram or weighted rows reach the chat through `MakananObserver`.                                       |
+| Screens      | `/pindai-kemasan` and `/chat-gizi` (Inertia pages `User/Pindai`, `User/ChatGizi`, same permissions as the API) call `/ai/v1/*` from the browser with the session cookie and the `XSRF-TOKEN` header (`resources/js/lib/aiApi.ts`). A chat is titled by its first question (60 characters). |
+| Purge        | `ai:purge-chats` deletes chats past retention (daily schedule entry exists).                                                                                                                                                                                                               |
 
 ## Routes
 
 Base: same origin as the Laravel app (local: `http://127.0.0.1:8001`). All routes sit in the `web`, `auth` group: session cookie, CSRF, JSON errors. Every response has `Cache-Control: no-store, private` and `X-Request-Id`.
 
-| Method and path                                           | Needs                                | Success                       | Notes                                                           |
-| --------------------------------------------------------- | ------------------------------------ | ----------------------------- | --------------------------------------------------------------- |
-| POST `/ai/v1/scan`                                        | `scan-nutrition`, throttle `ai-scan` | 200                           | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
-| GET `/ai/v1/foods`                                        | `nutrition-chat`                     | 200                           | `q` (<=200 chars, optional), `limit` 1 to 5                     |
-| POST `/ai/v1/chat/sessions`                               | `nutrition-chat`                     | 201                           | empty JSON object body                                          |
-| GET `/ai/v1/chat/sessions`                                | `nutrition-chat`                     | 200                           | `cursor`, `limit` 1 to 20; own sessions only                    |
-| DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                | 204                           | content erased at once; late results are refused                |
-| GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                | 200                           | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
-| POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`            | 200                           | one turn; see idempotency below                                 |
-| POST `/ai/v1/food-submissions`                            | `submit-food`, throttle `ai-submit`  | 201 (200 on identical resend) | body is closed: unknown keys are 422                            |
-| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `verify-food` and role `admin`       | 200                           | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
-| POST `/ai/v1/admin/foods/{food}/revoke`                   | `verify-food` and role `admin`       | 200                           | `{expected_revision, reason}`                                   |
+| Method and path                                           | Needs                                         | Success | Notes                                                           |
+| --------------------------------------------------------- | --------------------------------------------- | ------- | --------------------------------------------------------------- |
+| POST `/ai/v1/scan`                                        | `health_tool:use_scanner`, throttle `ai-scan` | 200     | multipart field `image`, JPEG or PNG, up to 5 MiB, up to 16 MP  |
+| GET `/ai/v1/foods`                                        | `health_tool:use_ai_chat`                     | 200     | `q` (<=200 chars, optional), `limit` 1 to 5                     |
+| POST `/ai/v1/chat/sessions`                               | `health_tool:use_ai_chat`                     | 201     | empty JSON object body                                          |
+| GET `/ai/v1/chat/sessions`                                | `health_tool:use_ai_chat`                     | 200     | `cursor`, `limit` 1 to 20; own sessions only                    |
+| DELETE `/ai/v1/chat/sessions/{session}`                   | owner                                         | 204     | content erased at once; late results are refused                |
+| GET `/ai/v1/chat/sessions/{session}/turns`                | owner                                         | 200     | `cursor`, `limit` 1 to 20; pending and failed turns are visible |
+| POST `/ai/v1/chat/sessions/{session}/turns`               | owner, throttle `ai-chat`                     | 200     | one turn; see idempotency below                                 |
+| POST `/ai/v1/admin/food-submissions/{submission}/approve` | `food:verify` and role `admin`                | 200     | `{expected_revision, reviewer_note, acknowledge_review_flags?}` |
+| POST `/ai/v1/admin/foods/{food}/revoke`                   | `food:verify` and role `admin`                | 200     | `{expected_revision, reason}`                                   |
 
-Roles from `AiPermissionSeeder`: `family_head` has scan, chat, submit. `nutritionist` has scan and chat only. `admin` has everything. Registration assigns `family_head`. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
+Permissions are the team's own names (no separate AI list): `health_tool:use_scanner` (scan), `health_tool:use_ai_chat` (chat, food search) and `food:verify` (admin approve/revoke, plus the `admin` role). `user`, `ahli_gizi` and `admin` get scan and chat; only `admin` verifies food, never `ahli_gizi`. Registration assigns `user`. `AiPermissionSeeder` must run after `RolePermissionSeeder` (which uses `syncPermissions`). There is no user food-submission endpoint: foods enter through the team's `makanan` (admin verifies) or the catalog seeder. Another user's session is always 404 (never 403), for read, send, delete and replay. A non-UUID id in an admin path is 404.
 
 ## Auth and CSRF flow
 
@@ -231,7 +242,7 @@ Envelope: `{"error":{"code","message","retryable"},"request_id":"req_..."}`. Mes
 
 ## Quotas (per user, server side)
 
-Scan 5 per minute and 60 per day. Chat 10 per minute and 100 per day. Submit 5 per minute and 30 per day. A request that fails validation still spends quota. Quota is checked before any provider call.
+Scan 5 per minute and 10 per day per user (free tier). Chat 10 per minute and 100 per day. Edit the hard-coded numbers in `config/ai.php` (`quotas`) when you move to a paid tier. A request that fails validation still spends quota. Quota is checked before any provider call.
 
 ## Privacy facts
 
@@ -303,7 +314,7 @@ Status of the MySQL runs: the full MySQL suite was run on the final code (commit
 
 ## Provider quota
 
-The Gemini key used for development is a free-tier key. Observed: about 20 requests per day on `gemini-3.6-flash` (free tier; other models may differ), rejected by the provider with HTTP 429 and shown to clients as 502 `AI_PROVIDER_ERROR`, and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 60 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
+The Gemini key used for development is a free-tier key. Observed: about 20 requests per day on `gemini-3.6-flash` (free tier; other models may differ), rejected by the provider with HTTP 429 and shown to clients as 502 `AI_PROVIDER_ERROR`, and 5 per minute on `gemini-3-flash-preview`. That is far below the app quotas (scan 10 per day per user). A demo or the judging can therefore hit `AI_PROVIDER_ERROR` long before any app quota.
 
 - For the competition demo and for real users use a paid-tier key (this also removes the free-tier content-use clause, see Privacy facts), or temporarily lower the AI quotas in `config/ai.php`.
 - Database-mode chat answers (a catalog food asked about by name) never call the model and keep working without the provider; `GET /ai/v1/foods` too. Scan and general-knowledge chat need the provider. Mixed mode (a catalog food plus an education question) calls the model once; only the database part survives a provider failure: the answer then holds the catalog facts and citation without the education text, plus a warning that the explanation is unavailable.

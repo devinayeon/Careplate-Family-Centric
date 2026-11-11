@@ -214,3 +214,19 @@ test('guests get 401, users without the permission 403, foreign sessions and adm
     expect(ChatTurn::query()->count())->toBe(0);
     Http::assertNothingSent();
 });
+
+// Owner request 2026-11-11 (Figma 05 Chat Gizi): the history list shows each chat by its first question.
+test('the first question becomes the session title and later questions leave it alone', function () {
+    cfFood(['name' => 'Tahu contoh', 'protein_g' => '10']);
+    [$user, $session] = chatActor();
+
+    chatOk(chatAsk($user, $session, 'Berapa protein tahu contoh?', 1));
+    chatOk(chatAsk($user, $session, 'Berapa protein 50 gram tahu contoh?', 2));
+
+    expect($session->fresh()->title)->toBe('Berapa protein tahu contoh?');
+
+    $long = str_repeat('é', 200);
+    [$user2, $session2] = chatActor();
+    chatAsk($user2, $session2, $long, 1);
+    expect(mb_strlen((string) $session2->fresh()->title))->toBe(60);
+});

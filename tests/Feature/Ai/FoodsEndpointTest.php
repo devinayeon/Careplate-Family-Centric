@@ -27,7 +27,7 @@ function foodsGet(?User $user, string $query = ''): TestResponse
     return $test->getJson('/ai/v1/foods'.$query);
 }
 
-test('unauthenticated is 401 and a user without nutrition-chat is 403, both as envelopes', function () {
+test('unauthenticated is 401 and a user without health_tool:use_ai_chat is 403, both as envelopes', function () {
     foodsGet(null)->assertStatus(401)->assertJsonPath('error.code', 'UNAUTHENTICATED');
     $r = foodsGet(foodsUser(''))->assertStatus(403)->assertJsonPath('error.code', 'FORBIDDEN');
 
@@ -35,7 +35,7 @@ test('unauthenticated is 401 and a user without nutrition-chat is 403, both as e
         ->and($r->headers->get('Cache-Control'))->toContain('no-store');
 });
 
-test('every role that owns nutrition-chat gets 200 with no-store and a request id', function (string $role) {
+test('every role that owns health_tool:use_ai_chat gets 200 with no-store and a request id', function (string $role) {
     $r = foodsGet(foodsUser($role))->assertOk();
 
     expect($r->headers->get('Cache-Control'))->toContain('no-store')

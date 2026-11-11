@@ -21,3 +21,7 @@ declare module 'vue' {
 declare module '@inertiajs/core' {
     interface PageProps extends InertiaPageProps, AppPageProps {}
 }
+
+declare module '@inertiajs/vue3' {
+    interface PageProps extends AppPageProps {}
+}

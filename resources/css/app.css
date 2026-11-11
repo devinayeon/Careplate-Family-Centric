@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../views/**/*.blade.php';
@@ -7,7 +9,76 @@
 
 @theme inline {
     --font-sans:
-        Instrument Sans, Figtree, ui-sans-serif, system-ui, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-        'Noto Color Emoji';
+        'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Bricolage Grotesque', 'Plus Jakarta Sans', sans-serif;
+
+    /* CarePlate Brand Tokens */
+    --color-primary: #0b8043;
+    --color-primary-deep: #086637;
+    --color-primary-tint: #e4f6ea;
+    --color-forest: #0e3b24;
+
+    --color-cream: #fdf8e6;
+    --color-hero-sky: #bae7cf;
+    --color-tile: #f4f3f0;
+    --color-line: #eceae5;
+    --color-line-strong: #d6d3cc;
+
+    --color-ink: #191919;
+    --color-muted: #5e5e5e;
+
+    /* Accents */
+    --color-accent: #eb4416;
+    --color-accent-tint: #ffece5;
+    --color-accent-text: #c7370c;
+
+    --color-sun: #ffc933;
+    --color-sun-tint: #fff4cc;
+
+    --color-terong: #6c4fd8;
+    --color-terong-tint: #eee9ff;
+
+    --color-status-success-bg: #e6f6ec;
+    --color-status-success-text: #0b7a46;
+
+    /* Shadows / Elevations */
+    --shadow-elevation-1:
+        0 1px 2px rgba(30, 35, 33, 0.06), 0 4px 12px rgba(30, 35, 33, 0.06);
+    --shadow-elevation-2: 0 12px 32px rgba(30, 35, 33, 0.12);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+}
+
+.font-display {
+    font-family: var(--font-display);
+}
+
+/* Subtle scrollbar for sticky sidebars and drawers */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 9999px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+}
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+}
+.dark .custom-scrollbar {
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }

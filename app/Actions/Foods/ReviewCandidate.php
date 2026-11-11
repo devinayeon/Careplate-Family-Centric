@@ -4,6 +4,7 @@ namespace App\Actions\Foods;
 
 use App\Exceptions\Ai\AiException;
 use App\Models\FoodSubmission;
+use App\Services\Ai\Foods\MakananSource;
 use App\Services\Ai\Foods\SnapshotManifest;
 
 /**
@@ -91,7 +92,9 @@ class ReviewCandidate
                 throw self::refuse('SOURCE_MISSING');
             }
         }
-        $manifestSha = $this->manifest->sha256For($s->source_provider, $s->source_id, $s->snapshot_version);
+        $manifestSha = $s->source_provider === MakananSource::PROVIDER
+            ? MakananSource::sha256For($s->source_id, $s->snapshot_version)
+            : $this->manifest->sha256For($s->source_provider, $s->source_id, $s->snapshot_version);
         if ($manifestSha === null) {
             throw self::refuse('SOURCE_NOT_IN_MANIFEST');
         }
