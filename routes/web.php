@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminArticleCategoryController;
 use App\Http\Controllers\Admin\AdminArticleController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminFoodController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
@@ -53,8 +54,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/kategori-artikel/{kategoriArtikel}', [AdminArticleCategoryController::class, 'update'])->name('article-categories.update');
     Route::delete('/kategori-artikel/{kategoriArtikel}', [AdminArticleCategoryController::class, 'destroy'])->name('article-categories.destroy');
 
+    // Manajemen Data Makanan
+    Route::get('/data-makanan', [AdminFoodController::class, 'index'])->name('foods');
+    Route::post('/data-makanan', [AdminFoodController::class, 'store'])->name('foods.store');
+    Route::post('/data-makanan/{makanan}', [AdminFoodController::class, 'update'])->name('foods.update');
+    Route::delete('/data-makanan/{makanan}', [AdminFoodController::class, 'destroy'])->name('foods.destroy');
+
     // Menu-menu Admin lainnya
-    Route::get('/data-makanan', fn () => redirect()->route('admin.dashboard'))->name('foods');
     Route::get('/verifikasi', fn () => redirect()->route('admin.dashboard'))->name('verifications');
 });
 

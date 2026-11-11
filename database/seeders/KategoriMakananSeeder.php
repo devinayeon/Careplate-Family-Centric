@@ -13,6 +13,13 @@ class KategoriMakananSeeder extends Seeder
     public function run(): void
     {
         $kategoriList = [
+            'Lauk Nabati',
+            'Lauk Hewani',
+            'Sayur',
+            'Makanan Pokok',
+            'Buah',
+            'Camilan',
+            'Minuman',
             'Sarapan',
             'Makan Siang',
             'Makan Malam',
