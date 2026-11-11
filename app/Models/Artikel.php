@@ -30,6 +30,8 @@ class Artikel extends Model
 
     protected $appends = [
         'foto_sampul_url',
+        'waktu_baca',
+        'tanggal_terbit',
     ];
 
     /**
@@ -65,6 +67,28 @@ class Artikel extends Model
         }
 
         return asset('storage/'.$this->foto_sampul);
+    }
+
+    /**
+     * Accessor estimasi waktu baca (rata-rata 200 kata per menit).
+     */
+    public function getWaktuBacaAttribute(): string
+    {
+        $rawText = trim(strip_tags((string) $this->konten));
+        $wordCount = str_word_count($rawText);
+        $minutes = max(1, (int) ceil($wordCount / 200));
+
+        return "{$minutes} menit baca";
+    }
+
+    /**
+     * Accessor tanggal publikasi yang terformat (contoh: 30 Okt 2026).
+     */
+    public function getTanggalTerbitAttribute(): string
+    {
+        $date = $this->published_at ?? $this->created_at;
+
+        return $date ? $date->translatedFormat('d M Y') : '';
     }
 
     /**

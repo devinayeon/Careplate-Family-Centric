@@ -13,7 +13,9 @@ use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\AiPageController;
+use App\Http\Controllers\User\UserArticleController;
 use App\Http\Controllers\User\UserDashboardController;
+use App\Http\Controllers\User\UserFamilyController;
 use App\Http\Controllers\User\UserFoodController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -106,9 +108,28 @@ Route::middleware(['auth'])->name('user.')->group(function () {
     Route::post('/data-makanan/ajukan', [UserFoodController::class, 'store'])->middleware(['permission:food:create', 'throttle:20,60'])->name('foods.store');
     Route::get('/data-makanan/{makanan}', [UserFoodController::class, 'show'])->whereNumber('makanan')->middleware('permission:food:read')->name('foods.show');
     Route::get('/pengajuan-saya', [UserFoodController::class, 'mine'])->middleware('permission:food:create')->name('foods.mine');
-    Route::get('/artikel', fn () => redirect()->route('user.dashboard'))->name('articles');
+    Route::get('/artikel', [UserArticleController::class, 'index'])->name('articles');
+    Route::get('/artikel/{slug}', [UserArticleController::class, 'show'])->name('articles.show');
     Route::get('/konsultasi', fn () => redirect()->route('user.dashboard'))->name('consultation');
-    Route::get('/keluarga', fn () => redirect()->route('user.dashboard'))->name('family');
+
+    // Modul Grup Keluarga
+    Route::get('/keluarga', [UserFamilyController::class, 'index'])->name('family');
+    Route::get('/keluarga/buat', [UserFamilyController::class, 'create'])->name('family.create');
+    Route::post('/keluarga/buat', [UserFamilyController::class, 'store'])->name('family.store');
+    Route::post('/keluarga/cek-nama', [UserFamilyController::class, 'checkName'])->name('family.check_name');
+    Route::post('/keluarga/gabung', [UserFamilyController::class, 'joinByCode'])->name('family.join_code');
+    Route::get('/keluarga/cek-kode/{kode}', [UserFamilyController::class, 'previewCode'])->name('family.preview_code');
+    Route::get('/keluarga/undangan/{kode}', [UserFamilyController::class, 'showJoinLink'])->name('family.join_link');
+    Route::post('/keluarga/undangan/{kode}', [UserFamilyController::class, 'acceptJoinLink'])->name('family.accept_join_link');
+    Route::post('/keluarga/keluar', [UserFamilyController::class, 'leaveGroup'])->name('family.leave');
+
+    // Pengelolaan Grup (Khusus Kepala Keluarga)
+    Route::get('/keluarga/kelola', [UserFamilyController::class, 'manage'])->name('family.manage');
+    Route::put('/keluarga/kelola/nama', [UserFamilyController::class, 'updateName'])->name('family.update_name');
+    Route::post('/keluarga/kelola/kode-baru', [UserFamilyController::class, 'regenerateCode'])->name('family.regenerate_code');
+    Route::post('/keluarga/kelola/alihkan-kepala', [UserFamilyController::class, 'transferHead'])->name('family.transfer_head');
+    Route::delete('/keluarga/kelola/anggota/{member}', [UserFamilyController::class, 'removeMember'])->name('family.remove_member');
+    Route::delete('/keluarga/kelola/hapus', [UserFamilyController::class, 'deleteGroup'])->name('family.delete_group');
 });
 
 // Profil akun
