@@ -69,10 +69,16 @@ const refreshData = () => {
       <!-- 2. Four Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card Total Pengguna -->
-        <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-xs">
-          <div class="flex items-center gap-2 text-gray-500 text-xs font-medium mb-3">
-            <Users class="w-4 h-4 text-gray-400" />
-            <span>Total Pengguna</span>
+        <Link
+          :href="route('admin.users')"
+          class="bg-white p-5 rounded-3xl border border-gray-100 shadow-xs hover:border-gray-200 hover:shadow-sm transition-all block group"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2 text-gray-500 text-xs font-medium">
+              <Users class="w-4 h-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+              <span>Total Pengguna</span>
+            </div>
+            <ArrowRight class="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-600 transition-colors" />
           </div>
           <div class="text-3xl font-extrabold text-gray-900 tracking-tight">
             {{ metrics.total_pengguna.total }}
@@ -80,7 +86,7 @@ const refreshData = () => {
           <div class="text-[11px] text-gray-400 mt-2 font-medium">
             {{ metrics.total_pengguna.detail }}
           </div>
-        </div>
+        </Link>
 
         <!-- Card Total Artikel -->
         <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-xs">

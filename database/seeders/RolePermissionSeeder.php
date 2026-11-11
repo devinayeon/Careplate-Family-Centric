@@ -145,6 +145,15 @@ class RolePermissionSeeder extends Seeder
         );
         $nutritionist->syncRoles([$ahliGiziRole, $nutritionistRole]);
 
+        \App\Models\AhliGizi::updateOrCreate(
+            ['user_id' => $nutritionist->id],
+            [
+                'spesialisasi' => 'Gizi Keluarga',
+                'nomor_str' => '1234 5678 9012 3456',
+                'jam_layanan' => 'Senin sampai Sabtu, 08.00 sampai 12.00',
+            ]
+        );
+
         // User Budi Santoso (Customer yang juga bertindak sebagai kepala keluarga di data grupnya)
         $budi = User::firstOrCreate(
             ['email' => 'budi@careplate.test'],

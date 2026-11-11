@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
@@ -30,9 +31,12 @@ Route::get('/dashboard', DashboardRedirectController::class)
 // ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/pengguna', [AdminUserController::class, 'index'])->name('users');
+    Route::post('/pengguna', [AdminUserController::class, 'store'])->name('users.store');
+    Route::put('/pengguna/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::delete('/pengguna/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
     // Menu-menu Admin lainnya
-    Route::get('/pengguna', fn () => redirect()->route('admin.dashboard'))->name('users');
     Route::get('/artikel', fn () => redirect()->route('admin.dashboard'))->name('articles');
     Route::get('/data-makanan', fn () => redirect()->route('admin.dashboard'))->name('foods');
     Route::get('/verifikasi', fn () => redirect()->route('admin.dashboard'))->name('verifications');

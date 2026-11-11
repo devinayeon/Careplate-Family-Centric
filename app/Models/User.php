@@ -24,6 +24,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read \App\Models\Pengguna|null $pengguna
+ * @property-read \App\Models\AhliGizi|null $ahliGizi
  */
 #[Fillable(['name', 'email', 'google_id', 'password'])]
 #[Hidden(['password', 'remember_token'])]
@@ -51,5 +52,13 @@ class User extends Authenticatable
     public function pengguna(): HasOne
     {
         return $this->hasOne(Pengguna::class, 'user_id');
+    }
+
+    /**
+     * Profile profesional ahli gizi (one-to-one).
+     */
+    public function ahliGizi(): HasOne
+    {
+        return $this->hasOne(AhliGizi::class, 'user_id');
     }
 }
