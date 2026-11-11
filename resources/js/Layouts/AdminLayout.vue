@@ -24,7 +24,9 @@ const user = computed(() => (page.props.auth as any)?.user);
 const isProfileOpen = ref(false);
 const isMobileMenuOpen = ref(false);
 
-const navItems = [
+const pendingVerificationCount = computed(() => (page.props as any).pendingVerificationCount ?? 0);
+
+const navItems = computed(() => [
     { name: "Dashboard", routeName: "admin.dashboard", icon: LayoutDashboard },
     { name: "Pengguna", routeName: "admin.users", icon: Users },
     { name: "Artikel", routeName: "admin.articles", icon: BookOpen },
@@ -33,9 +35,9 @@ const navItems = [
         name: "Verifikasi",
         routeName: "admin.verifications",
         icon: CheckCircle2,
-        badge: 12,
+        badge: pendingVerificationCount.value > 0 ? pendingVerificationCount.value : null,
     },
-];
+]);
 
 const logout = () => {
     router.post(route("logout"));

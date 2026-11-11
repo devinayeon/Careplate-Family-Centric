@@ -53,6 +53,9 @@ class Makanan extends Model
         'natrium',
         'sumber',
         'status',
+        'alasan_penolakan',
+        'diverifikasi_oleh',
+        'diverifikasi_pada',
         'pengaju_id',
         'nama_pengaju',
         'kategori_makanan_id',
@@ -79,6 +82,8 @@ class Makanan extends Model
             'natrium' => 'decimal:2',
             'kategori_makanan_id' => 'integer',
             'pengaju_id' => 'integer',
+            'diverifikasi_oleh' => 'integer',
+            'diverifikasi_pada' => 'datetime',
             'deleted_at' => 'datetime',
         ];
     }
@@ -97,6 +102,14 @@ class Makanan extends Model
     public function pengaju(): BelongsTo
     {
         return $this->belongsTo(User::class, 'pengaju_id');
+    }
+
+    /**
+     * Admin yang memverifikasi atau menolak makanan.
+     */
+    public function verifikator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'diverifikasi_oleh');
     }
 
     /**
