@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                     'keluarga' => $user->pengguna?->keluarga,
                 ]) : null,
             ],
+            'pendingVerificationCount' => fn () => $user ? \App\Models\Makanan::where('status', 'menunggu')->count() : 0,
         ];
     }
 }

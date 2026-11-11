@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminArticleController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFoodController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminVerificationController;
 use App\Http\Controllers\DashboardRedirectController;
 use App\Http\Controllers\Nutritionist\NutritionistConsultationController;
 use App\Http\Controllers\Nutritionist\NutritionistDashboardController;
@@ -60,8 +61,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/data-makanan/{makanan}', [AdminFoodController::class, 'update'])->name('foods.update');
     Route::delete('/data-makanan/{makanan}', [AdminFoodController::class, 'destroy'])->name('foods.destroy');
 
-    // Menu-menu Admin lainnya
-    Route::get('/verifikasi', fn () => redirect()->route('admin.dashboard'))->name('verifications');
+    // Verifikasi Pengajuan Makanan
+    Route::get('/verifikasi', [AdminVerificationController::class, 'index'])->name('verifications');
+    Route::post('/verifikasi/{makanan}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
+    Route::post('/verifikasi/{makanan}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+    Route::post('/verifikasi/{makanan}/update-approve', [AdminVerificationController::class, 'updateAndApprove'])->name('verifications.update-approve');
 });
 
 // ==========================================
