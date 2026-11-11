@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminArticleCategoryController;
+use App\Http\Controllers\Admin\AdminArticleController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\DashboardRedirectController;
@@ -36,8 +38,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/pengguna/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/pengguna/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
+    // Manajemen Artikel
+    Route::get('/artikel', [AdminArticleController::class, 'index'])->name('articles');
+    Route::get('/artikel/create', [AdminArticleController::class, 'create'])->name('articles.create');
+    Route::post('/artikel', [AdminArticleController::class, 'store'])->name('articles.store');
+    Route::get('/artikel/{artikel}/edit', [AdminArticleController::class, 'edit'])->name('articles.edit');
+    Route::put('/artikel/{artikel}', [AdminArticleController::class, 'update'])->name('articles.update');
+    Route::delete('/artikel/{artikel}', [AdminArticleController::class, 'destroy'])->name('articles.destroy');
+    Route::post('/artikel/upload-image', [AdminArticleController::class, 'uploadEditorImage'])->name('articles.upload-image');
+
+    // Manajemen Kategori Artikel
+    Route::get('/kategori-artikel', [AdminArticleCategoryController::class, 'index'])->name('article-categories.index');
+    Route::post('/kategori-artikel', [AdminArticleCategoryController::class, 'store'])->name('article-categories.store');
+    Route::put('/kategori-artikel/{kategoriArtikel}', [AdminArticleCategoryController::class, 'update'])->name('article-categories.update');
+    Route::delete('/kategori-artikel/{kategoriArtikel}', [AdminArticleCategoryController::class, 'destroy'])->name('article-categories.destroy');
+
     // Menu-menu Admin lainnya
-    Route::get('/artikel', fn () => redirect()->route('admin.dashboard'))->name('articles');
     Route::get('/data-makanan', fn () => redirect()->route('admin.dashboard'))->name('foods');
     Route::get('/verifikasi', fn () => redirect()->route('admin.dashboard'))->name('verifications');
 });

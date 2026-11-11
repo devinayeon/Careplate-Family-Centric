@@ -21,9 +21,12 @@ class DatabaseSeeder extends Seeder
             MakananSeeder::class,
         ]);
 
-        // Demo accounts use a well-known password: never seed them in production.
+        // Demo accounts (well-known password) and sample articles: never seed them in production.
         if (! app()->environment('production')) {
-            $this->call(PenggunaKeluargaSeeder::class);
+            $this->call([
+                PenggunaKeluargaSeeder::class,
+                ArtikelSeeder::class,
+            ]);
         }
     }
 }
