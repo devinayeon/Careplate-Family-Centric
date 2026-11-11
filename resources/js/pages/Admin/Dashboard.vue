@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import AdminLayout from '@/Layouts/AdminLayout.vue'
 import {
   Users,
@@ -13,7 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   metrics: {
     total_pengguna: { total: string; detail: string }
     total_artikel: { total: string; detail: string }
@@ -32,11 +33,19 @@ defineProps<{
     status: string
   }>
   sinkronisasi_ai: {
-    status: string
-    terakhir_sinkron: string
-    error_item: string
+    ready: number
+    needs_weight: number
+    failed: number
+    failed_names: string[]
+    terakhir_sinkron: string | null
   }
 }>()
+
+const flash = computed(() => usePage().props.flash as { success?: string; error?: string } | undefined)
+const retrying = ref(false)
+const retrySync = () => {
+  router.post(route('admin.ai-sync.run'), {}, { preserveScroll: true, onStart: () => (retrying.value = true), onFinish: () => (retrying.value = false) })
+}
 
 const refreshData = () => {
   router.reload()
@@ -189,6 +198,13 @@ const refreshData = () => {
                   <span>Menunggu</span>
                 </span>
                 <span
+                  v-else-if="item.status === 'Ditolak'"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200/60"
+                >
+                  <AlertCircle class="w-3 h-3 text-red-500" />
+                  <span>Ditolak</span>
+                </span>
+                <span
                   v-else
                   class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                 >
@@ -207,22 +223,31 @@ const refreshData = () => {
 
             <!-- Status Indicator -->
             <div class="flex items-center gap-2 text-xs font-medium text-gray-700 mb-4">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <span>Indeks terbaru, {{ sinkronisasi_ai.terakhir_sinkron }}</span>
+              <span class="w-2.5 h-2.5 rounded-full" :class="sinkronisasi_ai.failed === 0 && sinkronisasi_ai.ready > 0 ? 'bg-emerald-500' : 'bg-gray-300'"></span>
+              <span v-if="sinkronisasi_ai.ready > 0">{{ sinkronisasi_ai.ready }} makanan dipakai Chat Gizi<template v-if="sinkronisasi_ai.terakhir_sinkron">, terakhir {{ sinkronisasi_ai.terakhir_sinkron }}</template></span>
+              <span v-else>Belum ada makanan yang dipakai Chat Gizi</span>
             </div>
 
+            <p v-if="flash?.success" class="mb-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800" role="status">{{ flash.success }}</p>
+            <p v-if="flash?.error" class="mb-3 rounded-xl bg-[#fef2f2] px-3 py-2 text-xs font-semibold text-red-800" role="alert">{{ flash.error }}</p>
+
             <!-- Error alert box -->
-            <div class="bg-[#fef2f2] border border-[#fecaca] rounded-2xl p-4 flex items-start justify-between gap-3">
+            <div v-if="sinkronisasi_ai.failed > 0" class="bg-[#fef2f2] border border-[#fecaca] rounded-2xl p-4 flex items-start justify-between gap-3">
               <div class="flex items-start gap-2.5">
-                <AlertCircle class="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <AlertCircle class="w-4 h-4 text-red-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <div class="text-xs text-red-800 leading-snug">
-                  1 item gagal disinkronkan: <span class="font-semibold">{{ sinkronisasi_ai.error_item }}</span>.
+                  {{ sinkronisasi_ai.failed }} item gagal disinkronkan: <span class="font-semibold">{{ sinkronisasi_ai.failed_names.join(', ') }}<template v-if="sinkronisasi_ai.failed > sinkronisasi_ai.failed_names.length"> dan lainnya</template></span>.
                 </div>
               </div>
 
-              <button class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline shrink-0">
-                Coba lagi
+              <button type="button" :disabled="retrying" class="text-xs font-bold text-red-600 hover:text-red-700 hover:underline shrink-0 disabled:opacity-50" @click="retrySync">
+                {{ retrying ? 'Mencoba…' : 'Coba lagi' }}
               </button>
+            </div>
+
+            <div v-if="sinkronisasi_ai.needs_weight > 0" class="mt-3 bg-amber-50 border border-amber-200/60 rounded-2xl p-4 text-xs text-amber-800 leading-snug">
+              {{ sinkronisasi_ai.needs_weight }} makanan terverifikasi belum dipakai Chat Gizi karena satuannya bukan gram. Isi <span class="font-semibold">berat per satuan</span> di
+              <Link :href="route('admin.foods')" class="font-bold underline">Data Makanan</Link>.
             </div>
           </div>
 

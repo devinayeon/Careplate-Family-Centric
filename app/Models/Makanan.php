@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -18,6 +20,7 @@ use Illuminate\Support\Str;
  * @property float $protein
  * @property float $kuantitas
  * @property string $satuan
+ * @property float|null $berat_per_satuan_gram
  * @property float $karbohidrat
  * @property float $gula
  * @property float $natrium
@@ -28,12 +31,12 @@ use Illuminate\Support\Str;
  * @property int $kategori_makanan_id
  * @property string|null $foto_gizi
  * @property string|null $foto_makanan
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\KategoriMakanan $kategoriMakanan
- * @property-read \App\Models\User|null $pengaju
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\PelacakanMakanan> $pelacakanMakanan
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read KategoriMakanan $kategoriMakanan
+ * @property-read User|null $pengaju
+ * @property-read Collection<int, PelacakanMakanan> $pelacakanMakanan
  */
 class Makanan extends Model
 {
@@ -48,6 +51,7 @@ class Makanan extends Model
         'protein',
         'kuantitas',
         'satuan',
+        'berat_per_satuan_gram',
         'karbohidrat',
         'gula',
         'natrium',
@@ -77,6 +81,7 @@ class Makanan extends Model
             'lemak' => 'decimal:2',
             'protein' => 'decimal:2',
             'kuantitas' => 'decimal:2',
+            'berat_per_satuan_gram' => 'decimal:2',
             'karbohidrat' => 'decimal:2',
             'gula' => 'decimal:2',
             'natrium' => 'decimal:2',
@@ -133,7 +138,7 @@ class Makanan extends Model
             return $this->foto_makanan;
         }
 
-        return asset('storage/' . $this->foto_makanan);
+        return asset('storage/'.$this->foto_makanan);
     }
 
     /**

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref } from 'vue'
-import { Head, Link } from '@inertiajs/vue3'
-import { Camera, Image as ImageIcon, Lightbulb, Loader2, MessageCircle, ScanLine, ShieldCheck, Upload } from 'lucide-vue-next'
+import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Camera, Database, Image as ImageIcon, Lightbulb, Loader2, MessageCircle, ScanLine, ShieldCheck, Upload } from 'lucide-vue-next'
 import UserLayout from '@/Layouts/UserLayout.vue'
 import ScanResultView from '@/Components/Ai/ScanResultView.vue'
 import { AiApiError, scanLabel } from '@/lib/aiApi'
@@ -22,6 +22,22 @@ const uploadInput = ref<HTMLInputElement | null>(null)
 const cameraInput = ref<HTMLInputElement | null>(null)
 
 const busy = computed(() => phase.value === 'reading')
+const canSubmitFood = computed(() => ((usePage().props.auth as { user?: { permissions?: string[] } })?.user?.permissions ?? []).includes('food:create'))
+
+// "Ajukan ke Data Makanan": hand the per-serving numbers to the submission wizard through this tab only (Figma 07.12).
+function submitToFoodData() {
+    const r = result.value
+    if (!r) return
+    const n = r.normalized_per_serving
+    const size = r.extraction.serving_size
+    const unit = size?.unit?.toLowerCase()
+    const draft = {
+        ...(size?.value && (unit === 'g' || unit === 'ml') ? { kuantitas: size.value, satuan: unit } : {}),
+        energi: n.energy_kcal, protein: n.protein_g, karbohidrat: n.carbohydrate_g, lemak: n.fat_g, gula: n.sugars_total_g, natrium: n.sodium_mg,
+    }
+    try { sessionStorage.setItem('careplate.scanDraft', JSON.stringify(draft)) } catch { /* the wizard then starts empty */ }
+    router.visit(route('user.foods.create', { dari: 'pindai' }))
+}
 
 function clearPreview() {
     if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
@@ -82,6 +98,9 @@ function reset() {
                     <p class="mt-1 text-base text-[#5e5e5e]">Foto label gizi, lihat gula, lemak, dan natriumnya.</p>
                 </div>
                 <div v-if="phase === 'done'" class="flex shrink-0 flex-wrap justify-end gap-2">
+                    <button v-if="canSubmitFood" type="button" class="inline-flex h-11 items-center gap-2 rounded-full bg-[#0b8043] px-5 text-sm font-semibold text-white hover:bg-[#086637] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="submitToFoodData">
+                        <Database class="h-4 w-4" aria-hidden="true" /> Ajukan ke Data Makanan
+                    </button>
                     <button type="button" class="inline-flex h-11 items-center gap-2 rounded-full border-2 border-[#191919] bg-white px-5 text-sm font-semibold text-[#191919] hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#191919]" @click="reset">
                         <ScanLine class="h-4 w-4" aria-hidden="true" /> Pindai Lagi
                     </button>

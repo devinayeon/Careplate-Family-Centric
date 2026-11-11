@@ -7,10 +7,11 @@ use App\Models\Makanan;
 /**
  * The team's `makanan` master table seen as a source of AI foods.
  *
- * `makanan` stores nutrients PER PORTION (`kuantitas` + `satuan`); AI foods are per 100 g only. A row is
- * therefore eligible only when its unit is grams: converting ml, portions or pieces needs a density or a
- * weight nobody supplied, and guessing would invent numbers. Eligibility, the per-100 g conversion and the
- * content hash live here so the publisher (SyncMakananToFoods) and the verifier (ReviewCandidate) agree.
+ * `makanan` stores nutrients PER PORTION (`kuantitas` + `satuan`); AI foods are per 100 g only. The serving
+ * weighs `kuantitas` g for a gram unit, or `kuantitas` x `berat_per_satuan_gram` for any other unit (porsi,
+ * butir, ml...) when the admin gave that weight. Without a usable weight the row is not eligible: guessing a
+ * weight would invent numbers. Eligibility, the per-100 g conversion and the content hash live here so the
+ * publisher (SyncMakananToFoods) and the verifier (ReviewCandidate) agree.
  */
 final class MakananSource
 {
@@ -35,7 +36,7 @@ final class MakananSource
         if (trim((string) $m->nama) === '') {
             return 'name_empty';
         }
-        if (! in_array(mb_strtolower(trim((string) $m->satuan)), self::GRAM_UNITS, true)) {
+        if (! self::isGram($m) && self::unitWeight($m) === null) {
             return 'unit_not_gram';
         }
         if (! is_numeric($m->kuantitas) || bccomp((string) $m->kuantitas, '0', 4) <= 0) {
@@ -43,6 +44,14 @@ final class MakananSource
         }
 
         return null;
+    }
+
+    /** Grams of the whole serving as a decimal string (call only on an eligible row). */
+    public static function servingGrams(Makanan $m): string
+    {
+        $quantity = (string) $m->kuantitas;
+
+        return self::isGram($m) ? $quantity : bcmul($quantity, (string) self::unitWeight($m), 8);
     }
 
     /**
@@ -53,7 +62,7 @@ final class MakananSource
      */
     public static function per100g(Makanan $m): array
     {
-        $quantity = (string) $m->kuantitas;
+        $quantity = self::servingGrams($m);
 
         return [
             'energy_kcal' => self::scale($m->energi, $quantity),
@@ -91,6 +100,19 @@ final class MakananSource
         $hash = self::contentHash($row);
 
         return str_starts_with($version, substr($hash, 0, self::VERSION_PREFIX_LENGTH).'-') ? $hash : null;
+    }
+
+    private static function isGram(Makanan $m): bool
+    {
+        return in_array(mb_strtolower(trim((string) $m->satuan)), self::GRAM_UNITS, true);
+    }
+
+    /** Grams per one unit, or null when missing, not numeric or not above zero. */
+    private static function unitWeight(Makanan $m): ?string
+    {
+        $weight = $m->berat_per_satuan_gram;
+
+        return is_numeric($weight) && bccomp((string) $weight, '0', 4) > 0 ? (string) $weight : null;
     }
 
     private static function optional(mixed $value, string $quantity): ?string

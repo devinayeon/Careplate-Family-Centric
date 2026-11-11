@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\KategoriMakanan;
 use App\Models\Makanan;
+use App\Services\Ai\Foods\AiFoodStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,10 @@ class AdminFoodController extends Controller
             ])
             ->latest('id');
 
-        $foods = $query->paginate(10)->withQueryString()->through(function (Makanan $item) {
+        $page = $query->paginate(10)->withQueryString();
+        $aiStatus = AiFoodStatus::forMany(collect($page->items()));
+
+        $foods = $page->through(function (Makanan $item) use ($aiStatus) {
             $formattedTakaran = rtrim(rtrim(number_format((float) $item->kuantitas, 2, '.', ''), '0'), '.');
             if ($formattedTakaran === '') {
                 $formattedTakaran = '1';
@@ -40,6 +44,7 @@ class AdminFoodController extends Controller
                 'nama' => $item->nama,
                 'kuantitas' => (float) $item->kuantitas,
                 'satuan' => $item->satuan,
+                'berat_per_satuan_gram' => $item->berat_per_satuan_gram === null ? null : (float) $item->berat_per_satuan_gram,
                 'takaran_saji' => "{$formattedTakaran} {$item->satuan}",
                 'kategori' => $item->kategoriMakanan?->kategori ?? 'Umum',
                 'kategori_makanan_id' => $item->kategori_makanan_id,
@@ -53,6 +58,7 @@ class AdminFoodController extends Controller
                 'status' => $item->status ?? 'terverifikasi',
                 'pengaju' => $item->nama_pengaju ?: ($item->pengaju?->name ?? 'Admin'),
                 'foto_makanan_url' => $item->foto_makanan_url,
+                'ai_status' => $aiStatus[$item->id] ?? null,
             ];
         });
 
@@ -90,6 +96,7 @@ class AdminFoodController extends Controller
             'kategori_makanan_id' => 'required|exists:kategori_makanan,id',
             'kuantitas' => 'required|numeric|min:0.01',
             'satuan' => 'required|string|max:50',
+            'berat_per_satuan_gram' => 'nullable|numeric|gt:0|max:100000',
             'energi' => 'required|numeric|min:0',
             'protein' => 'required|numeric|min:0',
             'karbohidrat' => 'required|numeric|min:0',
@@ -128,6 +135,7 @@ class AdminFoodController extends Controller
             'kategori_makanan_id' => 'required|exists:kategori_makanan,id',
             'kuantitas' => 'required|numeric|min:0.01',
             'satuan' => 'required|string|max:50',
+            'berat_per_satuan_gram' => 'nullable|numeric|gt:0|max:100000',
             'energi' => 'required|numeric|min:0',
             'protein' => 'required|numeric|min:0',
             'karbohidrat' => 'required|numeric|min:0',

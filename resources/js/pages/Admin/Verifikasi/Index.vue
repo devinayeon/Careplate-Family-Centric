@@ -5,6 +5,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ChipFilter from '@/Components/UI/ChipFilter.vue';
 import SearchBar from '@/Components/UI/SearchBar.vue';
 import FoodStatusBadge from '@/Components/UI/FoodStatusBadge.vue';
+import AiFoodChip from '@/Components/Ai/AiFoodChip.vue';
 import FoodFormDrawer, { type FoodFormData } from '@/Components/Admin/FoodFormDrawer.vue';
 import RejectSubmissionModal from '@/Components/Admin/RejectSubmissionModal.vue';
 import {
@@ -27,6 +28,8 @@ export interface SubmissionItem {
     nama: string;
     kuantitas: number;
     satuan: string;
+    berat_per_satuan_gram?: number | null;
+    ai_status?: { state: string; label: string } | null;
     takaran_saji: string;
     kategori: string;
     kategori_makanan_id: number;
@@ -179,6 +182,7 @@ const openEditDrawer = () => {
         kategori_makanan_id: props.selectedItem.kategori_makanan_id,
         kuantitas: props.selectedItem.kuantitas,
         satuan: props.selectedItem.satuan,
+        berat_per_satuan_gram: props.selectedItem.berat_per_satuan_gram,
         energi: props.selectedItem.energi,
         protein: props.selectedItem.protein,
         karbohidrat: props.selectedItem.karbohidrat,
@@ -376,6 +380,7 @@ const confirmReject = (reason: string) => {
                             </div>
 
                             <FoodStatusBadge :status="selectedItem.status" />
+                            <AiFoodChip v-if="selectedItem.ai_status" :status="selectedItem.ai_status" />
                         </div>
 
                         <!-- 8 Nutrition Metric Cards Grid (Figma Node 22-5552) -->

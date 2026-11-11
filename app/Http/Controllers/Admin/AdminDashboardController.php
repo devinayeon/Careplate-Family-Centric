@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Keluarga;
 use App\Models\Makanan;
 use App\Models\User;
+use App\Services\Ai\Foods\AiFoodStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -48,30 +50,24 @@ class AdminDashboardController extends Controller
             $avgAnggota = '3,4';
         }
 
-        // Pengajuan makanan (menunggu verifikasi)
-        $pengajuanTerbaru = [
-            [
-                'id' => 1,
-                'nama' => 'Oseng tempe kecap',
-                'pengaju' => 'Rina Santoso',
-                'tanggal' => '3 Nov',
-                'status' => 'Menunggu',
-            ],
-            [
-                'id' => 2,
-                'nama' => 'Kerupuk udang',
-                'pengaju' => 'Hendra P.',
-                'tanggal' => '2 Nov',
-                'status' => 'Menunggu',
-            ],
-            [
-                'id' => 3,
-                'nama' => 'Sayur bening bayam',
-                'pengaju' => 'Maya W.',
-                'tanggal' => '28 Okt',
-                'status' => 'Terverifikasi',
-            ],
-        ];
+        // Pengajuan makanan: the three most recent submissions (anything a user sent in), and the real waiting queue.
+        // A submission is a row that is waiting or went through a review; foods the admin typed in directly are not.
+        $pengajuanTerbaru = Makanan::query()->where(fn ($q) => $q->where('status', 'menunggu')->orWhereNotNull('diverifikasi_oleh'))
+            ->latest('id')->limit(3)->get()
+            ->map(fn (Makanan $m) => [
+                'id' => $m->id,
+                'nama' => $m->nama,
+                'pengaju' => $m->nama_pengaju ?: 'Pengguna',
+                'tanggal' => $m->created_at?->translatedFormat('j M') ?? '',
+                'status' => match ($m->status) {
+                    'terverifikasi' => 'Terverifikasi',
+                    'ditolak' => 'Ditolak',
+                    default => 'Menunggu',
+                },
+            ])->all();
+        $menunggu = Makanan::query()->where('status', 'menunggu');
+        $tertua = (clone $menunggu)->min('created_at');
+        $ai = AiFoodStatus::summary();
 
         return Inertia::render('Admin/Dashboard', [
             'metrics' => [
@@ -93,14 +89,16 @@ class AdminDashboardController extends Controller
                 ],
             ],
             'antrean_verifikasi' => [
-                'jumlah' => 12,
-                'terlama_hari' => 2,
+                'jumlah' => (clone $menunggu)->count(),
+                'terlama_hari' => $tertua === null ? 0 : (int) Carbon::parse($tertua)->diffInDays(now(), true),
             ],
             'pengajuan_terbaru' => $pengajuanTerbaru,
             'sinkronisasi_ai' => [
-                'status' => 'Terkini',
-                'terakhir_sinkron' => '2 menit lalu',
-                'error_item' => 'Sayur bening bayam',
+                'ready' => $ai['ready'],
+                'needs_weight' => $ai['needs_weight'],
+                'failed' => $ai['failed'],
+                'failed_names' => $ai['failed_names'],
+                'terakhir_sinkron' => $ai['last_sync']?->locale('id')->diffForHumans(),
             ],
         ]);
     }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\KategoriMakanan;
 use App\Models\Makanan;
-use Carbon\Carbon;
+use App\Services\Ai\Foods\AiFoodStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +53,7 @@ class AdminVerificationController extends Controller
                 'nama' => $item->nama,
                 'kuantitas' => (float) $item->kuantitas,
                 'satuan' => $item->satuan,
+                'berat_per_satuan_gram' => $item->berat_per_satuan_gram === null ? null : (float) $item->berat_per_satuan_gram,
                 'takaran_saji' => "{$formattedTakaran} {$item->satuan}",
                 'kategori' => $item->kategoriMakanan?->kategori ?? 'Umum',
                 'kategori_makanan_id' => $item->kategori_makanan_id,
@@ -71,9 +72,6 @@ class AdminVerificationController extends Controller
                 'tanggal_lengkap' => $item->created_at?->translatedFormat('d M Y, H.i') ?? '',
             ];
         });
-
-
-        
 
         // Item terpilih untuk panel detail
         $selectedId = $request->query('selected');
@@ -121,14 +119,14 @@ class AdminVerificationController extends Controller
                 'energi_hitung' => round($totalHitung),
                 'energi_input' => round($energiInput),
                 'persen_selisih' => $persenSelisih,
-                'formula_text' => "4×{$p} + 4×{$c} + 9×{$f} = " . round($totalHitung) . " kkal, selisih {$persenSelisih}% dari " . round($energiInput) . " kkal.",
+                'formula_text' => "4×{$p} + 4×{$c} + 9×{$f} = ".round($totalHitung)." kkal, selisih {$persenSelisih}% dari ".round($energiInput).' kkal.',
             ];
 
             // 2. Deteksi Makanan Serupa di Database
             $similar = Makanan::where('status', 'terverifikasi')
                 ->where('id', '!=', $selectedItem['id'])
                 ->where(function ($q) use ($selectedItem) {
-                    $q->where('nama', 'like', '%' . Str::words($selectedItem['nama'], 2, '') . '%')
+                    $q->where('nama', 'like', '%'.Str::words($selectedItem['nama'], 2, '').'%')
                         ->orWhere('kategori_makanan_id', $selectedItem['kategori_makanan_id']);
                 })
                 ->first();
@@ -140,7 +138,7 @@ class AdminVerificationController extends Controller
                     'nama' => $similar->nama,
                     'energi' => round((float) $similar->energi),
                     'takaran' => "{$similarFormattedTakaran} {$similar->satuan}",
-                    'text' => "Mirip dengan \"{$similar->nama}\" (" . round((float) $similar->energi) . " kkal per {$similarFormattedTakaran} {$similar->satuan}) di database.",
+                    'text' => "Mirip dengan \"{$similar->nama}\" (".round((float) $similar->energi)." kkal per {$similarFormattedTakaran} {$similar->satuan}) di database.",
                 ];
             }
         }
@@ -216,6 +214,7 @@ class AdminVerificationController extends Controller
             'kategori_makanan_id' => 'required|exists:kategori_makanan,id',
             'kuantitas' => 'required|numeric|min:0.01',
             'satuan' => 'required|string|max:50',
+            'berat_per_satuan_gram' => 'nullable|numeric|gt:0|max:100000',
             'energi' => 'required|numeric|min:0',
             'protein' => 'required|numeric|min:0',
             'karbohidrat' => 'required|numeric|min:0',
@@ -270,6 +269,7 @@ class AdminVerificationController extends Controller
             'nama' => $item->nama,
             'kuantitas' => (float) $item->kuantitas,
             'satuan' => $item->satuan,
+            'berat_per_satuan_gram' => $item->berat_per_satuan_gram === null ? null : (float) $item->berat_per_satuan_gram,
             'takaran_saji' => "{$formattedTakaran} {$item->satuan}",
             'kategori' => $item->kategoriMakanan?->kategori ?? 'Umum',
             'kategori_makanan_id' => $item->kategori_makanan_id,
@@ -286,6 +286,7 @@ class AdminVerificationController extends Controller
             'alasan_penolakan' => $item->alasan_penolakan,
             'waktu_pengajuan' => $item->created_at?->diffForHumans() ?? 'Baru saja',
             'tanggal_lengkap' => $item->created_at?->translatedFormat('d M Y, H.i') ?? '',
+            'ai_status' => AiFoodStatus::forMany(collect([$item]))[$item->id],
         ];
     }
 }

@@ -161,3 +161,49 @@ it('can be switched off, and ai:sync-makanan backfills and reports', function ()
 
     $this->artisan('ai:sync-makanan')->expectsOutputToContain('unchanged: 1')->assertSuccessful();
 });
+
+// Owner request 2026-11-11 (plan phase 2): a weight per unit lets portions, pieces and ml reach the chat with real numbers.
+it('converts a non-gram unit to per 100 g with the weight per unit the admin gave', function (array $row, array $expected) {
+    $food = aiFoods(makanan($row + ['nama' => 'Nasi Sintetis']))->sole();
+
+    expect($food->status)->toBe('verified')
+        ->and($food->energy_kcal)->toBe($expected['energy'])
+        ->and($food->protein_g)->toBe($expected['protein']);
+})->with([
+    'one portion of 150 g' => [['satuan' => 'porsi', 'kuantitas' => '1.00', 'berat_per_satuan_gram' => '150.00', 'energi' => '300.00', 'protein' => '6.00'], ['energy' => '200.0000', 'protein' => '4.0000']],
+    'two pieces of 60 g' => [['satuan' => 'butir', 'kuantitas' => '2.00', 'berat_per_satuan_gram' => '60.00', 'energi' => '180.00', 'protein' => '15.00'], ['energy' => '150.0000', 'protein' => '12.5000']],
+    'ml with density 1.2 g per ml' => [['satuan' => 'ml', 'kuantitas' => '250.00', 'berat_per_satuan_gram' => '1.20', 'energi' => '300.00', 'protein' => '3.00'], ['energy' => '100.0000', 'protein' => '1.0000']],
+]);
+
+it('ignores the weight for grams and still skips a non-gram unit without a usable weight', function (array $row, string $reason) {
+    $m = makanan($row);
+
+    expect(aiFoods($m))->toHaveCount(0)
+        ->and(app(SyncMakananToFoods::class)->sync($m))->toBe("skipped:{$reason}");
+})->with([
+    'porsi, no weight' => [['satuan' => 'porsi', 'berat_per_satuan_gram' => null], 'unit_not_gram'],
+    'porsi, zero weight' => [['satuan' => 'porsi', 'berat_per_satuan_gram' => '0.00'], 'unit_not_gram'],
+]);
+
+it('gram rows use the quantity itself even when a weight is stored', function () {
+    $food = aiFoods(makanan(['kuantitas' => '50.00', 'energi' => '200.00', 'berat_per_satuan_gram' => '999.00']))->sole();
+
+    expect($food->energy_kcal)->toBe('400.0000');
+});
+
+it('a changed weight republishes exactly one new verified version', function () {
+    $m = makanan(['satuan' => 'porsi', 'kuantitas' => '1.00', 'berat_per_satuan_gram' => '100.00', 'energi' => '200.00']);
+    $m->update(['berat_per_satuan_gram' => '200.00']);
+
+    $verified = Food::verified()->where('source_id', (string) $m->id)->get();
+    expect($verified)->toHaveCount(1)->and($verified->first()->energy_kcal)->toBe('100.0000')->and(aiFoods($m))->toHaveCount(2);
+});
+
+it('clearing the weight of a non-gram row revokes its AI food', function () {
+    $m = makanan(['satuan' => 'porsi', 'kuantitas' => '1.00', 'berat_per_satuan_gram' => '150.00']);
+    expect(Food::verified()->where('source_id', (string) $m->id)->count())->toBe(1);
+
+    $m->update(['berat_per_satuan_gram' => null]);
+
+    expect(Food::verified()->where('source_id', (string) $m->id)->count())->toBe(0);
+});

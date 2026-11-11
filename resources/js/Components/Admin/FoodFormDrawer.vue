@@ -19,6 +19,7 @@ export interface FoodFormData {
     kategori_makanan_id: number | string;
     kuantitas: number | string;
     satuan: string;
+    berat_per_satuan_gram?: number | string | null;
     energi: number | string;
     protein: number | string;
     karbohidrat: number | string;
@@ -50,6 +51,7 @@ const form = useForm({
     kategori_makanan_id: '' as number | string,
     kuantitas: '100',
     satuan: 'g',
+    berat_per_satuan_gram: '' as number | string | null,
     energi: '',
     protein: '',
     karbohidrat: '',
@@ -68,6 +70,7 @@ const resetToCleanState = () => {
     form.kategori_makanan_id = props.categories[0]?.id || '';
     form.kuantitas = '100';
     form.satuan = 'g';
+    form.berat_per_satuan_gram = '';
     form.energi = '';
     form.protein = '';
     form.karbohidrat = '';
@@ -93,6 +96,7 @@ watch(
             form.kategori_makanan_id = props.foodToEdit.kategori_makanan_id;
             form.kuantitas = props.foodToEdit.kuantitas.toString();
             form.satuan = props.foodToEdit.satuan;
+            form.berat_per_satuan_gram = props.foodToEdit.berat_per_satuan_gram?.toString() ?? '';
             form.energi = props.foodToEdit.energi.toString();
             form.protein = props.foodToEdit.protein.toString();
             form.karbohidrat = props.foodToEdit.karbohidrat.toString();
@@ -335,6 +339,24 @@ const submit = () => {
                             <p v-if="form.errors.kuantitas || form.errors.satuan" class="text-xs text-red-500 mt-1 font-medium">
                                 {{ form.errors.kuantitas || form.errors.satuan }}
                             </p>
+
+                            <!-- Berat satu satuan: lets Chat Gizi convert a non-gram serving to per 100 g -->
+                            <div v-if="form.satuan !== 'g'" class="mt-3">
+                                <label for="berat-per-satuan" class="block text-xs font-bold text-[#191919] uppercase tracking-wider mb-1.5">
+                                    Berat per {{ form.satuan }} (gram)
+                                </label>
+                                <input
+                                    id="berat-per-satuan"
+                                    v-model="form.berat_per_satuan_gram"
+                                    type="number"
+                                    step="any"
+                                    min="0.01"
+                                    placeholder="Contoh: 150"
+                                    class="w-full px-3 py-2.5 rounded-xl border border-[#eceae5] bg-[#f4f3f0] focus:bg-white text-sm font-medium text-[#191919] focus:outline-none focus:border-[#0b8043] focus:ring-2 focus:ring-[#0b8043]/15 transition"
+                                />
+                                <p class="text-xs text-[#5e5e5e] mt-1">Opsional. Tanpa ini, Chat Gizi tidak memakai makanan ini.</p>
+                                <p v-if="form.errors.berat_per_satuan_gram" class="text-xs text-red-500 mt-1 font-medium">{{ form.errors.berat_per_satuan_gram }}</p>
+                            </div>
                         </div>
                     </div>
 

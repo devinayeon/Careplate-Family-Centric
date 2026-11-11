@@ -7,6 +7,7 @@ import SearchBar from '@/Components/UI/SearchBar.vue';
 import PillButton from '@/Components/UI/PillButton.vue';
 import DataTable, { type TableColumn } from '@/Components/UI/DataTable.vue';
 import FoodStatusBadge from '@/Components/UI/FoodStatusBadge.vue';
+import AiFoodChip from '@/Components/Ai/AiFoodChip.vue';
 import FoodFormDrawer, { type FoodFormData } from '@/Components/Admin/FoodFormDrawer.vue';
 import {
     Plus,
@@ -22,6 +23,8 @@ export interface FoodItem {
     nama: string;
     kuantitas: number;
     satuan: string;
+    berat_per_satuan_gram?: number | null;
+    ai_status?: { state: string; label: string } | null;
     takaran_saji: string;
     kategori: string;
     kategori_makanan_id: number;
@@ -132,6 +135,7 @@ const openEditDrawer = (item: FoodItem) => {
         kategori_makanan_id: item.kategori_makanan_id,
         kuantitas: item.kuantitas,
         satuan: item.satuan,
+        berat_per_satuan_gram: item.berat_per_satuan_gram,
         energi: item.energi,
         protein: item.protein,
         karbohidrat: item.karbohidrat,
@@ -294,8 +298,9 @@ const executeSoftDelete = () => {
                         </td>
 
                         <!-- Col 5: Status Badge -->
-                        <td class="px-6 py-3.5 whitespace-nowrap">
+                        <td class="px-6 py-3.5">
                             <FoodStatusBadge :status="item.status" />
+                            <AiFoodChip v-if="item.ai_status" :status="item.ai_status" class="mt-1.5" />
                         </td>
 
                         <!-- Col 6: Pengaju -->
