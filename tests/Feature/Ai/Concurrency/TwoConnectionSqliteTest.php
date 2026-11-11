@@ -220,6 +220,7 @@ test('(e) a write blocked by an open IMMEDIATE transaction on B becomes a retrya
         ->and($elapsed)->toBeGreaterThan(0.5)->toBeLessThan(5.0)
         ->and(DB::connection('cc_a')->table('chat_turns')->count())->toBe(1)
         ->and(DB::connection('cc_a')->table('chat_turns')->value('status'))->toBe('pending')
-        ->and(DB::connection('cc_a')->table('chat_sessions')->value('title'))->toBeNull()
+        // The blocked writes changed nothing: the title is still the first question, not B's 'lock'.
+        ->and(DB::connection('cc_a')->table('chat_sessions')->value('title'))->toBe('Berapa protein tahu?')
         ->and(ctGate()->finalize($turn, ctResponse('general'), [], []))->toBeTrue();
 });

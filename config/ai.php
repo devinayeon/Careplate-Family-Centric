@@ -12,6 +12,9 @@ return [
         'base_url' => env('OPENAI_BASE_URL', 'https://api.twigpine.com/v1'),
     ],
 
+    // Publish verified `makanan` rows (gram units) as AI foods automatically (ai:sync-makanan repairs/backfills).
+    'sync_makanan' => (bool) env('AI_SYNC_MAKANAN', true),
+
     'gemini' => [
         'api_key' => env('AI_GEMINI_KEY'),
         'model' => env('AI_GEMINI_MODEL', 'gemini-3.5-flash-lite'),
@@ -49,18 +52,16 @@ return [
         'max_amount_g' => 2000,
     ],
 
+    // Per signed-in user. Hard-coded on purpose (not env): edit the numbers here when moving off the free tier.
+    // Free tier today: 10 scans per user per day. Paid tier: raise per_day (for example 60).
     'quotas' => [
         'scan' => [
             'per_minute' => 5,
-            'per_day' => 60,
+            'per_day' => 10,
         ],
         'chat' => [
             'per_minute' => 10,
             'per_day' => 100,
-        ],
-        'submit' => [
-            'per_minute' => 5,
-            'per_day' => 30,
         ],
     ],
 ];

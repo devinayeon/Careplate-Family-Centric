@@ -1,4 +1,4 @@
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 

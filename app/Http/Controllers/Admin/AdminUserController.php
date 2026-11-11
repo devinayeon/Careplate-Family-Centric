@@ -52,7 +52,7 @@ class AdminUserController extends Controller
         // Transformasi data untuk tampilan tabel di frontend
         $usersFormatted = $usersPaginator->through(function ($u) {
             $primaryRole = $u->roles->first()?->name ?? 'user';
-            
+
             // Format label dan key peran
             if (in_array($primaryRole, ['ahli_gizi', 'nutritionist'])) {
                 $roleLabel = 'Ahli Gizi';

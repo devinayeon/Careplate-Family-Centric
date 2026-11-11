@@ -31,22 +31,14 @@ function dbLockError(bool $asQuery): Throwable
     return $asQuery ? new QueryException('sqlite', 'insert', [], $pdo) : $pdo;
 }
 
-it('maps SQLite lock contention while creating a submission to a retryable DB_BUSY', function (bool $asQuery) {
-    dbFailOnInsert('food_submissions', dbLockError($asQuery));
-
-    chatError(fsSubmit(fsUser(), fsBody()), 503, 'DB_BUSY', true);
-})->with([[true], [false]]);
-
 it('maps SQLite lock contention while creating a chat session to a retryable DB_BUSY', function (bool $asQuery) {
     dbFailOnInsert('chat_sessions', dbLockError($asQuery));
 
     chatError(test()->actingAs(ctUser())->postJson('/ai/v1/chat/sessions', []), 503, 'DB_BUSY', true);
 })->with([[true], [false]]);
 
-it('does not remap a non-lock database error from either create', function () {
-    dbFailOnInsert('food_submissions', new QueryException('sqlite', 'insert', [], new PDOException('disk I/O error')));
+it('does not remap a non-lock database error from a create', function () {
     dbFailOnInsert('chat_sessions', new QueryException('sqlite', 'insert', [], new PDOException('disk I/O error')));
 
-    chatError(fsSubmit(fsUser(), fsBody()), 500, 'INTERNAL');
     chatError(test()->actingAs(ctUser())->postJson('/ai/v1/chat/sessions', []), 500, 'INTERNAL');
 });

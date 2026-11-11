@@ -8,6 +8,7 @@ use App\Models\Keluarga;
 use App\Models\Makanan;
 use App\Models\Pengguna;
 use App\Models\User;
+use App\Services\Ai\Foods\AiFoodStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -66,18 +67,8 @@ class AdminDashboardController extends Controller
                 ];
             });
 
-        // 7. Status Sinkronisasi Basis Data & AI Chat Gizi Real
-        $lastSyncFood = Makanan::where('status', 'terverifikasi')->latest('updated_at')->first();
-        $terakhirSinkron = $lastSyncFood && $lastSyncFood->updated_at
-            ? Carbon::parse($lastSyncFood->updated_at)->diffForHumans()
-            : 'Terkini';
-
-        // Deteksi anomali integritas data (contoh: makanan terverifikasi tapi energi null/<=0)
-        $anomaliItem = Makanan::where('status', 'terverifikasi')
-            ->where(function ($q) {
-                $q->whereNull('energi')->orWhere('energi', '<=', 0);
-            })
-            ->first();
+        // 7. Sinkronisasi Chat Gizi: real state of the verified foods the AI chat can use (see AiFoodStatus)
+        $ai = AiFoodStatus::summary();
 
         return Inertia::render('Admin/Dashboard', [
             'metrics' => [
@@ -91,7 +82,7 @@ class AdminDashboardController extends Controller
                 ],
                 'total_makanan' => [
                     'total' => number_format($totalMakanan, 0, ',', '.'),
-                    'detail' => "{$totalMakananTerverifikasi} terverifikasi" . ($totalMakananMenunggu > 0 ? " • {$totalMakananMenunggu} menunggu" : ''),
+                    'detail' => "{$totalMakananTerverifikasi} terverifikasi".($totalMakananMenunggu > 0 ? " • {$totalMakananMenunggu} menunggu" : ''),
                 ],
                 'total_keluarga' => [
                     'total' => number_format($totalKeluarga, 0, ',', '.'),
@@ -104,10 +95,23 @@ class AdminDashboardController extends Controller
             ],
             'pengajuan_terbaru' => $pengajuanTerbaru,
             'sinkronisasi_ai' => [
-                'status' => 'Terkini',
-                'terakhir_sinkron' => $terakhirSinkron,
-                'error_item' => $anomaliItem ? $anomaliItem->nama : null,
+                'ready' => $ai['ready'],
+                'needs_weight' => $ai['needs_weight'],
+                'failed' => $ai['failed'],
+                'failed_names' => $ai['failed_names'],
+                'terakhir_sinkron' => $this->syncedAgo($ai['last_sync']),
             ],
         ]);
+    }
+
+    /** "16 menit yang lalu" for the sync panel, or null when nothing was ever published. */
+    private function syncedAgo(?Carbon $at): ?string
+    {
+        if ($at === null) {
+            return null;
+        }
+        $at->setLocale('id');
+
+        return $at->diffForHumans();
     }
 }

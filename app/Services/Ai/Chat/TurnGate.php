@@ -194,13 +194,18 @@ class TurnGate
         $sequence = (int) $session->next_sequence;
         $generation = (int) $session->generation;
 
+        $claim = [
+            'next_sequence' => $sequence + 1, 'active_turn_id' => $turn->id, 'active_token' => $token,
+            'active_lease_expires_at' => $lease, 'updated_at' => $now,
+        ];
+        if ($sequence === 1) {
+            // The history list names a chat by its first question; erased with the session (SessionEraser nulls it).
+            $claim['title'] = mb_substr(trim((string) ($turnInput['message'] ?? '')), 0, 60);
+        }
         $claimed = ChatSession::query()
             ->whereKey($session->id)->where('state', 'active')->where('generation', $generation)
             ->where('next_sequence', $sequence)->whereNull('active_turn_id')
-            ->update([
-                'next_sequence' => $sequence + 1, 'active_turn_id' => $turn->id, 'active_token' => $token,
-                'active_lease_expires_at' => $lease, 'updated_at' => $now,
-            ]);
+            ->update($claim);
         if ($claimed !== 1) {
             throw AiException::for('SESSION_BUSY');
         }

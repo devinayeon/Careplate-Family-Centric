@@ -1,10 +1,7 @@
 <?php
 
-use App\Models\Food;
-use App\Models\FoodSubmission;
 use App\Services\Ai\Foods\FoodMatch;
 use App\Services\Ai\Foods\FoodSearch;
-use Illuminate\Support\Facades\DB;
 
 require_once __DIR__.'/ChatFoodSupport.php';
 require_once __DIR__.'/FoodSubmissionSupport.php';
@@ -73,38 +70,4 @@ test('list() applies the PHP check after the SQL prefilter, so accent look-alike
     $found = collSearch()->list('tahu', 5);
 
     expect($found)->toHaveCount(1)->and($found[0]->is($real))->toBeTrue();
-});
-
-test('the same user repeating a source id that differs only by case is judged without a server error', function () {
-    fsManifest(['abc', 'ABC']);
-    $user = fsUser();
-    $body = fn (string $id) => fsBody(['source' => ['source_id' => $id]]);
-
-    fsSubmit($user, $body('abc'))->assertCreated();
-    $second = fsSubmit($user, $body('ABC'));
-
-    // MySQL's ci unique index and lookup treat 'ABC' as the same source as 'abc'. The candidate differs (its
-    // provenance carries the source id), so it is not the safe retry but a clean 409; SQLite keeps two sources (201).
-    // Never a 500, and never a second row for one ci source on MySQL.
-    if (DB::getDriverName() === 'sqlite') {
-        $second->assertCreated();
-        expect(FoodSubmission::query()->count())->toBe(2);
-    } else {
-        chatError($second, 409, 'IDEMPOTENCY_CONFLICT');
-        expect(FoodSubmission::query()->count())->toBe(1);
-    }
-});
-
-test('another user repeating a case-variant source gets IDEMPOTENCY_CONFLICT on MySQL, a new row on SQLite', function () {
-    fsManifest(['abc', 'ABC']);
-    fsSubmit(fsUser(), fsBody(['source' => ['source_id' => 'abc']]))->assertCreated();
-    $other = fsUser('admin');
-    $response = fsSubmit($other, fsBody(['source' => ['source_id' => 'ABC']]));
-
-    if (DB::getDriverName() === 'sqlite') {
-        $response->assertCreated();
-    } else {
-        chatError($response, 409, 'IDEMPOTENCY_CONFLICT');
-    }
-    expect(Food::query()->count())->toBe(0);
 });

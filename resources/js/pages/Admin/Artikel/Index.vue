@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { Head, Link, router } from "@inertiajs/vue3";
-import AdminLayout from "@/Layouts/AdminLayout.vue";
-import ChipFilter from "@/Components/UI/ChipFilter.vue";
-import SearchBar from "@/Components/UI/SearchBar.vue";
-import PillButton from "@/Components/UI/PillButton.vue";
-import DataTable, { type TableColumn } from "@/Components/UI/DataTable.vue";
-import ArticleCategoryModal from "@/Components/Admin/ArticleCategoryModal.vue";
+import { ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import ChipFilter from '@/Components/UI/ChipFilter.vue';
+import SearchBar from '@/Components/UI/SearchBar.vue';
+import PillButton from '@/Components/UI/PillButton.vue';
+import DataTable, { type TableColumn } from '@/Components/UI/DataTable.vue';
+import ArticleCategoryModal from '@/Components/Admin/ArticleCategoryModal.vue';
 import {
     Plus,
     Pencil,
@@ -17,7 +17,7 @@ import {
     Calendar,
     Sparkles,
     Folder,
-} from "lucide-vue-next";
+} from 'lucide-vue-next';
 
 export interface ArticleItem {
     id: number;
@@ -27,7 +27,7 @@ export interface ArticleItem {
     kategori: string;
     foto_sampul_url: string | null;
     nama_penulis: string;
-    status: "terbit" | "draf";
+    status: 'terbit' | 'draf';
     views: number;
     diperbarui: string;
     published_at: string | null;
@@ -53,8 +53,8 @@ const props = defineProps<{
     };
 }>();
 
-const activeStatusFilter = ref(props.filters.status || "semua");
-const searchQuery = ref(props.filters.search || "");
+const activeStatusFilter = ref(props.filters.status || 'semua');
+const searchQuery = ref(props.filters.search || '');
 
 // Delete modal state
 const isDeleteModalOpen = ref(false);
@@ -65,17 +65,17 @@ const isDeleting = ref(false);
 const isCategoryModalOpen = ref(false);
 
 const tableColumns: TableColumn[] = [
-    { key: "judul", label: "Judul", width: "460px" },
-    { key: "kategori", label: "Kategori", width: "160px" },
-    { key: "status", label: "Status", width: "130px" },
-    { key: "diperbarui", label: "Diperbarui", width: "140px" },
-    { key: "actions", label: "", width: "96px", align: "right" },
+    { key: 'judul', label: 'Judul', width: '460px' },
+    { key: 'kategori', label: 'Kategori', width: '160px' },
+    { key: 'status', label: 'Status', width: '130px' },
+    { key: 'diperbarui', label: 'Diperbarui', width: '140px' },
+    { key: 'actions', label: '', width: '96px', align: 'right' },
 ];
 
 const applyStatusFilter = (statusKey: string) => {
     activeStatusFilter.value = statusKey;
     router.get(
-        route("admin.articles"),
+        route('admin.articles'),
         {
             status: statusKey,
             search: searchQuery.value || undefined,
@@ -90,10 +90,10 @@ const applyStatusFilter = (statusKey: string) => {
 
 const handleSearch = () => {
     router.get(
-        route("admin.articles"),
+        route('admin.articles'),
         {
             status:
-                activeStatusFilter.value !== "semua"
+                activeStatusFilter.value !== 'semua'
                     ? activeStatusFilter.value
                     : undefined,
             search: searchQuery.value || undefined,
@@ -122,7 +122,7 @@ const confirmDelete = (article: ArticleItem) => {
 const executeDelete = () => {
     if (!articleToDelete.value) return;
     isDeleting.value = true;
-    router.delete(route("admin.articles.destroy", articleToDelete.value.id), {
+    router.delete(route('admin.articles.destroy', articleToDelete.value.id), {
         onSuccess: () => {
             isDeleteModalOpen.value = false;
             articleToDelete.value = null;
@@ -138,18 +138,18 @@ const executeDelete = () => {
     <AdminLayout title="Manajemen Artikel">
         <Head title="Manajemen Artikel - CarePlate Admin" />
 
-        <div class="space-y-6 max-w-6xl">
+        <div class="max-w-6xl space-y-6">
             <!-- Header Section -->
             <div
-                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
                 <div>
                     <h1
-                        class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight"
+                        class="text-3xl font-extrabold tracking-tight text-[#191919] sm:text-4xl dark:text-[#f0efea]"
                     >
                         Artikel
                     </h1>
-                    <p class="text-sm text-gray-500 dark:text-[#a3a3a3] mt-1">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-[#a3a3a3]">
                         Kelola artikel edukasi gizi, panduan konsumsi pangan,
                         dan konten keluarga.
                     </p>
@@ -158,14 +158,16 @@ const executeDelete = () => {
                     <button
                         type="button"
                         @click="isCategoryModalOpen = true"
-                        class="px-4 py-2.5 rounded-full border border-gray-200 dark:border-[#2e2e2e] bg-white dark:bg-[#1c1c1c] text-xs font-semibold text-gray-700 dark:text-[#f0efea] hover:bg-gray-50 dark:hover:bg-[#262626] hover:border-gray-300 dark:hover:border-[#3d3d3d] transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                        class="flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 shadow-2xs transition hover:border-gray-300 hover:bg-gray-50 dark:border-[#2e2e2e] dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:hover:border-[#3d3d3d] dark:hover:bg-[#262626]"
                     >
-                        <Folder class="w-3.5 h-3.5 text-[#0b8043] dark:text-[#3fcb7a]" />
+                        <Folder
+                            class="h-3.5 w-3.5 text-[#0b8043] dark:text-[#3fcb7a]"
+                        />
                         <span>Kelola Kategori</span>
                     </button>
                     <Link :href="route('admin.articles.create')">
                         <PillButton variant="primary" class="shadow-sm">
-                            <Plus class="w-4 h-4 mr-1.5" />
+                            <Plus class="mr-1.5 h-4 w-4" />
                             <span>Tulis Artikel</span>
                         </PillButton>
                     </Link>
@@ -174,7 +176,7 @@ const executeDelete = () => {
 
             <!-- Filter Tabs & Search Bar -->
             <div
-                class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
             >
                 <!-- Status Tabs -->
                 <div class="flex items-center gap-2 overflow-x-auto pb-1">
@@ -211,7 +213,7 @@ const executeDelete = () => {
 
             <!-- Table Card -->
             <div
-                class="bg-white dark:bg-[#1c1c1c] rounded-3xl border border-gray-100 dark:border-[#2e2e2e] shadow-xs overflow-hidden"
+                class="overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-xs dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
             >
                 <DataTable
                     :columns="tableColumns"
@@ -230,19 +232,19 @@ const executeDelete = () => {
                         <td class="px-6 py-3.5">
                             <div class="flex items-center gap-3.5">
                                 <div
-                                    class="w-16 h-11 shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-[#262626] border border-gray-200 dark:border-[#2e2e2e]"
+                                    class="h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-[#2e2e2e] dark:bg-[#262626]"
                                 >
                                     <img
                                         v-if="item.foto_sampul_url"
                                         :src="item.foto_sampul_url"
                                         :alt="item.judul"
-                                        class="w-full h-full object-cover"
+                                        class="h-full w-full object-cover"
                                     />
                                     <div
                                         v-else
-                                        class="w-full h-full flex items-center justify-center bg-emerald-50 dark:bg-[#17321f] text-[#0b8043] dark:text-[#3fcb7a]"
+                                        class="flex h-full w-full items-center justify-center bg-emerald-50 text-[#0b8043] dark:bg-[#17321f] dark:text-[#3fcb7a]"
                                     >
-                                        <BookOpen class="w-5 h-5 opacity-60" />
+                                        <BookOpen class="h-5 w-5 opacity-60" />
                                     </div>
                                 </div>
                                 <div class="min-w-0 pr-2">
@@ -253,13 +255,13 @@ const executeDelete = () => {
                                                 item.id,
                                             )
                                         "
-                                        class="font-semibold text-gray-900 dark:text-[#f0efea] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] transition line-clamp-1 block text-sm leading-snug"
+                                        class="line-clamp-1 block text-sm leading-snug font-semibold text-gray-900 transition hover:text-[#0b8043] dark:text-[#f0efea] dark:hover:text-[#3fcb7a]"
                                         :title="item.judul"
                                     >
                                         {{ item.judul }}
                                     </Link>
                                     <span
-                                        class="text-xs text-gray-400 dark:text-[#a3a3a3] block mt-0.5"
+                                        class="mt-0.5 block text-xs text-gray-400 dark:text-[#a3a3a3]"
                                     >
                                         oleh {{ item.nama_penulis }}
                                     </span>
@@ -270,7 +272,7 @@ const executeDelete = () => {
                         <!-- Kategori Column -->
                         <td class="px-6 py-3.5 whitespace-nowrap">
                             <span
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0f4f1] dark:bg-[#262626] text-[#2d4b38] dark:text-[#3fcb7a]"
+                                class="inline-flex items-center rounded-full bg-[#f0f4f1] px-2.5 py-1 text-xs font-medium text-[#2d4b38] dark:bg-[#262626] dark:text-[#3fcb7a]"
                             >
                                 {{ item.kategori }}
                             </span>
@@ -280,19 +282,19 @@ const executeDelete = () => {
                         <td class="px-6 py-3.5 whitespace-nowrap">
                             <span
                                 v-if="item.status === 'terbit'"
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#e6f6ec] dark:bg-[#17321f] text-[#0b7a46] dark:text-[#3fcb7a]"
+                                class="inline-flex items-center gap-1.5 rounded-full bg-[#e6f6ec] px-3 py-1 text-xs font-semibold text-[#0b7a46] dark:bg-[#17321f] dark:text-[#3fcb7a]"
                             >
                                 <span
-                                    class="w-1.5 h-1.5 rounded-full bg-[#0b7a46] dark:bg-[#3fcb7a]"
+                                    class="h-1.5 w-1.5 rounded-full bg-[#0b7a46] dark:bg-[#3fcb7a]"
                                 ></span>
                                 Terbit
                             </span>
                             <span
                                 v-else
-                                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#f4f3f0] dark:bg-[#262626] text-[#5e5e5e] dark:text-[#a3a3a3]"
+                                class="inline-flex items-center gap-1.5 rounded-full bg-[#f4f3f0] px-3 py-1 text-xs font-semibold text-[#5e5e5e] dark:bg-[#262626] dark:text-[#a3a3a3]"
                             >
                                 <span
-                                    class="w-1.5 h-1.5 rounded-full bg-[#8c8b88] dark:bg-[#737373]"
+                                    class="h-1.5 w-1.5 rounded-full bg-[#8c8b88] dark:bg-[#737373]"
                                 ></span>
                                 Draf
                             </span>
@@ -300,7 +302,7 @@ const executeDelete = () => {
 
                         <!-- Diperbarui Column -->
                         <td
-                            class="px-6 py-3.5 whitespace-nowrap text-xs text-gray-500 dark:text-[#a3a3a3] font-normal"
+                            class="px-6 py-3.5 text-xs font-normal whitespace-nowrap text-gray-500 dark:text-[#a3a3a3]"
                         >
                             {{ item.diperbarui }}
                         </td>
@@ -312,18 +314,18 @@ const executeDelete = () => {
                                     :href="
                                         route('admin.articles.edit', item.id)
                                     "
-                                    class="p-1.5 rounded-lg text-gray-400 dark:text-[#a3a3a3] hover:text-[#0b8043] dark:hover:text-[#3fcb7a] hover:bg-emerald-50 dark:hover:bg-[#17321f] transition"
+                                    class="rounded-lg p-1.5 text-gray-400 transition hover:bg-emerald-50 hover:text-[#0b8043] dark:text-[#a3a3a3] dark:hover:bg-[#17321f] dark:hover:text-[#3fcb7a]"
                                     title="Edit Artikel"
                                 >
-                                    <Pencil class="w-4 h-4" />
+                                    <Pencil class="h-4 w-4" />
                                 </Link>
                                 <button
                                     type="button"
                                     @click="confirmDelete(item)"
-                                    class="p-1.5 rounded-lg text-gray-400 dark:text-[#a3a3a3] hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
+                                    class="rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-600 dark:text-[#a3a3a3] dark:hover:bg-red-950/40 dark:hover:text-red-400"
                                     title="Hapus Artikel"
                                 >
-                                    <Trash2 class="w-4 h-4" />
+                                    <Trash2 class="h-4 w-4" />
                                 </button>
                             </div>
                         </td>
@@ -335,20 +337,24 @@ const executeDelete = () => {
         <!-- Delete Confirmation Modal -->
         <div
             v-if="isDeleteModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
+            class="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs duration-150"
         >
             <div
-                class="bg-white dark:bg-[#1c1c1c] rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-[#2e2e2e]"
+                class="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
             >
                 <div
-                    class="w-12 h-12 rounded-2xl bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 flex items-center justify-center mb-4"
+                    class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400"
                 >
-                    <AlertCircle class="w-6 h-6" />
+                    <AlertCircle class="h-6 w-6" />
                 </div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-[#f0efea] mb-1">
+                <h3
+                    class="mb-1 text-lg font-bold text-gray-900 dark:text-[#f0efea]"
+                >
                     Hapus Artikel?
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-[#a3a3a3] mb-6 leading-relaxed">
+                <p
+                    class="mb-6 text-sm leading-relaxed text-gray-600 dark:text-[#a3a3a3]"
+                >
                     Apakah Anda yakin ingin menghapus artikel
                     <strong class="text-gray-900 dark:text-[#f0efea]"
                         >"{{ articleToDelete?.judul }}"</strong
@@ -359,7 +365,7 @@ const executeDelete = () => {
                         type="button"
                         @click="isDeleteModalOpen = false"
                         :disabled="isDeleting"
-                        class="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-600 dark:text-[#a3a3a3] hover:bg-gray-100 dark:hover:bg-[#262626] transition"
+                        class="rounded-full px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-100 dark:text-[#a3a3a3] dark:hover:bg-[#262626]"
                     >
                         Batal
                     </button>
@@ -367,9 +373,9 @@ const executeDelete = () => {
                         type="button"
                         @click="executeDelete"
                         :disabled="isDeleting"
-                        class="px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-red-600 hover:bg-red-700 shadow-sm transition disabled:opacity-50"
+                        class="rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
                     >
-                        {{ isDeleting ? "Menghapus..." : "Ya, Hapus" }}
+                        {{ isDeleting ? 'Menghapus...' : 'Ya, Hapus' }}
                     </button>
                 </div>
             </div>

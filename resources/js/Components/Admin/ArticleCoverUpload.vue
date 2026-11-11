@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { UploadCloud, Image as ImageIcon, Trash2, RefreshCw } from 'lucide-vue-next';
+import {
+    UploadCloud,
+    Image as ImageIcon,
+    Trash2,
+    RefreshCw,
+} from 'lucide-vue-next';
 
 const props = defineProps<{
     initialPreviewUrl?: string | null;
@@ -19,7 +24,7 @@ watch(
     () => props.initialPreviewUrl,
     (newVal) => {
         previewUrl.value = newVal || null;
-    }
+    },
 );
 
 const triggerSelect = () => {
@@ -67,28 +72,32 @@ const removeImage = () => {
         <!-- Preview Box when image is set -->
         <div
             v-if="previewUrl"
-            class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-[#2e2e2e] bg-gray-50 dark:bg-[#262626] aspect-[21/9] max-h-64 group shadow-xs"
+            class="group relative aspect-[21/9] max-h-64 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 shadow-xs dark:border-[#2e2e2e] dark:bg-[#262626]"
         >
             <img
                 :src="previewUrl"
                 alt="Foto Sampul Artikel"
-                class="w-full h-full object-cover transition duration-300 group-hover:scale-102"
+                class="h-full w-full object-cover transition duration-300 group-hover:scale-102"
             />
-            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+            <div
+                class="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
+            >
                 <button
                     type="button"
                     @click="triggerSelect"
-                    class="px-4 py-2 rounded-xl bg-white dark:bg-[#1c1c1c] text-gray-800 dark:text-[#f0efea] text-xs font-semibold shadow-md hover:bg-gray-50 dark:hover:bg-[#262626] flex items-center gap-1.5 transition cursor-pointer"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-xs font-semibold text-gray-800 shadow-md transition hover:bg-gray-50 dark:bg-[#1c1c1c] dark:text-[#f0efea] dark:hover:bg-[#262626]"
                 >
-                    <RefreshCw class="w-3.5 h-3.5 text-[#0b8043] dark:text-[#3fcb7a]" />
+                    <RefreshCw
+                        class="h-3.5 w-3.5 text-[#0b8043] dark:text-[#3fcb7a]"
+                    />
                     <span>Ganti Foto</span>
                 </button>
                 <button
                     type="button"
                     @click="removeImage"
-                    class="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-semibold shadow-md hover:bg-red-700 flex items-center gap-1.5 transition cursor-pointer"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow-md transition hover:bg-red-700"
                 >
-                    <Trash2 class="w-3.5 h-3.5" />
+                    <Trash2 class="h-3.5 w-3.5" />
                     <span>Hapus</span>
                 </button>
             </div>
@@ -102,28 +111,35 @@ const removeImage = () => {
             @dragleave.prevent="isDragging = false"
             @drop.prevent="handleDrop"
             :class="[
-                'border-2 border-dashed rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200',
+                'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-8',
                 isDragging
-                    ? 'border-[#0b8043] dark:border-[#3fcb7a] bg-emerald-50/50 dark:bg-[#17321f]/50 scale-[0.99]'
-                    : 'border-gray-200 dark:border-[#2e2e2e] hover:border-[#0b8043] dark:hover:border-[#3fcb7a] hover:bg-emerald-50/20 dark:hover:bg-[#17321f]/20 bg-white dark:bg-[#1c1c1c]'
+                    ? 'scale-[0.99] border-[#0b8043] bg-emerald-50/50 dark:border-[#3fcb7a] dark:bg-[#17321f]/50'
+                    : 'border-gray-200 bg-white hover:border-[#0b8043] hover:bg-emerald-50/20 dark:border-[#2e2e2e] dark:bg-[#1c1c1c] dark:hover:border-[#3fcb7a] dark:hover:bg-[#17321f]/20',
             ]"
         >
-            <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-[#17321f] flex items-center justify-center text-[#0b8043] dark:text-[#3fcb7a] mb-3">
-                <UploadCloud class="w-6 h-6" />
+            <div
+                class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-[#0b8043] dark:bg-[#17321f] dark:text-[#3fcb7a]"
+            >
+                <UploadCloud class="h-6 w-6" />
             </div>
-            <h4 class="text-sm font-semibold text-gray-800 dark:text-[#f0efea] mb-1">
+            <h4
+                class="mb-1 text-sm font-semibold text-gray-800 dark:text-[#f0efea]"
+            >
                 Unggah Foto Sampul Artikel
             </h4>
-            <p class="text-xs text-gray-500 dark:text-[#a3a3a3] max-w-sm mb-3">
-                Tarik dan lepaskan file gambar ke sini, atau klik untuk memilih file dari komputer Anda.
+            <p class="mb-3 max-w-sm text-xs text-gray-500 dark:text-[#a3a3a3]">
+                Tarik dan lepaskan file gambar ke sini, atau klik untuk memilih
+                file dari komputer Anda.
             </p>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-[#262626] text-[11px] font-medium text-gray-600 dark:text-[#a3a3a3]">
-                <ImageIcon class="w-3 h-3 text-gray-400" />
+            <span
+                class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-[11px] font-medium text-gray-600 dark:bg-[#262626] dark:text-[#a3a3a3]"
+            >
+                <ImageIcon class="h-3 w-3 text-gray-400" />
                 Format PNG, JPG, WebP (Rasio 16:9 disarankan, maks 3MB)
             </span>
         </div>
 
-        <p v-if="error" class="text-xs text-red-500 mt-1 font-medium">
+        <p v-if="error" class="mt-1 text-xs font-medium text-red-500">
             {{ error }}
         </p>
     </div>

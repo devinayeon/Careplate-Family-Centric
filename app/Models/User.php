@@ -24,15 +24,15 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read \App\Models\Pengguna|null $pengguna
- * @property-read \App\Models\AhliGizi|null $ahliGizi
+ * @property-read Pengguna|null $pengguna
+ * @property-read AhliGizi|null $ahliGizi
  */
 #[Fillable(['name', 'email', 'google_id', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.

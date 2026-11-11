@@ -87,14 +87,17 @@ const userInitials = (name: string) => {
     <AdminLayout title="Pengaturan Profil">
         <Head title="Pengaturan Profil - CarePlate Admin" />
 
-        <div class="space-y-6 max-w-4xl mx-auto pb-12">
+        <div class="mx-auto max-w-4xl space-y-6 pb-12">
             <!-- Header Section -->
             <div>
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-[#191919] dark:text-[#f0efea] tracking-tight">
+                <h1
+                    class="text-3xl font-extrabold tracking-tight text-[#191919] sm:text-4xl dark:text-[#f0efea]"
+                >
                     Pengaturan Profil
                 </h1>
-                <p class="text-sm text-[#5e5e5e] dark:text-[#a3a3a3] mt-1">
-                    Kelola data identitas dan keamanan akun administrator CarePlate Anda.
+                <p class="mt-1 text-sm text-[#5e5e5e] dark:text-[#a3a3a3]">
+                    Kelola data identitas dan keamanan akun administrator
+                    CarePlate Anda.
                 </p>
             </div>
 
@@ -109,9 +112,11 @@ const userInitials = (name: string) => {
             >
                 <div
                     v-if="props.success"
-                    class="p-4 rounded-xl bg-emerald-50 dark:bg-[#17321f] border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 shadow-2xs"
+                    class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-2xs dark:border-emerald-800/60 dark:bg-[#17321f] dark:text-emerald-300"
                 >
-                    <CheckCircle2 class="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <CheckCircle2
+                        class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                    />
                     <span class="text-sm font-semibold">
                         {{ props.success }}
                     </span>
@@ -129,9 +134,11 @@ const userInitials = (name: string) => {
             >
                 <div
                     v-if="props.password_success"
-                    class="p-4 rounded-xl bg-emerald-50 dark:bg-[#17321f] border border-emerald-200 dark:border-emerald-800/60 flex items-center gap-3 text-emerald-800 dark:text-emerald-300 shadow-2xs"
+                    class="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-2xs dark:border-emerald-800/60 dark:bg-[#17321f] dark:text-emerald-300"
                 >
-                    <CheckCircle2 class="w-5 h-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <CheckCircle2
+                        class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                    />
                     <span class="text-sm font-semibold">
                         {{ props.password_success }}
                     </span>
@@ -139,97 +146,146 @@ const userInitials = (name: string) => {
             </transition>
 
             <!-- Profile Overview Summary Card -->
-            <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl border border-gray-100 dark:border-[#2e2e2e] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div
+                class="flex flex-col justify-between gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-xs sm:flex-row sm:items-center dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+            >
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-[#0b8043] text-white flex items-center justify-center font-bold text-2xl shadow-md shrink-0">
+                    <div
+                        class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-[#0b8043] text-2xl font-bold text-white shadow-md"
+                    >
                         {{ userInitials(adminUser.name) }}
                     </div>
                     <div>
-                        <div class="flex items-center gap-2.5 flex-wrap">
-                            <h2 class="text-xl font-bold text-gray-900 dark:text-[#f0efea]">
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <h2
+                                class="text-xl font-bold text-gray-900 dark:text-[#f0efea]"
+                            >
                                 {{ adminUser.name }}
                             </h2>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-[#17321f] dark:text-[#3fcb7a]">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-[#17321f] dark:text-[#3fcb7a]"
+                            >
+                                <span
+                                    class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500"
+                                ></span>
                                 Administrator
                             </span>
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-[#a3a3a3] mt-1 flex items-center gap-1.5">
-                            <Mail class="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                        <p
+                            class="mt-1 flex items-center gap-1.5 text-sm text-gray-500 dark:text-[#a3a3a3]"
+                        >
+                            <Mail
+                                class="h-4 w-4 text-gray-400 dark:text-gray-500"
+                            />
                             <span>{{ adminUser.email }}</span>
                         </p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-[#a3a3a3] sm:border-l sm:border-gray-100 dark:sm:border-[#2e2e2e] sm:pl-6">
-                    <Calendar class="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <div
+                    class="flex items-center gap-2 text-xs font-medium text-gray-500 sm:border-l sm:border-gray-100 sm:pl-6 dark:text-[#a3a3a3] dark:sm:border-[#2e2e2e]"
+                >
+                    <Calendar
+                        class="h-4 w-4 text-gray-400 dark:text-gray-500"
+                    />
                     <span>Terdaftar: {{ adminUser.created_at }}</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <!-- Card 1: Informasi Pribadi -->
-                <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl border border-gray-100 dark:border-[#2e2e2e] p-6 shadow-xs flex flex-col justify-between">
+                <div
+                    class="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-xs dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+                >
                     <div>
-                        <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-[#2e2e2e]">
-                            <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-[#17321f] text-emerald-600 dark:text-[#3fcb7a] flex items-center justify-center">
-                                <User class="w-5 h-5" />
+                        <div
+                            class="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-[#2e2e2e]"
+                        >
+                            <div
+                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-[#17321f] dark:text-[#3fcb7a]"
+                            >
+                                <User class="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 class="font-bold text-base text-gray-900 dark:text-[#f0efea]">
+                                <h3
+                                    class="text-base font-bold text-gray-900 dark:text-[#f0efea]"
+                                >
                                     Informasi Pribadi
                                 </h3>
-                                <p class="text-xs text-gray-500 dark:text-[#a3a3a3]">
+                                <p
+                                    class="text-xs text-gray-500 dark:text-[#a3a3a3]"
+                                >
                                     Perbarui nama lengkap dan email Anda.
                                 </p>
                             </div>
                         </div>
 
-                        <form @submit.prevent="submitProfile" class="mt-5 space-y-4">
+                        <form
+                            @submit.prevent="submitProfile"
+                            class="mt-5 space-y-4"
+                        >
                             <!-- Nama Lengkap -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                    Nama Lengkap <span class="text-red-500">*</span>
+                                <label
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                                >
+                                    Nama Lengkap
+                                    <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <User class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                    <User
+                                        class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                    />
                                     <input
                                         v-model="profileForm.name"
                                         type="text"
                                         required
                                         placeholder="Nama Lengkap"
-                                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition outline-none
-                                               bg-gray-50 dark:bg-[#262626] border-gray-200 dark:border-[#3d3d3d] text-gray-900 dark:text-[#f0efea]
-                                               focus:bg-white dark:focus:bg-[#1c1c1c] focus:ring-2 focus:ring-[#0b8043]/30 focus:border-[#0b8043]"
-                                        :class="{ 'border-red-500 dark:border-red-500': profileForm.errors.name }"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 transition outline-none focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/30 dark:border-[#3d3d3d] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                        :class="{
+                                            'border-red-500 dark:border-red-500':
+                                                profileForm.errors.name,
+                                        }"
                                     />
                                 </div>
-                                <p v-if="profileForm.errors.name" class="text-xs text-red-500 mt-1 flex items-center gap-1 font-medium">
-                                    <AlertCircle class="w-3.5 h-3.5" />
+                                <p
+                                    v-if="profileForm.errors.name"
+                                    class="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                                >
+                                    <AlertCircle class="h-3.5 w-3.5" />
                                     <span>{{ profileForm.errors.name }}</span>
                                 </p>
                             </div>
 
                             <!-- Alamat Email -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                    Alamat Email <span class="text-red-500">*</span>
+                                <label
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                                >
+                                    Alamat Email
+                                    <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <Mail class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                    <Mail
+                                        class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                    />
                                     <input
                                         v-model="profileForm.email"
                                         type="email"
                                         required
                                         placeholder="admin@careplate.test"
-                                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm transition outline-none
-                                               bg-gray-50 dark:bg-[#262626] border-gray-200 dark:border-[#3d3d3d] text-gray-900 dark:text-[#f0efea]
-                                               focus:bg-white dark:focus:bg-[#1c1c1c] focus:ring-2 focus:ring-[#0b8043]/30 focus:border-[#0b8043]"
-                                        :class="{ 'border-red-500 dark:border-red-500': profileForm.errors.email }"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-4 pl-10 text-sm text-gray-900 transition outline-none focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/30 dark:border-[#3d3d3d] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                        :class="{
+                                            'border-red-500 dark:border-red-500':
+                                                profileForm.errors.email,
+                                        }"
                                     />
                                 </div>
-                                <p v-if="profileForm.errors.email" class="text-xs text-red-500 mt-1 flex items-center gap-1 font-medium">
-                                    <AlertCircle class="w-3.5 h-3.5" />
+                                <p
+                                    v-if="profileForm.errors.email"
+                                    class="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                                >
+                                    <AlertCircle class="h-3.5 w-3.5" />
                                     <span>{{ profileForm.errors.email }}</span>
                                 </p>
                             </div>
@@ -238,11 +294,18 @@ const userInitials = (name: string) => {
                             <div class="pt-3">
                                 <button
                                     type="submit"
-                                    :disabled="profileForm.processing || isUpdatingProfile"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white bg-[#0b8043] hover:bg-[#086637] dark:bg-[#3fcb7a] dark:text-[#0e1a13] dark:hover:bg-[#34b86c] transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                                    :disabled="
+                                        profileForm.processing ||
+                                        isUpdatingProfile
+                                    "
+                                    class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0b8043] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-all hover:bg-[#086637] disabled:opacity-50 dark:bg-[#3fcb7a] dark:text-[#0e1a13] dark:hover:bg-[#34b86c]"
                                 >
-                                    <Save class="w-4 h-4" />
-                                    <span>{{ profileForm.processing ? 'Menyimpan...' : 'Simpan Perubahan' }}</span>
+                                    <Save class="h-4 w-4" />
+                                    <span>{{
+                                        profileForm.processing
+                                            ? 'Menyimpan...'
+                                            : 'Simpan Perubahan'
+                                    }}</span>
                                 </button>
                             </div>
                         </form>
@@ -250,116 +313,199 @@ const userInitials = (name: string) => {
                 </div>
 
                 <!-- Card 2: Keamanan & Kata Sandi -->
-                <div class="bg-white dark:bg-[#1c1c1c] rounded-2xl border border-gray-100 dark:border-[#2e2e2e] p-6 shadow-xs flex flex-col justify-between">
+                <div
+                    class="flex flex-col justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-xs dark:border-[#2e2e2e] dark:bg-[#1c1c1c]"
+                >
                     <div>
-                        <div class="flex items-center gap-3 pb-4 border-b border-gray-100 dark:border-[#2e2e2e]">
-                            <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-[#17321f] text-emerald-600 dark:text-[#3fcb7a] flex items-center justify-center">
-                                <ShieldCheck class="w-5 h-5" />
+                        <div
+                            class="flex items-center gap-3 border-b border-gray-100 pb-4 dark:border-[#2e2e2e]"
+                        >
+                            <div
+                                class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-[#17321f] dark:text-[#3fcb7a]"
+                            >
+                                <ShieldCheck class="h-5 w-5" />
                             </div>
                             <div>
-                                <h3 class="font-bold text-base text-gray-900 dark:text-[#f0efea]">
+                                <h3
+                                    class="text-base font-bold text-gray-900 dark:text-[#f0efea]"
+                                >
                                     Perbarui Kata Sandi
                                 </h3>
-                                <p class="text-xs text-gray-500 dark:text-[#a3a3a3]">
+                                <p
+                                    class="text-xs text-gray-500 dark:text-[#a3a3a3]"
+                                >
                                     Gunakan kata sandi kuat dan aman.
                                 </p>
                             </div>
                         </div>
 
-                        <form @submit.prevent="submitPassword" class="mt-5 space-y-4">
+                        <form
+                            @submit.prevent="submitPassword"
+                            class="mt-5 space-y-4"
+                        >
                             <!-- Kata Sandi Saat Ini -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                    Kata Sandi Saat Ini <span class="text-red-500">*</span>
+                                <label
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                                >
+                                    Kata Sandi Saat Ini
+                                    <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <KeyRound class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                    <KeyRound
+                                        class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                    />
                                     <input
                                         v-model="passwordForm.current_password"
-                                        :type="showCurrentPassword ? 'text' : 'password'"
+                                        :type="
+                                            showCurrentPassword
+                                                ? 'text'
+                                                : 'password'
+                                        "
                                         required
                                         placeholder="••••••••"
-                                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition outline-none
-                                               bg-gray-50 dark:bg-[#262626] border-gray-200 dark:border-[#3d3d3d] text-gray-900 dark:text-[#f0efea]
-                                               focus:bg-white dark:focus:bg-[#1c1c1c] focus:ring-2 focus:ring-[#0b8043]/30 focus:border-[#0b8043]"
-                                        :class="{ 'border-red-500 dark:border-red-500': passwordForm.errors.current_password }"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-10 pl-10 text-sm text-gray-900 transition outline-none focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/30 dark:border-[#3d3d3d] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                        :class="{
+                                            'border-red-500 dark:border-red-500':
+                                                passwordForm.errors
+                                                    .current_password,
+                                        }"
                                     />
                                     <button
                                         type="button"
-                                        @click="showCurrentPassword = !showCurrentPassword"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        @click="
+                                            showCurrentPassword =
+                                                !showCurrentPassword
+                                        "
+                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                     >
-                                        <Eye v-if="!showCurrentPassword" class="w-4 h-4" />
-                                        <EyeOff v-else class="w-4 h-4" />
+                                        <Eye
+                                            v-if="!showCurrentPassword"
+                                            class="h-4 w-4"
+                                        />
+                                        <EyeOff v-else class="h-4 w-4" />
                                     </button>
                                 </div>
-                                <p v-if="passwordForm.errors.current_password" class="text-xs text-red-500 mt-1 flex items-center gap-1 font-medium">
-                                    <AlertCircle class="w-3.5 h-3.5" />
-                                    <span>{{ passwordForm.errors.current_password }}</span>
+                                <p
+                                    v-if="passwordForm.errors.current_password"
+                                    class="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                                >
+                                    <AlertCircle class="h-3.5 w-3.5" />
+                                    <span>{{
+                                        passwordForm.errors.current_password
+                                    }}</span>
                                 </p>
                             </div>
 
                             <!-- Kata Sandi Baru -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                    Kata Sandi Baru <span class="text-red-500">*</span>
+                                <label
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                                >
+                                    Kata Sandi Baru
+                                    <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <Lock class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                    <Lock
+                                        class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                    />
                                     <input
                                         v-model="passwordForm.password"
-                                        :type="showNewPassword ? 'text' : 'password'"
+                                        :type="
+                                            showNewPassword
+                                                ? 'text'
+                                                : 'password'
+                                        "
                                         required
                                         placeholder="Minimal 8 karakter"
-                                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition outline-none
-                                               bg-gray-50 dark:bg-[#262626] border-gray-200 dark:border-[#3d3d3d] text-gray-900 dark:text-[#f0efea]
-                                               focus:bg-white dark:focus:bg-[#1c1c1c] focus:ring-2 focus:ring-[#0b8043]/30 focus:border-[#0b8043]"
-                                        :class="{ 'border-red-500 dark:border-red-500': passwordForm.errors.password }"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-10 pl-10 text-sm text-gray-900 transition outline-none focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/30 dark:border-[#3d3d3d] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                        :class="{
+                                            'border-red-500 dark:border-red-500':
+                                                passwordForm.errors.password,
+                                        }"
                                     />
                                     <button
                                         type="button"
-                                        @click="showNewPassword = !showNewPassword"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        @click="
+                                            showNewPassword = !showNewPassword
+                                        "
+                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                     >
-                                        <Eye v-if="!showNewPassword" class="w-4 h-4" />
-                                        <EyeOff v-else class="w-4 h-4" />
+                                        <Eye
+                                            v-if="!showNewPassword"
+                                            class="h-4 w-4"
+                                        />
+                                        <EyeOff v-else class="h-4 w-4" />
                                     </button>
                                 </div>
-                                <p v-if="passwordForm.errors.password" class="text-xs text-red-500 mt-1 flex items-center gap-1 font-medium">
-                                    <AlertCircle class="w-3.5 h-3.5" />
-                                    <span>{{ passwordForm.errors.password }}</span>
+                                <p
+                                    v-if="passwordForm.errors.password"
+                                    class="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                                >
+                                    <AlertCircle class="h-3.5 w-3.5" />
+                                    <span>{{
+                                        passwordForm.errors.password
+                                    }}</span>
                                 </p>
                             </div>
 
                             <!-- Konfirmasi Kata Sandi Baru -->
                             <div>
-                                <label class="block text-xs font-bold text-gray-700 dark:text-[#f0efea] uppercase tracking-wider mb-1.5">
-                                    Ulangi Kata Sandi Baru <span class="text-red-500">*</span>
+                                <label
+                                    class="mb-1.5 block text-xs font-bold tracking-wider text-gray-700 uppercase dark:text-[#f0efea]"
+                                >
+                                    Ulangi Kata Sandi Baru
+                                    <span class="text-red-500">*</span>
                                 </label>
                                 <div class="relative">
-                                    <Lock class="w-4 h-4 text-gray-400 dark:text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                                    <Lock
+                                        class="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+                                    />
                                     <input
-                                        v-model="passwordForm.password_confirmation"
-                                        :type="showConfirmPassword ? 'text' : 'password'"
+                                        v-model="
+                                            passwordForm.password_confirmation
+                                        "
+                                        :type="
+                                            showConfirmPassword
+                                                ? 'text'
+                                                : 'password'
+                                        "
                                         required
                                         placeholder="Ketik ulang kata sandi baru"
-                                        class="w-full pl-10 pr-10 py-2.5 rounded-xl border text-sm transition outline-none
-                                               bg-gray-50 dark:bg-[#262626] border-gray-200 dark:border-[#3d3d3d] text-gray-900 dark:text-[#f0efea]
-                                               focus:bg-white dark:focus:bg-[#1c1c1c] focus:ring-2 focus:ring-[#0b8043]/30 focus:border-[#0b8043]"
-                                        :class="{ 'border-red-500 dark:border-red-500': passwordForm.errors.password_confirmation }"
+                                        class="w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pr-10 pl-10 text-sm text-gray-900 transition outline-none focus:border-[#0b8043] focus:bg-white focus:ring-2 focus:ring-[#0b8043]/30 dark:border-[#3d3d3d] dark:bg-[#262626] dark:text-[#f0efea] dark:focus:bg-[#1c1c1c]"
+                                        :class="{
+                                            'border-red-500 dark:border-red-500':
+                                                passwordForm.errors
+                                                    .password_confirmation,
+                                        }"
                                     />
                                     <button
                                         type="button"
-                                        @click="showConfirmPassword = !showConfirmPassword"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        @click="
+                                            showConfirmPassword =
+                                                !showConfirmPassword
+                                        "
+                                        class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                     >
-                                        <Eye v-if="!showConfirmPassword" class="w-4 h-4" />
-                                        <EyeOff v-else class="w-4 h-4" />
+                                        <Eye
+                                            v-if="!showConfirmPassword"
+                                            class="h-4 w-4"
+                                        />
+                                        <EyeOff v-else class="h-4 w-4" />
                                     </button>
                                 </div>
-                                <p v-if="passwordForm.errors.password_confirmation" class="text-xs text-red-500 mt-1 flex items-center gap-1 font-medium">
-                                    <AlertCircle class="w-3.5 h-3.5" />
-                                    <span>{{ passwordForm.errors.password_confirmation }}</span>
+                                <p
+                                    v-if="
+                                        passwordForm.errors
+                                            .password_confirmation
+                                    "
+                                    class="mt-1 flex items-center gap-1 text-xs font-medium text-red-500"
+                                >
+                                    <AlertCircle class="h-3.5 w-3.5" />
+                                    <span>{{
+                                        passwordForm.errors
+                                            .password_confirmation
+                                    }}</span>
                                 </p>
                             </div>
 
@@ -367,11 +513,18 @@ const userInitials = (name: string) => {
                             <div class="pt-3">
                                 <button
                                     type="submit"
-                                    :disabled="passwordForm.processing || isUpdatingPassword"
-                                    class="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white bg-[#0b8043] hover:bg-[#086637] dark:bg-[#3fcb7a] dark:text-[#0e1a13] dark:hover:bg-[#34b86c] transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                                    :disabled="
+                                        passwordForm.processing ||
+                                        isUpdatingPassword
+                                    "
+                                    class="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#0b8043] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-all hover:bg-[#086637] disabled:opacity-50 dark:bg-[#3fcb7a] dark:text-[#0e1a13] dark:hover:bg-[#34b86c]"
                                 >
-                                    <Lock class="w-4 h-4" />
-                                    <span>{{ passwordForm.processing ? 'Memperbarui...' : 'Perbarui Kata Sandi' }}</span>
+                                    <Lock class="h-4 w-4" />
+                                    <span>{{
+                                        passwordForm.processing
+                                            ? 'Memperbarui...'
+                                            : 'Perbarui Kata Sandi'
+                                    }}</span>
                                 </button>
                             </div>
                         </form>
